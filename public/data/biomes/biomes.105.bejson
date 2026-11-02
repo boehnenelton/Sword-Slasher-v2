@@ -1,0 +1,70 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_world_generator.js",
+  "Primary_Key_Field": "biome_uuid",
+  "Type_Discriminator_Field": "biome_record_type",
+  "Domain_Type_Field": "biome_generation_mode_type",
+  "Records_Type": ["WorldBiome"],
+  "Fields": [
+    { "name": "biome_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "biome_record_type", "type": "string", "required": true, "enum": ["WorldBiome"] },
+    { "name": "biome_generation_mode_type", "type": "string", "required": true, "enum": ["STATIC", "PROCEDURAL", "HYBRID"] },
+    { "name": "biome_climate_category_type", "type": "string", "required": true, "enum": ["SUBTERRANEAN", "FOREST", "DUNGEON", "OVERWORLD"] },
+    { "name": "biome_slug_code", "type": "string", "required": true },
+    { "name": "biome_display_title", "type": "string", "required": true },
+    { "name": "biome_base_tile_uuid_fk", "type": "string", "required": true, "foreign_key": { "references": "tiles.tile_uuid", "on_delete": "restrict" } },
+    { "name": "biome_base_tile_slug_code", "type": "string", "required": true },
+    { "name": "biome_cluster_rules_json", "type": "string", "required": true },
+    { "name": "biome_scatter_rules_json", "type": "string", "required": true },
+    { "name": "biome_ambient_color_hex", "type": "string", "required": true },
+    { "name": "biome_created_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    [
+      "0f94d339-50d0-4daf-aa01-88eeea870b2a",
+      "WorldBiome",
+      "HYBRID",
+      "DUNGEON",
+      "ganon_sanctuary",
+      "Ganon's Dark Sanctuary",
+      "7019444c-4dc1-4921-9784-77e5521fc8a2",
+      "stone_floor",
+      "{\"clusters\": [{\"tile\": \"pillar\", \"rate\": 0.08}]}",
+      "{\"scatter\": [{\"object\": \"torch\", \"spacing\": 4}]}",
+      "#120202",
+      "2026-10-25T21:04:00Z"
+    ],
+    [
+      "0f94d339-50d0-4daf-aa01-88eeea870b2b",
+      "WorldBiome",
+      "HYBRID",
+      "SUBTERRANEAN",
+      "cavern",
+      "Forgotten Cavern",
+      "7019444c-4dc1-4921-9784-77e5521fc8a2",
+      "stone_floor",
+      "{\"clusters\": [{\"tile\": \"stalagmite\", \"rate\": 0.08}]}",
+      "{\"scatter\": [{\"object\": \"torch\", \"spacing\": 6}]}",
+      "#09090b",
+      "2026-10-25T21:04:00Z"
+    ],
+    [
+      "0f94d339-50d0-4daf-aa01-88eeea870b2c",
+      "WorldBiome",
+      "HYBRID",
+      "OVERWORLD",
+      "hyrule_castle",
+      "Hyrule Castle Courtyard",
+      "7019444c-4dc1-4921-9784-77e5521fc8a2",
+      "cobble_floor",
+      "{\"clusters\": [{\"tile\": \"statue\", \"rate\": 0.05}]}",
+      "{\"scatter\": [{\"object\": \"torch\", \"spacing\": 5}]}",
+      "#111827",
+      "2026-10-25T21:04:00Z"
+    ]
+  ]
+}

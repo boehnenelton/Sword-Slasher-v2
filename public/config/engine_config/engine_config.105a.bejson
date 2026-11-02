@@ -1,0 +1,28 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_game.js",
+  "Primary_Key_Field": "cfg_uuid",
+  "Type_Discriminator_Field": "cfg_record_type",
+  "Domain_Type_Field": "cfg_parameter_value_type",
+  "Records_Type": ["EngineConfiguration"],
+  "Fields": [
+    { "name": "cfg_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "cfg_record_type", "type": "string", "required": true, "enum": ["EngineConfiguration"] },
+    { "name": "cfg_parameter_value_type", "type": "string", "required": true, "enum": ["STRING", "NUMBER", "BOOLEAN", "JSON_OBJECT"] },
+    { "name": "cfg_subsystem_scope_type", "type": "string", "required": true, "enum": ["CORE_RUNTIME", "RENDER_VIEWPORT", "TELEMETRY_HUD", "INPUT_DECK", "WORLD_BOOT"] },
+    { "name": "cfg_setting_key_code", "type": "string", "required": true },
+    { "name": "cfg_setting_serialized_value_text", "type": "string", "required": true },
+    { "name": "cfg_description_text", "type": "string", "required": true },
+    { "name": "cfg_updated_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["ff001122-3344-4556-8778-99aabbccdde1", "EngineConfiguration", "STRING", "CORE_RUNTIME", "engine_version", "2.0.0-105", "Vanilla JavaScript / React Engine BEJSON 105 release version.", "2026-10-25T21:04:00Z"],
+    ["ff001122-3344-4556-8778-99aabbccdde2", "EngineConfiguration", "STRING", "RENDER_VIEWPORT", "default_canvas_id", "ss-canvas", "Default HTML5 canvas element ID.", "2026-10-25T21:04:00Z"],
+    ["ff001122-3344-4556-8778-99aabbccdde3", "EngineConfiguration", "NUMBER", "RENDER_VIEWPORT", "view_fraction", "1.0", "Viewport canvas scale ratio.", "2026-10-25T21:04:00Z"],
+    ["ff001122-3344-4556-8778-99aabbccdde4", "EngineConfiguration", "BOOLEAN", "TELEMETRY_HUD", "telemetry_enabled", "true", "Enable live on-screen telemetry HUD and bottleneck alerts.", "2026-10-25T21:04:00Z"],
+    ["ff001122-3344-4556-8778-99aabbccdde5", "EngineConfiguration", "STRING", "WORLD_BOOT", "default_level_id", "ganon_sanctuary", "Default initial level slug or UUID to load.", "2026-10-25T21:04:00Z"]
+  ]
+}

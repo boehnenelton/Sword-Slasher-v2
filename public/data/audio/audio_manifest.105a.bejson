@@ -1,0 +1,32 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_assets.js",
+  "Primary_Key_Field": "aud_uuid",
+  "Type_Discriminator_Field": "aud_record_type",
+  "Domain_Type_Field": "aud_channel_category_type",
+  "Records_Type": ["AudioAssetManifest"],
+  "Fields": [
+    { "name": "aud_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "aud_record_type", "type": "string", "required": true, "enum": ["AudioAssetManifest"] },
+    { "name": "aud_channel_category_type", "type": "string", "required": true, "enum": ["BGM_AMBIENT_LOOP", "SFX_COMBAT", "SFX_UI_CHIME", "SFX_FOOTSTEP"] },
+    { "name": "aud_slug_code", "type": "string", "required": true },
+    { "name": "aud_display_title", "type": "string", "required": true },
+    { "name": "aud_duration_ms_metric", "type": "integer", "required": true },
+    { "name": "aud_default_volume_ratio_metric", "type": "number", "required": true },
+    { "name": "aud_is_looping_flag", "type": "boolean", "required": true },
+    { "name": "aud_audio_source_data_uri", "type": "string", "required": false },
+    { "name": "aud_created_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["a0011223-3445-4556-8667-778899aabbcc", "AudioAssetManifest", "BGM_AMBIENT_LOOP", "ganon_theme", "Ganon's Dark World Ominous Theme", 64000, 0.70, true, null, "2026-10-25T21:04:00Z"],
+    ["a0011223-3445-4556-8667-778899aabbcd", "AudioAssetManifest", "SFX_UI_CHIME", "chime_bell", "Dark Prophecy Chime", 450, 0.85, false, null, "2026-10-25T21:04:00Z"],
+    ["a0011223-3445-4556-8667-778899aabbce", "AudioAssetManifest", "SFX_COMBAT", "sword_slash", "Shadow Blade Slash Effect", 200, 0.90, false, null, "2026-10-25T21:04:00Z"],
+    ["a0011223-3445-4556-8667-778899aabbcf", "AudioAssetManifest", "SFX_COMBAT", "spin_attack", "Shadow Spin Burst", 350, 0.95, false, null, "2026-10-25T21:04:00Z"],
+    ["a0011223-3445-4556-8667-778899aabbd0", "AudioAssetManifest", "SFX_COMBAT", "dark_aura", "Ganon Dark Energy Burst", 600, 1.00, false, null, "2026-10-25T21:04:00Z"],
+    ["a0011223-3445-4556-8667-778899aabbd1", "AudioAssetManifest", "SFX_UI_CHIME", "kidnap_chime", "Princess Kidnap Triumph", 1200, 1.00, false, null, "2026-10-25T21:04:00Z"]
+  ]
+}

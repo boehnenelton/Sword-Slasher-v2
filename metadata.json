@@ -1,0 +1,6 @@
+{
+  "name": "Sword Slasher RPG: Shadow Link's Awakening",
+  "description": "Zelda: A Link to the Past style top-down dark RPG driven by BEJSON 105 Simulation Engine where you play as Shadow Link obeying Ganon's command to kidnap Princess Zelda.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

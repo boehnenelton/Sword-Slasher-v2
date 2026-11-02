@@ -1,0 +1,35 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_game.js",
+  "Primary_Key_Field": "telm_uuid",
+  "Type_Discriminator_Field": "telm_record_type",
+  "Domain_Type_Field": "telm_health_severity_type",
+  "Records_Type": ["RuntimeTelemetryFrame"],
+  "Fields": [
+    { "name": "telm_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "telm_record_type", "type": "string", "required": true, "enum": ["RuntimeTelemetryFrame"] },
+    { "name": "telm_health_severity_type", "type": "string", "required": true, "enum": ["NOMINAL_60FPS", "DEGRADED_LOW_FPS", "CRITICAL_PHYSICS_BOTTLENECK", "CRITICAL_RENDER_BOTTLENECK"] },
+    { "name": "telm_rolling_fps_count", "type": "integer", "required": true },
+    { "name": "telm_frame_duration_ms_metric", "type": "number", "required": true },
+    { "name": "telm_update_duration_ms_metric", "type": "number", "required": true },
+    { "name": "telm_draw_duration_ms_metric", "type": "number", "required": true },
+    { "name": "telm_physics_duration_ms_metric", "type": "number", "required": true },
+    { "name": "telm_actor_sync_duration_ms_metric", "type": "number", "required": true },
+    { "name": "telm_chunk_draw_duration_ms_metric", "type": "number", "required": true },
+    { "name": "telm_collision_checks_count", "type": "integer", "required": true },
+    { "name": "telm_total_bodies_count", "type": "integer", "required": true },
+    { "name": "telm_static_bodies_count", "type": "integer", "required": true },
+    { "name": "telm_dynamic_bodies_count", "type": "integer", "required": true },
+    { "name": "telm_tiles_drawn_count", "type": "integer", "required": true },
+    { "name": "telm_tiles_culled_count", "type": "integer", "required": true },
+    { "name": "telm_used_js_heap_mb_metric", "type": "number", "required": true },
+    { "name": "telm_alerts_list_json", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["ee001122-3344-4556-8778-99aabbccddee", "RuntimeTelemetryFrame", "NOMINAL_60FPS", 60, 4.2, 1.1, 3.1, 0.8, 0.1, 1.9, 120, 62, 60, 2, 256, 0, 14.25, "[]"]
+  ]
+}

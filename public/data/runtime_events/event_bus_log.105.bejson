@@ -1,0 +1,23 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_events.js",
+  "Primary_Key_Field": "ebus_uuid",
+  "Type_Discriminator_Field": "ebus_record_type",
+  "Domain_Type_Field": "ebus_signal_channel_type",
+  "Records_Type": ["RuntimeEventLog"],
+  "Fields": [
+    { "name": "ebus_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "ebus_record_type", "type": "string", "required": true, "enum": ["RuntimeEventLog"] },
+    { "name": "ebus_signal_channel_type", "type": "string", "required": true, "enum": ["LIFECYCLE_BOOT", "LIFECYCLE_START", "LIFECYCLE_STOP", "UI_FRAME_UPDATE", "SCRIPT_OP_TRIGGER"] },
+    { "name": "ebus_event_name_code", "type": "string", "required": true },
+    { "name": "ebus_occurred_epoch_ms_timestamp", "type": "integer", "required": true }
+  ],
+  "Values": [
+    ["cc001122-3344-4556-8778-99aabbccddee", "RuntimeEventLog", "LIFECYCLE_BOOT", "BootstrapCompleted", 1792962240000],
+    ["cc001122-3344-4556-8778-99aabbccddf0", "RuntimeEventLog", "LIFECYCLE_START", "GameStarted", 1792962240016]
+  ]
+}

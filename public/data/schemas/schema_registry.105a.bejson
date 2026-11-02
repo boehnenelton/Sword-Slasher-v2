@@ -1,0 +1,42 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_schema_validator.js",
+  "Primary_Key_Field": "schm_uuid",
+  "Type_Discriminator_Field": "schm_record_type",
+  "Domain_Type_Field": "schm_format_variant_type",
+  "Records_Type": ["SchemaRegistry"],
+  "Fields": [
+    { "name": "schm_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "schm_record_type", "type": "string", "required": true, "enum": ["SchemaRegistry"] },
+    { "name": "schm_format_variant_type", "type": "string", "required": true, "enum": ["105", "105a", "105db"] },
+    { "name": "schm_domain_layer_type", "type": "string", "required": true, "enum": ["PERSISTENCE", "ASSET_MANIFEST", "RUNTIME_STATE", "SYSTEM_CONFIG"] },
+    { "name": "schm_target_entity_name", "type": "string", "required": true },
+    { "name": "schm_entity_prefix_code", "type": "string", "required": true },
+    { "name": "schm_dedicated_folder_path", "type": "string", "required": true },
+    { "name": "schm_relative_file_path", "type": "string", "required": true },
+    { "name": "schm_primary_key_field_name", "type": "string", "required": true },
+    { "name": "schm_type_discriminator_field_name", "type": "string", "required": true },
+    { "name": "schm_domain_type_field_name", "type": "string", "required": true },
+    { "name": "schm_foreign_keys_rules_json", "type": "string", "required": true },
+    { "name": "schm_write_owner_module_name", "type": "string", "required": true },
+    { "name": "schm_summary_description_text", "type": "string", "required": true },
+    { "name": "schm_created_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["10500001-a001-4000-8000-000000000001", "SchemaRegistry", "105a", "PERSISTENCE", "MfdbManifest", "mfdb_", "data/manifest/", "../manifest/105a.mfdb.bejson", "mfdb_uuid", "mfdb_record_type", "mfdb_entity_category_type", "[]", "lib_bejson_Gaming_mfdb_manager.js", "Master MFDB 105 multi-file manifest", "2026-10-25T21:04:00Z"],
+    ["10500002-a002-4000-8000-000000000002", "SchemaRegistry", "105", "PERSISTENCE", "WorldBiome", "biome_", "data/biomes/", "../biomes/biomes.105.bejson", "biome_uuid", "biome_record_type", "biome_generation_mode_type", "[{\"field\":\"biome_base_tile_uuid_fk\",\"references\":\"tiles.tile_uuid\",\"on_delete\":\"restrict\"}]", "lib_bejson_Gaming_world_generator.js", "Biome visual style and procedural scatter rules", "2026-10-25T21:04:00Z"],
+    ["10500003-a003-4000-8000-000000000003", "SchemaRegistry", "105", "PERSISTENCE", "GameLevel", "lvl_", "data/levels/", "../levels/levels.105.bejson", "lvl_uuid", "lvl_record_type", "lvl_environment_zone_type", "[{\"field\":\"lvl_biome_uuid_fk\",\"references\":\"biomes.biome_uuid\",\"on_delete\":\"restrict\"},{\"field\":\"lvl_bgm_audio_uuid_fk\",\"references\":\"audio.aud_uuid\",\"on_delete\":\"set_null\"}]", "lib_bejson_Gaming_level_loader.js", "Game world level bounds and victory conditions", "2026-10-25T21:04:00Z"],
+    ["10500004-a004-4000-8000-000000000004", "SchemaRegistry", "105", "PERSISTENCE", "TileChunkMatrix", "chk_", "data/chunks/", "../chunks/cave_chunk_0_0.105.bejson", "chk_uuid", "chk_record_type", "chk_storage_encoding_type", "[{\"field\":\"chk_lvl_uuid_fk\",\"references\":\"levels.lvl_uuid\",\"on_delete\":\"cascade\"}]", "lib_bejson_Gaming_grid_manager.js", "Spatial 16x16 tile chunk matrices", "2026-10-25T21:04:00Z"],
+    ["10500005-a005-4000-8000-000000000005", "SchemaRegistry", "105", "PERSISTENCE", "ActorArchetype", "stat_", "data/actor_stats/", "../actor_stats/actor_stats.105.bejson", "stat_uuid", "stat_record_type", "stat_archetype_behavior_type", "[{\"field\":\"stat_default_sprite_uuid_fk\",\"references\":\"sprites.spr_uuid\",\"on_delete\":\"set_null\"}]", "lib_bejson_Gaming_actor_registry.js", "Base combat stats, progression, and role archetypes", "2026-10-25T21:04:00Z"],
+    ["10500006-a006-4000-8000-000000000006", "SchemaRegistry", "105", "PERSISTENCE", "ActorInstance", "actor_", "data/actors/", "../actors/actors.105.bejson", "actor_uuid", "actor_record_type", "actor_entity_role_type", "[{\"field\":\"actor_lvl_uuid_fk\",\"references\":\"levels.lvl_uuid\",\"on_delete\":\"cascade\"},{\"field\":\"actor_stat_uuid_fk\",\"references\":\"actor_stats.stat_uuid\",\"on_delete\":\"restrict\"},{\"field\":\"actor_weapon_item_uuid_fk\",\"references\":\"items.item_uuid\",\"on_delete\":\"set_null\"},{\"field\":\"actor_armor_item_uuid_fk\",\"references\":\"items.item_uuid\",\"on_delete\":\"set_null\"},{\"field\":\"actor_interaction_evt_uuid_fk\",\"references\":\"events.evt_uuid\",\"on_delete\":\"set_null\"}]", "lib_bejson_Gaming_actor_controller.js", "Spawned game characters, monsters, and NPC instances", "2026-10-25T21:04:00Z"],
+    ["10500007-a007-4000-8000-000000000007", "SchemaRegistry", "105", "PERSISTENCE", "ItemDefinition", "item_", "data/items/", "../items/items.105.bejson", "item_uuid", "item_record_type", "item_category_type", "[]", "lib_bejson_Gaming_inventory_manager.js", "Weapons, armor, consumables, and gear", "2026-10-25T21:04:00Z"],
+    ["10500008-a008-4000-8000-000000000008", "SchemaRegistry", "105", "PERSISTENCE", "WorldObject", "obj_", "data/objects/", "../objects/objects.105.bejson", "obj_uuid", "obj_record_type", "obj_prop_category_type", "[{\"field\":\"obj_lvl_uuid_fk\",\"references\":\"levels.lvl_uuid\",\"on_delete\":\"cascade\"},{\"field\":\"obj_rule_uuid_fk\",\"references\":\"object_rules.rule_uuid\",\"on_delete\":\"restrict\"},{\"field\":\"obj_interaction_evt_uuid_fk\",\"references\":\"events.evt_uuid\",\"on_delete\":\"set_null\"}]", "lib_bejson_Gaming_object_manager.js", "Placed environmental props and containers", "2026-10-25T21:04:00Z"],
+    ["10500009-a009-4000-8000-000000000009", "SchemaRegistry", "105", "PERSISTENCE", "ObjectPhysicsRule", "rule_", "data/object_rules/", "../object_rules/object_rules.105.bejson", "rule_uuid", "rule_record_type", "rule_category_type", "[{\"field\":\"rule_biome_uuid_fk\",\"references\":\"biomes.biome_uuid\",\"on_delete\":\"set_null\"}]", "lib_bejson_Gaming_bejson_physics.js", "Collider and interaction rules for world objects", "2026-10-25T21:04:00Z"],
+    ["10500010-a010-4000-8000-000000000010", "SchemaRegistry", "105", "PERSISTENCE", "WorldPortal", "port_", "data/portals/", "../portals/portals.105.bejson", "port_uuid", "port_record_type", "port_transition_trigger_type", "[{\"field\":\"port_source_lvl_uuid_fk\",\"references\":\"levels.lvl_uuid\",\"on_delete\":\"cascade\"},{\"field\":\"port_target_lvl_uuid_fk\",\"references\":\"levels.lvl_uuid\",\"on_delete\":\"cascade\"},{\"field\":\"port_requires_item_uuid_fk\",\"references\":\"items.item_uuid\",\"on_delete\":\"set_null\"}]", "lib_bejson_Gaming_level_loader.js", "Level transitions and teleporters", "2026-10-25T21:04:00Z"],
+    ["10500011-a011-4000-8000-000000000011", "SchemaRegistry", "105", "PERSISTENCE", "GameEvent", "evt_", "data/events/", "../events/events.105.bejson", "evt_uuid", "evt_record_type", "evt_trigger_type", "[{\"field\":\"evt_lvl_uuid_fk\",\"references\":\"levels.lvl_uuid\",\"on_delete\":\"cascade\"}]", "lib_bejson_Gaming_bejson_events.js", "Dialogue, triggers, and opcode scripts", "2026-10-25T21:04:00Z"]
+  ]
+}

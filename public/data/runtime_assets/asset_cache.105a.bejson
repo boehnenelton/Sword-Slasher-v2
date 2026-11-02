@@ -1,0 +1,24 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_assets.js",
+  "Primary_Key_Field": "asst_uuid",
+  "Type_Discriminator_Field": "asst_record_type",
+  "Domain_Type_Field": "asst_resource_media_type",
+  "Records_Type": ["RuntimeAssetCache"],
+  "Fields": [
+    { "name": "asst_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "asst_record_type", "type": "string", "required": true, "enum": ["RuntimeAssetCache"] },
+    { "name": "asst_resource_media_type", "type": "string", "required": true, "enum": ["IMAGE_SPRITE", "IMAGE_TILESET", "AUDIO_BUFFER"] },
+    { "name": "asst_lookup_slug_code", "type": "string", "required": true },
+    { "name": "asst_source_uri_path", "type": "string", "required": true },
+    { "name": "asst_is_loaded_ready_flag", "type": "boolean", "required": true },
+    { "name": "asst_cached_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["ee112233-4455-6677-8899-00aabbccdd01", "RuntimeAssetCache", "AUDIO_BUFFER", "ganon_theme", "synth_procedural", true, "2026-10-25T21:04:00Z"]
+  ]
+}

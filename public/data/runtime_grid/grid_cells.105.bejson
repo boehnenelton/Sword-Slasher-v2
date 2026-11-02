@@ -1,0 +1,24 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_grid.js",
+  "Primary_Key_Field": "grid_uuid",
+  "Type_Discriminator_Field": "grid_record_type",
+  "Domain_Type_Field": "grid_terrain_surface_type",
+  "Records_Type": ["RuntimeGridCell"],
+  "Fields": [
+    { "name": "grid_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "grid_record_type", "type": "string", "required": true, "enum": ["RuntimeGridCell"] },
+    { "name": "grid_terrain_surface_type", "type": "string", "required": true, "enum": ["EMPTY", "STONE_FLOOR", "STONE_WALL", "CAVERN_WATER"] },
+    { "name": "grid_row_coord_index", "type": "integer", "required": true },
+    { "name": "grid_column_coord_index", "type": "integer", "required": true },
+    { "name": "grid_is_solid_blocking_flag", "type": "boolean", "required": true }
+  ],
+  "Values": [
+    ["dd001122-3344-4556-8778-99aabbccddee", "RuntimeGridCell", "STONE_WALL", 0, 0, true],
+    ["dd001122-3344-4556-8778-99aabbccddf0", "RuntimeGridCell", "STONE_FLOOR", 1, 1, false]
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_physics.js",
+  "Primary_Key_Field": "rule_uuid",
+  "Type_Discriminator_Field": "rule_record_type",
+  "Domain_Type_Field": "rule_category_type",
+  "Records_Type": ["ObjectPhysicsRule"],
+  "Fields": [
+    { "name": "rule_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "rule_record_type", "type": "string", "required": true, "enum": ["ObjectPhysicsRule"] },
+    { "name": "rule_category_type", "type": "string", "required": true, "enum": ["WALL_BOUNDARY", "FLORA_OBSTACLE", "FURNITURE_PROP", "INTERACTIVE_CONTAINER", "SURFACE_HAZARD"] },
+    { "name": "rule_sub_category_type", "type": "string", "required": true, "enum": ["SOLID_WALL", "BREAKABLE", "CHEST", "LIGHT_PROP", "SLOW_TERRAIN", "SPIKE_HAZARD"] },
+    { "name": "rule_object_slug_code", "type": "string", "required": true },
+    { "name": "rule_biome_uuid_fk", "type": "string", "required": false, "foreign_key": { "references": "biomes.biome_uuid", "on_delete": "set_null" } },
+    { "name": "rule_is_solid_blocking_flag", "type": "boolean", "required": true },
+    { "name": "rule_is_interactable_flag", "type": "boolean", "required": true },
+    { "name": "rule_is_breakable_flag", "type": "boolean", "required": true },
+    { "name": "rule_causes_boomerang_return_flag", "type": "boolean", "required": true },
+    { "name": "rule_boomerang_crush_through_flag", "type": "boolean", "required": true },
+    { "name": "rule_contact_damage_points_count", "type": "integer", "required": true },
+    { "name": "rule_speed_multiplier_metric", "type": "number", "required": true },
+    { "name": "rule_knockback_force_metric", "type": "integer", "required": true },
+    { "name": "rule_hitbox_width_px", "type": "integer", "required": true },
+    { "name": "rule_hitbox_height_px", "type": "integer", "required": true },
+    { "name": "rule_lifespan_seconds_metric", "type": "number", "required": true },
+    { "name": "rule_fallback_color_hex", "type": "string", "required": true },
+    { "name": "rule_description_text", "type": "string", "required": true },
+    { "name": "rule_created_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["f8812345-6789-4abc-8def-012345678901", "ObjectPhysicsRule", "WALL_BOUNDARY", "SOLID_WALL", "cave_wall", "0f94d339-50d0-4daf-aa01-88eeea870b2a", true, false, false, true, false, 0, 1.0, 0, 16, 16, -1.0, "#000000", "Impassable cavern rock boundary wall.", "2026-10-25T21:04:00Z"],
+    ["f8812345-6789-4abc-8def-012345678902", "ObjectPhysicsRule", "FURNITURE_PROP", "LIGHT_PROP", "wall_torch", "0f94d339-50d0-4daf-aa01-88eeea870b2a", false, false, false, false, false, 0, 1.0, 0, 16, 16, -1.0, "#DE2626", "Mounted cavern wall torch emitting ambient light.", "2026-10-25T21:04:00Z"],
+    ["f8812345-6789-4abc-8def-012345678903", "ObjectPhysicsRule", "INTERACTIVE_CONTAINER", "CHEST", "chest_potions", "0f94d339-50d0-4daf-aa01-88eeea870b2b", true, true, false, true, false, 0, 1.0, 0, 16, 16, -1.0, "#f59e0b", "Dark treasure chest containing dark elixirs.", "2026-10-25T21:04:00Z"],
+    ["f8812345-6789-4abc-8def-012345678904", "ObjectPhysicsRule", "FLORA_OBSTACLE", "BREAKABLE", "clay_pot", "0f94d339-50d0-4daf-aa01-88eeea870b2a", true, false, true, false, true, 0, 1.0, 0, 16, 16, -1.0, "#b45309", "Breakable ceramic pot crushed by boomerangs and weapons.", "2026-10-25T21:04:00Z"],
+    ["f8812345-6789-4abc-8def-012345678905", "ObjectPhysicsRule", "FLORA_OBSTACLE", "BREAKABLE", "dark_bush", "0f94d339-50d0-4daf-aa01-88eeea870b2a", true, false, true, false, true, 0, 1.0, 0, 16, 16, -1.0, "#14532d", "Breakable dark foliage bush crushed through by boomerangs.", "2026-10-25T21:04:00Z"]
+  ]
+}

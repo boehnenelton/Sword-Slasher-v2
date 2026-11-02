@@ -1,0 +1,32 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_assets.js",
+  "Primary_Key_Field": "tile_uuid",
+  "Type_Discriminator_Field": "tile_record_type",
+  "Domain_Type_Field": "tile_layer_category_type",
+  "Records_Type": ["TileAssetManifest"],
+  "Fields": [
+    { "name": "tile_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "tile_record_type", "type": "string", "required": true, "enum": ["TileAssetManifest"] },
+    { "name": "tile_layer_category_type", "type": "string", "required": true, "enum": ["GROUND_TERRAIN", "WALL_BOUNDARY", "LIQUID_HAZARD", "DECOR_OVERLAY", "FRINGE_CANOPY"] },
+    { "name": "tile_slug_code", "type": "string", "required": true },
+    { "name": "tile_integer_index_code", "type": "integer", "required": true },
+    { "name": "tile_width_px", "type": "integer", "required": true },
+    { "name": "tile_height_px", "type": "integer", "required": true },
+    { "name": "tile_is_solid_blocking_flag", "type": "boolean", "required": true },
+    { "name": "tile_footstep_audio_uuid_fk", "type": "string", "required": false, "foreign_key": { "references": "audio.aud_uuid", "on_delete": "set_null" } },
+    { "name": "tile_material_sound_slug_code", "type": "string", "required": true },
+    { "name": "tile_image_source_data_uri", "type": "string", "required": false },
+    { "name": "tile_created_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["7019444c-4dc1-4921-9784-77e5521fc8a1", "TileAssetManifest", "GROUND_TERRAIN", "dark_tile", 0, 16, 16, false, null, "footstep_stone", null, "2026-10-25T21:04:00Z"],
+    ["7019444c-4dc1-4921-9784-77e5521fc8a2", "TileAssetManifest", "GROUND_TERRAIN", "stone_floor", 1, 16, 16, false, null, "footstep_stone", null, "2026-10-25T21:04:00Z"],
+    ["23e26250-8bd4-4982-9fcd-f6f134ab3ac8", "TileAssetManifest", "WALL_BOUNDARY", "stone_wall", 2, 16, 16, true, null, "hit_wall", null, "2026-10-25T21:04:00Z"],
+    ["952f6b55-6f37-4640-a102-4bea49cb3d8f", "TileAssetManifest", "LIQUID_HAZARD", "cavern_water", 3, 16, 16, true, null, "water_splash", null, "2026-10-25T21:04:00Z"]
+  ]
+}
