@@ -106,15 +106,20 @@ export const GameViewport: React.FC<Props> = ({
 
   // Item pickup handler callback
   const handleItemPickup = useCallback((item: DroppedItem) => {
-    soundEngine.playChimeSFX();
     if (item.type === 'rupee') {
+      soundEngine.playRupeePickupSFX();
       shadowEngine.rupees = Math.min(shadowEngine.maxRupees, shadowEngine.rupees + item.value);
     } else if (item.type === 'heart') {
+      soundEngine.playHeartPickupSFX();
       bejsonEngine.playerHp = Math.min(bejsonEngine.playerMaxHp, bejsonEngine.playerHp + item.value);
     } else if (item.type === 'bomb') {
+      soundEngine.playChimeSFX();
       shadowEngine.bombs = Math.min(shadowEngine.maxBombs, shadowEngine.bombs + item.value);
     } else if (item.type === 'arrow') {
+      soundEngine.playChimeSFX();
       shadowEngine.arrows = Math.min(shadowEngine.maxArrows, shadowEngine.arrows + item.value);
+    } else {
+      soundEngine.playChimeSFX();
     }
   }, []);
 
@@ -180,7 +185,11 @@ export const GameViewport: React.FC<Props> = ({
     // Cut bushes / break pots with AABB check
     propsRef.current = propsRef.current.map(prop => {
       if (!prop.destroyed && physicsEngine.checkAABBRaw(hitX - 16, hitY - 16, 32, 32, prop.x - 10, prop.y - 10, 20, 20)) {
-        soundEngine.playHitSFX();
+        if (prop.type === 'pot') {
+          soundEngine.playPotBreakSFX();
+        } else {
+          soundEngine.playBushCutSFX();
+        }
         projectilePhysics.spawnDrop(prop.x, prop.y);
         return { ...prop, destroyed: true };
       }
@@ -192,10 +201,14 @@ export const GameViewport: React.FC<Props> = ({
       if (enemy.hp <= 0) return enemy;
       const isHit = physicsEngine.checkAABBRaw(hitX - 18, hitY - 18, 36, 36, enemy.x - 12, enemy.y - 12, 24, 24);
       if (isHit) {
-        soundEngine.playHitSFX();
         screenEffects.triggerShake(6, 0.25);
         const newHp = Math.max(0, enemy.hp - 25);
-        if (newHp === 0) projectilePhysics.spawnDrop(enemy.x, enemy.y);
+        if (newHp === 0) {
+          soundEngine.playEnemyDeathSFX();
+          projectilePhysics.spawnDrop(enemy.x, enemy.y);
+        } else {
+          soundEngine.playHitSFX();
+        }
 
         // Vector Knockback calculation
         const kb = physicsEngine.calculateKnockbackVector(px, py, enemy.x, enemy.y, 8.5);
@@ -225,9 +238,13 @@ export const GameViewport: React.FC<Props> = ({
       if (enemy.hp <= 0) return enemy;
       const isHit = physicsEngine.checkAABBRaw(px - 32, py - 32, 64, 64, enemy.x - 12, enemy.y - 12, 24, 24);
       if (isHit) {
-        soundEngine.playHitSFX();
         const newHp = Math.max(0, enemy.hp - 40);
-        if (newHp === 0) projectilePhysics.spawnDrop(enemy.x, enemy.y);
+        if (newHp === 0) {
+          soundEngine.playEnemyDeathSFX();
+          projectilePhysics.spawnDrop(enemy.x, enemy.y);
+        } else {
+          soundEngine.playHitSFX();
+        }
 
         const kb = physicsEngine.calculateKnockbackVector(px, py, enemy.x, enemy.y, 14.0);
         return {
@@ -243,6 +260,11 @@ export const GameViewport: React.FC<Props> = ({
     // Cut all surrounding bushes & pots
     propsRef.current = propsRef.current.map(prop => {
       if (!prop.destroyed && physicsEngine.checkAABBRaw(px - 32, py - 32, 64, 64, prop.x - 10, prop.y - 10, 20, 20)) {
+        if (prop.type === 'pot') {
+          soundEngine.playPotBreakSFX();
+        } else {
+          soundEngine.playBushCutSFX();
+        }
         projectilePhysics.spawnDrop(prop.x, prop.y);
         return { ...prop, destroyed: true };
       }
@@ -262,7 +284,7 @@ export const GameViewport: React.FC<Props> = ({
 
     if (activeItem.id === 'shadow_boomerang') {
       if (projectilePhysics.boomerangs.length > 0) return;
-      soundEngine.playSlashSFX();
+      soundEngine.playBoomerangSFX();
       projectilePhysics.spawnBoomerang(px, py, dir, 0);
     } else if (activeItem.id === 'dark_bow') {
       if (shadowEngine.arrows <= 0) return;
@@ -692,7 +714,7 @@ export const GameViewport: React.FC<Props> = ({
         const hitPlayer = physicsEngine.checkAABBRaw(ex - 8, ey - 8, 16, 16, px - 8, py - 8, 16, 16);
         if (hitPlayer && playerHurtRef.current <= 0) {
           bejsonEngine.playerHp = Math.max(0, bejsonEngine.playerHp - e.attack);
-          soundEngine.playHitSFX();
+          soundEngine.playPlayerHurtSFX();
           screenEffects.triggerShake(10, 0.35);
           screenEffects.triggerFlash('#DE2626', 0.55, 0.25);
           playerHurtRef.current = 24; // Invincibility frames

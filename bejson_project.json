@@ -7,10 +7,10 @@
   "Project_Modified_Date": "2026-10-27",
   "Project_Description": "BEJSON 105 powered top-down Zelda-inspired RPG featuring Shadow Link, lib_bejson_Gaming_ family engine, vanilla JS parity mirror, AABB bounding box physics, Y-sorted 2.5D depth rendering, vector knockback, and custom Web Audio soundtrack.",
   "Schema_Version": "1.7.0",
-  "Project_Version": "1.0.35",
-  "Package_Version": "135",
+  "Project_Version": "1.0.37",
+  "Package_Version": "137",
   "Project_GUID": "GUID_PLACEHOLDER",
-  "Versioned_UUID": "105a0100-2026-1102-9999-000000000135",
+  "Versioned_UUID": "105a0100-2026-1102-9999-000000000137",
   "Is_Registered": false,
   "Project_Type": "React_Web_App",
   "Records_Type": [
@@ -49,11 +49,11 @@
   "Values": [
     [
       "Sword Slasher RPG: Shadow Link's Awakening",
-      "1.0.35",
-      "135",
+      "1.0.37",
+      "137",
       "/",
       "GUID_PLACEHOLDER",
-      "105a0100-2026-1102-9999-000000000135",
+      "105a0100-2026-1102-9999-000000000137",
       "748a22e3-91e0-49db-a6c7-caf510578cd2",
       "Elton Boehnen",
       "BEJSON 105 powered top-down Zelda-inspired RPG engine.",
@@ -65,7 +65,7 @@
       "src/main.tsx",
       "react-typescript",
       "300",
-      "shadow_link_awakening-V135-PKG135.zip",
+      "shadow_link_awakening-V137-PKG137.zip",
       "",
       "",
       "",
@@ -73,7 +73,7 @@
       "2026-11-02",
       "Template_Initialization",
       "{}",
-      "1.0.35 | 2026-11-02 | Refactored System Menu Tab 2 (AI Architect) into a sleek single-column chat client with top-docked preset prompt combo box, model selector, and Send Preset button.",
+      "1.0.37 | 2026-11-02 | Stored all sound effects and BGM as BEJSON 105 sound frequency data tables (audio_manifest.105a.bejson). SoundEngine.ts parses frequency specs, waveforms, filter cutoffs, and envelope sequences via O(1) Field Map Cache.",
       "None reported.",
       "None recorded."
     ]

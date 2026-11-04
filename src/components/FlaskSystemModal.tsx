@@ -536,10 +536,46 @@ if __name__ == "__main__":
 
     console.log("[Standalone HTML Game] Booting full engine replica with embedded BEJSON chunk...", EMBEDDED_BEJSON_BUNDLE);
 
+    // Robust Dataset Search Helper
+    function findDataset(keyword) {
+      if (!EMBEDDED_BEJSON_BUNDLE || !EMBEDDED_BEJSON_BUNDLE.Datasets) return null;
+      for (const key in EMBEDDED_BEJSON_BUNDLE.Datasets) {
+        if (key.includes(keyword)) return EMBEDDED_BEJSON_BUNDLE.Datasets[key];
+      }
+      return null;
+    }
+
+    // WEB AUDIO RETRO SYNTHESIZER ENGINE (OFFLINE PARITY)
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioCtx = new AudioCtx();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSfxTone(freq, endFreq, dur, type = 'sawtooth', volume = 0.3) {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      if (endFreq && endFreq !== freq) osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), now + dur);
+      gain.gain.setValueAtTime(volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + dur);
+    }
+
     // Extract SVG / Base64 sprite assets from embedded BEJSON dataset manifest
     const spriteImages = {};
     try {
-      const sprDoc = EMBEDDED_BEJSON_BUNDLE.Datasets ? EMBEDDED_BEJSON_BUNDLE.Datasets['sprites/sprites_manifest.105a.bejson'] : null;
+      const sprDoc = findDataset('sprites_manifest');
       if (sprDoc && sprDoc.Values && sprDoc.Fields) {
         const slugIdx = sprDoc.Fields.findIndex(f => f.name === 'spr_slug_code');
         const uriIdx = sprDoc.Fields.findIndex(f => f.name === 'spr_image_source_data_uri');
@@ -583,7 +619,9 @@ if __name__ == "__main__":
       { id: 'p1', x: 260, y: 180, type: 'pot', destroyed: false },
       { id: 'p2', x: 300, y: 180, type: 'bush', destroyed: false },
       { id: 'p3', x: 500, y: 220, type: 'pot', destroyed: false },
-      { id: 'p4', x: 540, y: 220, type: 'bush', destroyed: false }
+      { id: 'p4', x: 540, y: 220, type: 'bush', destroyed: false },
+      { id: 'p5', x: 720, y: 350, type: 'pot', destroyed: false },
+      { id: 'p6', x: 420, y: 550, type: 'bush', destroyed: false }
     ];
 
     let enemies = [
@@ -649,6 +687,7 @@ if __name__ == "__main__":
     const btnStartGame = document.getElementById('btn-start-game');
     if (btnStartGame) {
       btnStartGame.addEventListener('click', () => {
+        initAudio();
         document.getElementById('intro-screen').style.display = 'none';
       });
     }
@@ -665,6 +704,7 @@ if __name__ == "__main__":
       if (isSheathed) { isSheathed = false; return; }
       if (swordCooldown > 0 || (slashAnim && slashAnim.timer > 0)) return;
 
+      playSfxTone(520, 90, 0.14, 'sawtooth', 0.4);
       slashAnim = { x: px, y: py, dir: playerFacing, timer: 14, maxTimer: 14 };
       swordCooldown = 16;
 
@@ -678,12 +718,14 @@ if __name__ == "__main__":
       props.forEach(p => {
         if (!p.destroyed && Math.hypot(p.x - hx, p.y - hy) < 26) {
           p.destroyed = true;
+          playSfxTone(1400, 300, 0.12, 'sawtooth', 0.3);
           droppedItems.push({ x: p.x, y: p.y, type: 'heart', timer: 300 });
         }
       });
 
       enemies = enemies.map(e => {
         if (e.hp > 0 && Math.hypot(e.x - hx, e.y - hy) < 32) {
+          playSfxTone(140, 35, 0.12, 'sawtooth', 0.5);
           const angle = Math.atan2(e.y - py, e.x - px);
           const kb = { vx: Math.cos(angle) * 8, vy: Math.sin(angle) * 8 };
           return { ...e, hp: Math.max(0, e.hp - 25), hurtTime: 14, knockback: kb };
@@ -693,6 +735,7 @@ if __name__ == "__main__":
     }
 
     function executeWhirlingBlade() {
+      playSfxTone(220, 110, 0.35, 'square', 0.5);
       spinAnim = { x: px, y: py, timer: 18, maxTimer: 18 };
       enemies = enemies.map(e => {
         if (e.hp > 0 && Math.hypot(e.x - px, e.y - py) < 65) {
@@ -706,6 +749,7 @@ if __name__ == "__main__":
 
     function executeYItem() {
       isSheathed = false;
+      playSfxTone(350, 300, 0.16, 'triangle', 0.3);
       let vx = 0, vy = 0;
       if (playerFacing === 'UP') vy = -8;
       if (playerFacing === 'DOWN') vy = 8;
@@ -715,6 +759,7 @@ if __name__ == "__main__":
     }
 
     function executeInteract() {
+      playSfxTone(659.25, 783.99, 0.14, 'triangle', 0.4);
       playerHp = Math.min(playerMaxHp, playerHp + 10);
     }
 
@@ -768,6 +813,7 @@ if __name__ == "__main__":
           props.forEach(p => {
             if (!p.destroyed && Math.hypot(p.x - b.x, p.y - b.y) < 18) {
               p.destroyed = true;
+              playSfxTone(1400, 300, 0.12, 'sawtooth', 0.3);
               droppedItems.push({ x: p.x, y: p.y, type: 'heart', timer: 300 });
             }
           });
@@ -787,6 +833,7 @@ if __name__ == "__main__":
       droppedItems = droppedItems.filter(i => {
         i.timer--;
         if (Math.hypot(px - i.x, py - i.y) < 16) {
+          playSfxTone(659.25, 783.99, 0.14, 'triangle', 0.4);
           playerHp = Math.min(playerMaxHp, playerHp + 20);
           return false;
         }
@@ -805,12 +852,62 @@ if __name__ == "__main__":
         }
 
         if (dist < 16 && playerHurtTime <= 0) {
+          playSfxTone(180, 50, 0.18, 'square', 0.5);
           playerHp = Math.max(0, playerHp - 10);
           playerHurtTime = 24;
           const angle = Math.atan2(py - ey, px - ex);
           playerKnockback = { vx: Math.cos(angle) * 9, vy: Math.sin(angle) * 9 };
         }
         return { ...e, x: ex, y: ey, hurtTime: Math.max(0, e.hurtTime - 1) };
+      });
+    }
+
+    // Render Tilemap Terrain Floor Matrix
+    function renderTilemapTerrain() {
+      const tileSize = 32;
+      ctx.fillStyle = '#0f0b12';
+      ctx.fillRect(0, 0, mapWorldWidth, mapWorldHeight);
+
+      ctx.fillStyle = '#18121e';
+      ctx.strokeStyle = '#271c30';
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x < mapWorldWidth; x += tileSize) {
+        for (let y = 0; y < mapWorldHeight; y += tileSize) {
+          if (x < 32 || x >= mapWorldWidth - 32 || y < 32 || y >= mapWorldHeight - 32) {
+            ctx.fillStyle = '#221526';
+            ctx.fillRect(x, y, tileSize, tileSize);
+            ctx.strokeStyle = '#3d2445';
+            ctx.strokeRect(x, y, tileSize, tileSize);
+            ctx.fillStyle = '#DE2626';
+            ctx.fillRect(x + 12, y + 12, 8, 8);
+          } else {
+            const isAlt = ((x / tileSize) + (y / tileSize)) % 2 === 0;
+            ctx.fillStyle = isAlt ? '#181120' : '#140d1a';
+            ctx.fillRect(x, y, tileSize, tileSize);
+            ctx.strokeStyle = '#23182d';
+            ctx.strokeRect(x, y, tileSize, tileSize);
+
+            ctx.fillStyle = '#2d1f3b';
+            ctx.fillRect(x + 4, y + 4, 6, 6);
+            ctx.fillRect(x + 18, y + 18, 8, 6);
+          }
+        }
+      }
+
+      // Pillars
+      const pillars = [
+        { x: 128, y: 128 }, { x: 896, y: 128 },
+        { x: 128, y: 640 }, { x: 896, y: 640 },
+        { x: 384, y: 384 }, { x: 640, y: 384 }
+      ];
+      pillars.forEach(p => {
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(p.x - 16, p.y - 16, 32, 32);
+        ctx.strokeStyle = '#DE2626';
+        ctx.strokeRect(p.x - 16, p.y - 16, 32, 32);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(p.x - 6, p.y - 6, 12, 12);
       });
     }
 
@@ -831,11 +928,10 @@ if __name__ == "__main__":
       ctx.scale(zoomScale, zoomScale);
       ctx.translate(-camX, -camY);
 
-      ctx.strokeStyle = '#1a080d';
-      ctx.lineWidth = 1;
-      for (let x = 0; x <= mapWorldWidth; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, mapWorldHeight); ctx.stroke(); }
-      for (let y = 0; y <= mapWorldHeight; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(mapWorldWidth, y); ctx.stroke(); }
+      // Render BEJSON Tilemap Floor
+      renderTilemapTerrain();
 
+      // Props (Pots & Bushes)
       props.forEach(p => {
         if (p.destroyed) return;
         ctx.fillStyle = p.type === 'pot' ? '#b45309' : '#14532d';
@@ -872,36 +968,44 @@ if __name__ == "__main__":
 
       const isHurt = playerHurtTime > 0 && Math.floor(playerHurtTime / 3) % 2 === 0;
 
+      // Render Obsidian Shield
       const renderShield = () => {
         if (playerFacing === 'UP') {
-          ctx.fillStyle = '#000000'; ctx.fillRect(px - 6, py - 8, 12, 15);
+          ctx.fillStyle = '#0d0d12'; ctx.fillRect(px - 6, py - 8, 12, 15);
           ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(px - 6, py - 8, 12, 15);
           ctx.fillStyle = '#DE2626';
           ctx.beginPath(); ctx.moveTo(px - 4, py - 5); ctx.lineTo(px + 4, py - 5); ctx.lineTo(px, py + 4); ctx.closePath(); ctx.fill();
         } else {
           const sX = playerFacing === 'LEFT' ? px - 12 : (playerFacing === 'RIGHT' ? px + 2 : px - 12);
-          ctx.fillStyle = '#000000'; ctx.fillRect(sX, py - 3, 12, 15);
+          ctx.fillStyle = '#0d0d12'; ctx.fillRect(sX, py - 3, 12, 15);
           ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(sX, py - 3, 12, 15);
           ctx.fillStyle = '#DE2626'; ctx.fillRect(sX + 2, py, 8, 8);
         }
       };
 
+      // 2.5D Layer Order: When facing UP, render Shield FIRST (mounted behind Link)
       if (playerFacing === 'UP') renderShield();
 
+      // Render Shadow Link Sprite
       const linkImg = spriteImages['shadow_link_sheet'];
       if (linkImg && linkImg.complete && !isHurt) {
         ctx.drawImage(linkImg, px - 16, py - 16, 32, 32);
       } else {
-        ctx.fillStyle = isHurt ? '#ffffff' : '#000000';
+        // HIGH-VISIBILITY FALLBACK: Distinct Dark Obsidian Slate Body, Crimson Belt, Glowing Red Eyes
+        ctx.fillStyle = isHurt ? '#ffffff' : '#1e1e2d';
         ctx.fillRect(px - 9, py - 10, 18, 20);
-        ctx.fillStyle = '#DE2626'; ctx.fillRect(px - 3, py, 6, 4);
+        ctx.strokeStyle = '#3f3f5a'; ctx.strokeRect(px - 9, py - 10, 18, 20);
 
-        ctx.fillStyle = '#DE2626';
-        if (playerFacing === 'DOWN') { ctx.fillRect(px - 6, py - 7, 4, 3); ctx.fillRect(px + 2, py - 7, 4, 3); }
-        else if (playerFacing === 'LEFT') ctx.fillRect(px - 7, py - 7, 4, 3);
-        else if (playerFacing === 'RIGHT') ctx.fillRect(px + 3, py - 7, 4, 3);
+        ctx.fillStyle = '#12121a'; ctx.fillRect(px - 7, py - 14, 14, 8); // Head / Cap
+        ctx.fillStyle = '#DE2626'; ctx.fillRect(px - 9, py + 1, 18, 3); // Belt
+
+        ctx.fillStyle = '#f87171'; // Glowing Eyes
+        if (playerFacing === 'DOWN') { ctx.fillRect(px - 5, py - 7, 3, 3); ctx.fillRect(px + 2, py - 7, 3, 3); }
+        else if (playerFacing === 'LEFT') ctx.fillRect(px - 6, py - 7, 3, 3);
+        else if (playerFacing === 'RIGHT') ctx.fillRect(px + 3, py - 7, 3, 3);
       }
 
+      // When facing DOWN / LEFT / RIGHT, render Shield AFTER Link's body (held in hand in front)
       if (playerFacing !== 'UP') renderShield();
 
       if (slashAnim && slashAnim.timer > 0) {

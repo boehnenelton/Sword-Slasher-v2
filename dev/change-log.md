@@ -1,5 +1,27 @@
 # dev/change-log.md - Revision History
 
+## [2.0.0-105 / Package 137] - 2026-11-02
+- Decoupled all sound effect and BGM specs into BEJSON 105 frequency matrices (`audio_manifest.105a.bejson`).
+- Defined explicit SFX frequency data types in BEJSON: `aud_waveform_type` (`sawtooth`, `square`, `triangle`, `sine`, `noise`), `aud_start_freq_hz`, `aud_end_freq_hz`, `aud_frequency_ramp_type`, `aud_filter_type`, `aud_filter_cutoff_hz`, `aud_filter_q_factor`, and `aud_note_sequence_json`.
+- Updated `SoundEngine.ts` to ingest BEJSON sound frequency tables via $O(1)$ Field Map Cache with boundary-layer whitespace sanitization.
+- Updated `bejson_project.json` versioning ledger to Version 1.0.37 / Package 137.
+
+## [2.0.0-105 / Package 136] - 2026-11-02
+- Refined, optimized, hardened, and remediated the Web Audio synthesis engine (`soundEngine.ts`).
+- Pre-generated a 1-second white noise buffer for procedural retro sound effects:
+  - `playPotBreakSFX()`: Bandpass noise filter crunch.
+  - `playBushCutSFX()`: Highpass noise leaf rustle.
+  - `playEnemyDeathSFX()`: Disintegration noise burst with descending tone.
+  - `playPlayerHurtSFX()`: Punchy thud with low frequency drop.
+  - `playHeartPickupSFX()`: Classic Zelda dual-note heart chime (E5 -> G5).
+  - `playRupeePickupSFX()`: Dual-note rupee chime (B5 -> E6).
+  - `playBoomerangSFX()`: Pitch-modulated whirring boomerang rotation SFX.
+  - `startChargeSFX()` / `stopChargeSFX()`: Looping rising energy hum while holding B button.
+- Hardened Web Audio context initialization against browser autoplay restriction policies with automatic click/keydown/touch event unlocks.
+- Added Master, Music, and SFX volume controls with persistent `localStorage` saving.
+- Updated `GameViewport.tsx` to trigger specific sound effects across all gameplay events.
+- Updated `bejson_project.json` versioning ledger to Version 1.0.36 / Package 136.
+
 ## [2.0.0-105 / Package 135] - 2026-11-02
 - Refactored System Menu Tab 2 (`2. AI Architect`) in `FlaskSystemModal.tsx` into a sleek single-column chat client window.
 - Removed left-hand side panel ("INGESTED GAME CONTEXT" & vertical preset button stack).
