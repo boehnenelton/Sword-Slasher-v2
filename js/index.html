@@ -77,7 +77,14 @@
   </div>
 
   <div id="controls-bar">
-    Controls: WASD / Arrow Keys = Move | J = Slash | K = Spin | Shift = Dash | X = Map | I = Inventory
+    Controls: WASD / Arrows = Move | J = Slash | K = Spin | Shift = Dash | X = Map | I = Inventory
+    <div style="margin-top: 8px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+      <span style="color: #fbbf24; font-weight: bold;">DEBUG ROOMS:</span>
+      <button id="btn-room-debug" style="background:#27272a; color:#fff; border:1px solid #DE2626; padding:2px 8px; font-family:monospace; cursor:pointer; font-size:10px;">🔧 Debug Chamber [Key 1]</button>
+      <button id="btn-room-sanctuary" style="background:#27272a; color:#fff; border:1px solid #DE2626; padding:2px 8px; font-family:monospace; cursor:pointer; font-size:10px;">🏛️ Ganon Sanctuary [Key 2]</button>
+      <button id="btn-room-cavern" style="background:#27272a; color:#fff; border:1px solid #DE2626; padding:2px 8px; font-family:monospace; cursor:pointer; font-size:10px;">🦇 Forgotten Cavern [Key 3]</button>
+      <button id="btn-room-courtyard" style="background:#27272a; color:#fff; border:1px solid #DE2626; padding:2px 8px; font-family:monospace; cursor:pointer; font-size:10px;">🏰 Castle Courtyard [Key 4]</button>
+    </div>
   </div>
 
   <script type="module" src="./main.js"></script>

@@ -708,6 +708,93 @@ class SoundEngine {
       osc.stop(now + 0.45);
     }
   }
+
+  // --- ENVIRONMENTAL BIOME AUDIO PROFILE SYNTHESIZER ---
+  private ambientOsc: OscillatorNode | null = null;
+  private ambientGain: GainNode | null = null;
+  private ambientFilter: BiquadFilterNode | null = null;
+  private currentDroneHz: number = 0;
+
+  public playBiomeFootstep(audioProfile: any) {
+    this.initCtx();
+    if (!this.ctx || !this.sfxGain || this.isMuted) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = audioProfile.ambientWaveform === 'sawtooth' ? 'sawtooth' : 'triangle';
+    osc.frequency.setValueAtTime(audioProfile.footstepFreq || 220, now);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, (audioProfile.footstepFreq || 220) * 0.4), now + 0.08);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(audioProfile.filterCutoff || 900, now);
+
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + (0.06 * (audioProfile.reverbDecay || 0.8)));
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.sfxGain);
+
+    osc.start(now);
+    osc.stop(now + (0.06 * (audioProfile.reverbDecay || 0.8)));
+  }
+
+  public updateAmbientBiomeDrone(audioProfile: any) {
+    this.initCtx();
+    if (!this.ctx || !this.musicGain || this.isMuted) return;
+
+    if (this.currentDroneHz === audioProfile.ambientDroneHz && this.ambientOsc) return;
+
+    const now = this.ctx.currentTime;
+
+    if (!this.ambientOsc) {
+      this.ambientOsc = this.ctx.createOscillator();
+      this.ambientGain = this.ctx.createGain();
+      this.ambientFilter = this.ctx.createBiquadFilter();
+
+      this.ambientOsc.type = audioProfile.ambientWaveform || 'sine';
+      this.ambientOsc.frequency.setValueAtTime(audioProfile.ambientDroneHz || 65, now);
+
+      this.ambientFilter.type = 'lowpass';
+      this.ambientFilter.frequency.setValueAtTime(audioProfile.filterCutoff || 900, now);
+
+      this.ambientGain.gain.setValueAtTime(0.01, now);
+      this.ambientGain.gain.linearRampToValueAtTime(0.12, now + 1.0);
+
+      this.ambientOsc.connect(this.ambientFilter);
+      this.ambientFilter.connect(this.ambientGain);
+      this.ambientGain.connect(this.musicGain);
+
+      this.ambientOsc.start(now);
+    } else if (this.ambientOsc && this.ambientGain && this.ambientFilter) {
+      this.ambientOsc.frequency.linearRampToValueAtTime(audioProfile.ambientDroneHz || 65, now + 0.5);
+      this.ambientFilter.frequency.linearRampToValueAtTime(audioProfile.filterCutoff || 900, now + 0.5);
+    }
+
+    this.currentDroneHz = audioProfile.ambientDroneHz || 65;
+  }
+
+  public stopAmbientBiomeDrone() {
+    if (this.ambientOsc && this.ctx) {
+      const now = this.ctx.currentTime;
+      if (this.ambientGain) {
+        this.ambientGain.gain.linearRampToValueAtTime(0.001, now + 0.5);
+      }
+      setTimeout(() => {
+        try {
+          this.ambientOsc?.stop();
+          this.ambientOsc?.disconnect();
+        } catch (_) {}
+        this.ambientOsc = null;
+        this.ambientGain = null;
+        this.ambientFilter = null;
+        this.currentDroneHz = 0;
+      }, 500);
+    }
+  }
 }
 
 export const soundEngine = new SoundEngine();

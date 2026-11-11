@@ -50,21 +50,33 @@ export const WorldMapOverlay: React.FC<Props> = ({ isOpen, onClose }) => {
             {levels.map(lvl => {
               const isCurrent = lvl.slug === currentSlug;
               return (
-                <div
+                <button
                   key={lvl.uuid}
-                  className={`p-3 rounded-lg border-2 flex flex-col gap-1 transition-all ${
+                  onClick={() => {
+                    soundEngine.playChimeSFX();
+                    bejsonEngine.currentLevelSlug = lvl.slug;
+                    bejsonEngine.playerX = 320;
+                    bejsonEngine.playerY = 320;
+                    onClose();
+                  }}
+                  className={`p-3 rounded-lg border-2 flex flex-col gap-1 transition-all text-left cursor-pointer hover:scale-[1.02] ${
                     isCurrent
                       ? 'bg-[#DE2626]/20 border-[#DE2626] shadow-[0_0_15px_rgba(222,38,38,0.5)] ring-2 ring-[#DE2626]'
-                      : 'bg-zinc-950 border-zinc-800'
+                      : 'bg-zinc-950 border-zinc-800 hover:border-zinc-600'
                   }`}
+                  title={`Warp to ${lvl.title}`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold text-white font-['Press_Start_2P'] truncate">
                       {lvl.title.split(' - ')[0]}
                     </span>
-                    {isCurrent && (
+                    {isCurrent ? (
                       <span className="flex items-center gap-1 text-[9px] font-bold text-[#DE2626] bg-black px-2 py-0.5 rounded border border-[#DE2626] animate-pulse">
                         <MapPin className="w-3 h-3" /> YOU ARE HERE
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-amber-400 font-bold bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800">
+                        WARP ➔
                       </span>
                     )}
                   </div>
@@ -72,7 +84,7 @@ export const WorldMapOverlay: React.FC<Props> = ({ isOpen, onClose }) => {
                     <span>SIZE: {lvl.mapSizeTier}</span>
                     <span className="text-emerald-400 font-bold">{lvl.width}x{lvl.height}</span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

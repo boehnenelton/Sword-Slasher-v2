@@ -6,7 +6,7 @@
  * Version:         200104
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart, Key, Gem, Zap, Settings, Info, Cpu } from 'lucide-react';
 import { bejsonEngine } from '../engine/bejsonEngine';
 import { shadowEngine } from '../lib/lib_bejson_Gaming_shadow_engine';
@@ -24,6 +24,14 @@ export const GameHUD: React.FC<Props> = ({ levelTitle, objective, onOpenSettings
   const maxHp = bejsonEngine.playerMaxHp;
   const mp = bejsonEngine.magicPoints;
   const maxMp = bejsonEngine.maxMagicPoints;
+
+  const [activeItemSlug, setActiveItemSlug] = useState(shadowEngine.activeYItemSlug);
+
+  useEffect(() => {
+    return shadowEngine.subscribe(() => {
+      setActiveItemSlug(shadowEngine.activeYItemSlug);
+    });
+  }, []);
 
   const activeYItem = shadowEngine.getActiveYItem();
 

@@ -9,6 +9,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { bejsonEngine, GameEventData } from '../engine/bejsonEngine';
 import { shadowEngine } from '../lib/lib_bejson_Gaming_shadow_engine';
+import { bejsonGaming } from '../lib/lib_bejson_Gaming_engine';
 import { projectilePhysics, DroppedItem, ObjectCollisionBox } from '../lib/lib_bejson_Gaming_projectile_physics';
 import { soundEngine } from '../engine/soundEngine';
 import { physicsEngine, KnockbackState } from '../engine/physicsEngine';
@@ -51,8 +52,11 @@ interface DestructibleProp {
   id: string;
   x: number;
   y: number;
-  type: 'pot' | 'bush';
+  type: 'pot' | 'bush' | 'pedestal';
   destroyed: boolean;
+  icon?: string;
+  title?: string;
+  itemId?: string;
 }
 
 // Y-Renderable interface for 2.5D Top-to-Bottom depth sorting
@@ -101,6 +105,7 @@ export const GameViewport: React.FC<Props> = ({
   const swordVariationRef = useRef<number>(0);
   const spinAnimRef = useRef<{ x: number; y: number; timer: number; maxTimer: number } | null>(null);
   const swordCooldownRef = useRef<number>(0);
+  const bowCooldownRef = useRef<number>(0);
   const isSheathedRef = useRef<boolean>(false);
   const openingTriggeredRef = useRef(false);
 
@@ -144,9 +149,40 @@ export const GameViewport: React.FC<Props> = ({
     enemiesRef.current = enemyList;
   }, []);
 
+  const syncPropsForLevel = useCallback((levelSlug: string) => {
+    if (levelSlug === 'debug_chamber') {
+      const cx = 512;
+      const cy = 512;
+      propsRef.current = [
+        // Item Testing Pedestals (North Section)
+        { id: 'ped_boomerang', x: cx - 120, y: cy - 180, type: 'pedestal', destroyed: false, itemId: 'shadow_boomerang', icon: '🪃', title: 'BOOMERANG' },
+        { id: 'ped_bow', x: cx - 40, y: cy - 180, type: 'pedestal', destroyed: false, itemId: 'dark_bow', icon: '🏹', title: 'DARK BOW' },
+
+        // Zone Props
+        { id: 'p1', x: cx - 160, y: cy - 80, type: 'pot', destroyed: false },
+        { id: 'p2', x: cx - 200, y: cy - 80, type: 'bush', destroyed: false },
+        { id: 'p3', x: cx + 160, y: cy - 80, type: 'pot', destroyed: false },
+        { id: 'p4', x: cx + 200, y: cy - 80, type: 'bush', destroyed: false }
+      ];
+    } else {
+      propsRef.current = [
+        { id: 'p1', x: 300, y: 400, type: 'pot', destroyed: false },
+        { id: 'p2', x: 340, y: 400, type: 'bush', destroyed: false },
+        { id: 'p3', x: 600, y: 450, type: 'pot', destroyed: false },
+        { id: 'p4', x: 640, y: 450, type: 'bush', destroyed: false },
+        { id: 'p5', x: 512, y: 600, type: 'pot', destroyed: false },
+        { id: 'p6', x: 200, y: 700, type: 'bush', destroyed: false },
+        { id: 'p7', x: 800, y: 700, type: 'pot', destroyed: false },
+        { id: 'p8', x: 450, y: 300, type: 'bush', destroyed: false },
+        { id: 'p9', x: 550, y: 300, type: 'pot', destroyed: false }
+      ];
+    }
+  }, []);
+
   useEffect(() => {
     syncEnemiesForLevel(bejsonEngine.currentLevelSlug);
-  }, [syncEnemiesForLevel]);
+    syncPropsForLevel(bejsonEngine.currentLevelSlug);
+  }, [syncEnemiesForLevel, syncPropsForLevel]);
 
   // Execute Sword Slash (SNES Fast Swing Arc with Vector Knockback & Sheathing Mechanic)
   const executeSwordSlash = useCallback(() => {
@@ -182,9 +218,17 @@ export const GameViewport: React.FC<Props> = ({
     if (dir === 'LEFT') hitX -= reach;
     if (dir === 'RIGHT') hitX += reach;
 
-    // Cut bushes / break pots with AABB check
+    // Cut bushes / break pots / activate pedestals with AABB check
     propsRef.current = propsRef.current.map(prop => {
       if (!prop.destroyed && physicsEngine.checkAABBRaw(hitX - 16, hitY - 16, 32, 32, prop.x - 10, prop.y - 10, 20, 20)) {
+        if (prop.type === 'pedestal') {
+          if (prop.itemId) {
+            shadowEngine.setSelectedYItem(prop.itemId);
+            soundEngine.playChimeSFX();
+            screenEffects.triggerFlash('#FFFFFF', 0.3, 0.2);
+          }
+          return prop;
+        }
         if (prop.type === 'pot') {
           soundEngine.playPotBreakSFX();
         } else {
@@ -287,18 +331,22 @@ export const GameViewport: React.FC<Props> = ({
       soundEngine.playBoomerangSFX();
       projectilePhysics.spawnBoomerang(px, py, dir, 0);
     } else if (activeItem.id === 'dark_bow') {
+      if (bowCooldownRef.current > 0) return; // Controlled reciprocation speed limit!
       if (shadowEngine.arrows <= 0) return;
       shadowEngine.arrows--;
+      bowCooldownRef.current = 26; // ~0.43s reloading cooldown between shots
+
       soundEngine.playSlashSFX();
 
       let vx = 0;
       let vy = 0;
-      if (dir === 'UP') vy = -7;
-      if (dir === 'DOWN') vy = 7;
-      if (dir === 'LEFT') vx = -7;
-      if (dir === 'RIGHT') vx = 7;
+      const arrowSpeed = 5.2; // Controlled, realistic arrow velocity
+      if (dir === 'UP') vy = -arrowSpeed;
+      if (dir === 'DOWN') vy = arrowSpeed;
+      if (dir === 'LEFT') vx = -arrowSpeed;
+      if (dir === 'RIGHT') vx = arrowSpeed;
 
-      otherProjectilesRef.current.push({ x: px, y: py, vx, vy, type: 'arrow', timer: 50 });
+      otherProjectilesRef.current.push({ x: px, y: py, vx, vy, type: 'arrow', timer: 55 });
     } else if (activeItem.id === 'dark_bombs') {
       if (shadowEngine.bombs <= 0) return;
       shadowEngine.bombs--;
@@ -321,7 +369,16 @@ export const GameViewport: React.FC<Props> = ({
 
     let interactedProp = false;
     propsRef.current = propsRef.current.map(prop => {
-      if (!prop.destroyed && physicsEngine.checkAABBRaw(px - 16, py - 16, 32, 32, prop.x - 10, prop.y - 10, 20, 20)) {
+      if (!prop.destroyed && physicsEngine.checkAABBRaw(px - 18, py - 18, 36, 36, prop.x - 12, prop.y - 12, 24, 24)) {
+        if (prop.type === 'pedestal') {
+          if (prop.itemId) {
+            shadowEngine.setSelectedYItem(prop.itemId);
+            soundEngine.playChimeSFX();
+            screenEffects.triggerFlash('#FFFFFF', 0.3, 0.2);
+            interactedProp = true;
+          }
+          return prop;
+        }
         soundEngine.playChimeSFX();
         interactedProp = true;
         projectilePhysics.spawnDrop(prop.x, prop.y);
@@ -449,6 +506,31 @@ export const GameViewport: React.FC<Props> = ({
 
       const isMoving = Math.hypot(dx, dy) > 0.1;
 
+      // Active Biome Audio Profile Calculation & Environmental Synth Dispatch
+      let activeBiomeSlug = 'dark_grass';
+      if (currentLvl?.slug === 'debug_chamber') {
+        const pTileX = Math.floor(bejsonEngine.playerX / tileUnitPx);
+        const pTileY = Math.floor(bejsonEngine.playerY / tileUnitPx);
+        if (pTileX < 32 && pTileY < 32) activeBiomeSlug = 'dark_grass';
+        else if (pTileX >= 32 && pTileY < 32) activeBiomeSlug = 'sanctuary_obsidian';
+        else if (pTileX < 32 && pTileY >= 32) activeBiomeSlug = 'subterranean_cave';
+        else activeBiomeSlug = 'desert_sand';
+      } else if (currentLvl?.slug === 'ganon_sanctuary') {
+        activeBiomeSlug = 'sanctuary_obsidian';
+      } else if (currentLvl?.slug === 'forgotten_cavern') {
+        activeBiomeSlug = 'subterranean_cave';
+      }
+
+      const activeAudioProf = bejsonGaming.getAudioProfileForBiome(activeBiomeSlug);
+
+      if (isMoving && tick % 16 === 0) {
+        soundEngine.playBiomeFootstep(activeAudioProf);
+      }
+
+      if (tick % 30 === 0) {
+        soundEngine.updateAmbientBiomeDrone(activeAudioProf);
+      }
+
       // Sword B Button Charging & Sheathing Logic
       if (keysRef.current['b'] || keysRef.current['j'] || keysRef.current['z']) {
         bHeldTimeRef.current++;
@@ -474,6 +556,9 @@ export const GameViewport: React.FC<Props> = ({
       dx += pKb.vx;
       dy += pKb.vy;
       physicsEngine.applyFriction(pKb, 0.82);
+
+      if (swordCooldownRef.current > 0) swordCooldownRef.current--;
+      if (bowCooldownRef.current > 0) bowCooldownRef.current--;
 
       if (playerHurtRef.current > 0) {
         playerHurtRef.current--;
@@ -765,6 +850,40 @@ export const GameViewport: React.FC<Props> = ({
             ctx.strokeStyle = isSanctuary ? '#110c17' : '#0f1710';
             ctx.lineWidth = 1;
             ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
+          } else if (bejsonEngine.currentLevelSlug === 'debug_chamber') {
+            const isHallway = (c >= 30 && c <= 33) || (r >= 30 && r <= 33);
+            if (isHallway) {
+              // Cobblestone Hallway Walkway
+              const altWay = (r + c) % 2 === 0;
+              ctx.fillStyle = altWay ? '#52525b' : '#3f3f46';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+              ctx.strokeStyle = '#27272a';
+              ctx.lineWidth = 0.5;
+              ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
+            } else if (c < 30 && r < 30) {
+              // Zone A: Dark Grassland Biome
+              const alt = (r + c) % 2 === 0;
+              ctx.fillStyle = alt ? '#2e7d32' : '#256628';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+            } else if (c > 33 && r < 30) {
+              // Zone B: Obsidian Sanctuary Biome
+              const alt = (r + c) % 2 === 0;
+              ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+              ctx.strokeStyle = '#333338';
+              ctx.lineWidth = 0.5;
+              ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
+            } else if (c < 30 && r > 33) {
+              // Zone C: Subterranean Cavern Biome
+              const alt = (r + c) % 2 === 0;
+              ctx.fillStyle = alt ? '#3f3f46' : '#27272a';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+            } else {
+              // Zone D: Gerudo Dark Sands Biome
+              const alt = (r + c) % 2 === 0;
+              ctx.fillStyle = alt ? '#b45309' : '#92400e';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+            }
           } else if (isSanctuary) {
             const isCenterCarpet = c >= 14 && c <= 17;
             if (isCenterCarpet) {
@@ -861,7 +980,24 @@ export const GameViewport: React.FC<Props> = ({
           const pr: DestructibleProp = item.data;
           if (pr.x < camX - 20 || pr.x > camX + viewportWorldW + 20 || pr.y < camY - 20 || pr.y > camY + viewportWorldH + 20) return;
 
-          if (pr.type === 'pot') {
+          if (pr.type === 'pedestal') {
+            // Golden Item Testing Pedestal Base
+            ctx.fillStyle = '#09090b';
+            ctx.fillRect(pr.x - 14, pr.y - 2, 28, 12);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(pr.x - 12, pr.y - 12, 24, 10);
+            ctx.strokeStyle = '#DE2626';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(pr.x - 12, pr.y - 12, 24, 10);
+
+            // Floating Item Icon
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(pr.icon || '🪃', pr.x, pr.y - 16);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 8px monospace';
+            ctx.fillText(pr.title || 'ITEM', pr.x, pr.y + 18);
+          } else if (pr.type === 'pot') {
             ctx.fillStyle = '#b45309';
             ctx.beginPath();
             ctx.arc(pr.x, pr.y + 1, 9, 0, Math.PI * 2);

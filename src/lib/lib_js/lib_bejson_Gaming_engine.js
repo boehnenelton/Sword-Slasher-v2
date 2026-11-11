@@ -119,6 +119,78 @@ export class BejsonGamingEngine {
       description: bejsonCore.getFieldValue('items', row, 'item_description_text')
     };
   }
+
+  getBiomes() {
+    const doc = this.documents.get('biomes');
+    if (!doc) return [];
+    return doc.Values.map(row => {
+      let audioProf = {
+        ambientDroneHz: 65,
+        ambientWaveform: 'triangle',
+        footstepFreq: 220,
+        reverbDecay: 0.8,
+        filterCutoff: 900,
+        echoIntervalMs: 1200,
+        windNoise: 0.15
+      };
+      try {
+        const rawJson = bejsonCore.getFieldValue('biomes', row, 'biome_audio_profile_json');
+        if (rawJson) audioProf = JSON.parse(rawJson);
+      } catch (_) {}
+
+      let clusterRules = {};
+      try {
+        const raw = bejsonCore.getFieldValue('biomes', row, 'biome_cluster_rules_json');
+        if (raw) clusterRules = JSON.parse(raw);
+      } catch (_) {}
+
+      let scatterRules = {};
+      try {
+        const raw = bejsonCore.getFieldValue('biomes', row, 'biome_scatter_rules_json');
+        if (raw) scatterRules = JSON.parse(raw);
+      } catch (_) {}
+
+      return {
+        uuid: bejsonCore.getFieldValue('biomes', row, 'biome_uuid'),
+        recordType: bejsonCore.getFieldValue('biomes', row, 'biome_record_type') || 'WorldBiome',
+        generationMode: bejsonCore.getFieldValue('biomes', row, 'biome_generation_mode_type') || 'HYBRID',
+        climateCategory: bejsonCore.getFieldValue('biomes', row, 'biome_climate_category_type') || 'OVERWORLD',
+        slug: bejsonCore.getFieldValue('biomes', row, 'biome_slug_code'),
+        displayTitle: bejsonCore.getFieldValue('biomes', row, 'biome_display_title'),
+        baseTileUuid: bejsonCore.getFieldValue('biomes', row, 'biome_base_tile_uuid_fk'),
+        baseTileSlug: bejsonCore.getFieldValue('biomes', row, 'biome_base_tile_slug_code'),
+        clusterRules,
+        scatterRules,
+        ambientColorHex: bejsonCore.getFieldValue('biomes', row, 'biome_ambient_color_hex') || '#000000',
+        audioProfile: audioProf,
+        createdUtc: bejsonCore.getFieldValue('biomes', row, 'biome_created_utc_timestamp')
+      };
+    });
+  }
+
+  getBiomeBySlug(slug) {
+    const biome = this.getBiomes().find(b => b.slug === slug);
+    if (!biome) {
+      throw new Error(`Biome slug '${slug}' not found in BEJSON dataset`);
+    }
+    return biome;
+  }
+
+  getAudioProfileForBiome(slug) {
+    try {
+      return this.getBiomeBySlug(slug).audioProfile;
+    } catch (_) {
+      return {
+        ambientDroneHz: 65,
+        ambientWaveform: 'triangle',
+        footstepFreq: 220,
+        reverbDecay: 0.8,
+        filterCutoff: 900,
+        echoIntervalMs: 1200,
+        windNoise: 0.15
+      };
+    }
+  }
 }
 
 export const bejsonGaming = new BejsonGamingEngine();

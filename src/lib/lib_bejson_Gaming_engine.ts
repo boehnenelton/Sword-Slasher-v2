@@ -74,6 +74,32 @@ export interface GamingPortalRecord {
   targetY: number;
 }
 
+export interface GamingAudioProfile {
+  ambientDroneHz: number;
+  ambientWaveform: 'sine' | 'sawtooth' | 'triangle' | 'square';
+  footstepFreq: number;
+  reverbDecay: number;
+  filterCutoff: number;
+  echoIntervalMs: number;
+  windNoise: number;
+}
+
+export interface GamingBiomeRecord {
+  uuid: string;
+  recordType: string;
+  generationMode: string;
+  climateCategory: string;
+  slug: string;
+  displayTitle: string;
+  baseTileUuid: string;
+  baseTileSlug: string;
+  clusterRules: Record<string, any>;
+  scatterRules: Record<string, any>;
+  ambientColorHex: string;
+  audioProfile: GamingAudioProfile;
+  createdUtc: string;
+}
+
 export class BejsonGamingEngine {
   private documents: Map<string, BejsonDocument> = new Map();
 
@@ -211,6 +237,81 @@ export class BejsonGamingEngine {
         targetX: Number(bejsonCore.getFieldValue('portals', row, 'port_target_spawn_coord_x_index')),
         targetY: Number(bejsonCore.getFieldValue('portals', row, 'port_target_spawn_coord_y_index'))
       }));
+  }
+
+  /**
+   * Query Biomes table via O(1) Field Map Cache
+   */
+  public getBiomes(): GamingBiomeRecord[] {
+    const doc = this.documents.get('biomes');
+    if (!doc) return [];
+    return doc.Values.map(row => {
+      let audioProf: GamingAudioProfile = {
+        ambientDroneHz: 65,
+        ambientWaveform: 'triangle',
+        footstepFreq: 220,
+        reverbDecay: 0.8,
+        filterCutoff: 900,
+        echoIntervalMs: 1200,
+        windNoise: 0.15
+      };
+      try {
+        const rawJson = bejsonCore.getFieldValue('biomes', row, 'biome_audio_profile_json');
+        if (rawJson) audioProf = JSON.parse(rawJson);
+      } catch (_) {}
+
+      let clusterRules = {};
+      try {
+        const raw = bejsonCore.getFieldValue('biomes', row, 'biome_cluster_rules_json');
+        if (raw) clusterRules = JSON.parse(raw);
+      } catch (_) {}
+
+      let scatterRules = {};
+      try {
+        const raw = bejsonCore.getFieldValue('biomes', row, 'biome_scatter_rules_json');
+        if (raw) scatterRules = JSON.parse(raw);
+      } catch (_) {}
+
+      return {
+        uuid: bejsonCore.getFieldValue('biomes', row, 'biome_uuid'),
+        recordType: bejsonCore.getFieldValue('biomes', row, 'biome_record_type') || 'WorldBiome',
+        generationMode: bejsonCore.getFieldValue('biomes', row, 'biome_generation_mode_type') || 'HYBRID',
+        climateCategory: bejsonCore.getFieldValue('biomes', row, 'biome_climate_category_type') || 'OVERWORLD',
+        slug: bejsonCore.getFieldValue('biomes', row, 'biome_slug_code'),
+        displayTitle: bejsonCore.getFieldValue('biomes', row, 'biome_display_title'),
+        baseTileUuid: bejsonCore.getFieldValue('biomes', row, 'biome_base_tile_uuid_fk'),
+        baseTileSlug: bejsonCore.getFieldValue('biomes', row, 'biome_base_tile_slug_code'),
+        clusterRules,
+        scatterRules,
+        ambientColorHex: bejsonCore.getFieldValue('biomes', row, 'biome_ambient_color_hex') || '#000000',
+        audioProfile: audioProf,
+        createdUtc: bejsonCore.getFieldValue('biomes', row, 'biome_created_utc_timestamp')
+      };
+    });
+  }
+
+  public getBiomeBySlug(slug: string): GamingBiomeRecord {
+    const biome = this.getBiomes().find(b => b.slug === slug);
+    if (!biome) {
+      throw new Error(`Biome slug '${slug}' not found in BEJSON dataset`);
+    }
+    return biome;
+  }
+
+  public getAudioProfileForBiome(slug: string): GamingAudioProfile {
+    try {
+      return this.getBiomeBySlug(slug).audioProfile;
+    } catch (_) {
+      return {
+        ambientDroneHz: 65,
+        ambientWaveform: 'triangle',
+        footstepFreq: 220,
+        reverbDecay: 0.8,
+        filterCutoff: 900,
+        echoIntervalMs: 1200,
+        windNoise: 0.15
+      };
+    }
   }
 }
 

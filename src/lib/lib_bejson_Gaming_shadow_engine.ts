@@ -35,20 +35,26 @@ export class ShadowEngineState {
   public doActionName: string = 'LIFT · TALK · PULL · DASH';
 
   public yItems: ShadowItemState[] = [
-    { id: 'shadow_boomerang', name: 'Shadow Boomerang', icon: '🪃', category: 'Y_ITEM', unlocked: true, description: 'Homing boomerang that returns to Shadow Link.' },
-    { id: 'dark_bow', name: 'Dark Bow & Arrows', icon: '🏹', category: 'Y_ITEM', ammo: 30, maxAmmo: 30, unlocked: true, description: 'Fires shadow piercing arrows across distances.' },
-    { id: 'dark_bombs', name: 'Dark Bombs', icon: '💣', category: 'Y_ITEM', ammo: 10, maxAmmo: 10, unlocked: true, description: 'Demolishes cracked walls and heavy barriers.' },
-    { id: 'magic_powder', name: 'Shadow Powder', icon: '✨', category: 'Y_ITEM', unlocked: true, description: 'Transforms dark magic hazards into health items.' },
-    { id: 'hookshot', name: 'Shadow Hookshot', icon: '🪝', category: 'Y_ITEM', unlocked: true, description: 'Grapples onto wooden chests and far posts.' },
-    { id: 'dark_elixir', name: 'Dark Elixir', icon: '🧪', category: 'Y_ITEM', ammo: 2, maxAmmo: 4, unlocked: true, description: 'Restores 50 health points for Shadow Link.' },
-    { id: 'fire_rod', name: 'Flame Rod', icon: '🔥', category: 'Y_ITEM', unlocked: true, description: 'Launches dark crimson flames.' },
-    { id: 'ice_rod', name: 'Frost Rod', icon: '❄️', category: 'Y_ITEM', unlocked: true, description: 'Freezes enemies in solid ice blocks.' }
+    { id: 'shadow_boomerang', name: 'Shadow Boomerang', icon: '🪃', category: 'Y_ITEM', unlocked: true, description: 'Homing boomerang that returns to Shadow Link and crushes props.' },
+    { id: 'dark_bow', name: 'Dark Bow & Arrows', icon: '🏹', category: 'Y_ITEM', ammo: 30, maxAmmo: 30, unlocked: true, description: 'Fires shadow piercing arrows across distances.' }
   ];
+
+  private listeners: Set<() => void> = new Set();
+
+  public subscribe(fn: () => void): () => void {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
+
+  public notify() {
+    this.listeners.forEach(fn => fn());
+  }
 
   public setSelectedYItem(slug: string) {
     const item = this.yItems.find(i => i.id === slug && i.unlocked);
     if (item) {
       this.activeYItemSlug = item.id;
+      this.notify();
     }
   }
 

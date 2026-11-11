@@ -146,29 +146,21 @@ export default function App() {
         {activeTab === 'telemetry' && <TelemetryView />}
       </div>
 
-      {/* Floating Controls Right - Single Unified System Menu Button */}
-      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
-        {isFlaskSystemEnabled && (
-          <button
-            onClick={() => handleOpenSystemMenu('compiler')}
-            className="bg-zinc-900/90 hover:bg-zinc-800 text-white p-2.5 px-3.5 rounded-xl border border-white/10 hover:border-white/20 shadow-xl flex items-center gap-2 transition-all cursor-pointer group"
-            title="Open System Menu"
-          >
-            <div className="w-7 h-7 bg-zinc-800 border border-white/10 rounded-lg flex items-center justify-center">
-              <Terminal className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
-            </div>
-            <div className="text-left font-mono">
-              <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider leading-none">SYSTEM</div>
-              <div className="text-xs font-bold text-white uppercase tracking-tight">MENU</div>
-            </div>
-          </button>
-        )}
-      </div>
-
       {/* Sub Screen Inventory Overlay */}
       <SubScreenOverlay
         isOpen={isSubScreenOpen}
         onClose={() => setIsSubScreenOpen(false)}
+        onExitToTitle={() => {
+          setIsSubScreenOpen(false);
+          soundEngine.stopMusic();
+          setInGame(false);
+        }}
+        onWarpToDebug={() => {
+          bejsonEngine.currentLevelSlug = 'debug_chamber';
+          bejsonEngine.playerX = 320;
+          bejsonEngine.playerY = 320;
+          setIsSubScreenOpen(false);
+        }}
       />
 
       {/* World Map Overlay */}

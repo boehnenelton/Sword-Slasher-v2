@@ -25,11 +25,11 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Map World & Viewport Scale Constants (100% Identical to React GameViewport)
-const tilesW = 64;
-const tilesH = 64;
+let tilesW = 64;
+let tilesH = 64;
 const tileUnitPx = 16;
-const mapWorldWidth = tilesW * tileUnitPx;   // 1024px
-const mapWorldHeight = tilesH * tileUnitPx; // 1024px
+let mapWorldWidth = tilesW * tileUnitPx;   // 1024px
+let mapWorldHeight = tilesH * tileUnitPx; // 1024px
 const zoomScale = 1.25;
 
 // Web Audio Retro Synthesizer Engine
@@ -73,6 +73,74 @@ const sfx = {
   chime: () => playSfxTone(523.25, 659.25, 0.15, 'triangle', 0.35)
 };
 
+let currentAmbientDroneHz = 0;
+let ambientOsc = null;
+let ambientGain = null;
+let ambientFilter = null;
+
+function updateAmbientBiomeDrone(audioProfile) {
+  initAudio();
+  if (!audioCtx) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  if (currentAmbientDroneHz === audioProfile.ambientDroneHz && ambientOsc) return;
+
+  const now = audioCtx.currentTime;
+
+  if (!ambientOsc) {
+    ambientOsc = audioCtx.createOscillator();
+    ambientGain = audioCtx.createGain();
+    ambientFilter = audioCtx.createBiquadFilter();
+
+    ambientOsc.type = audioProfile.ambientWaveform || 'sine';
+    ambientOsc.frequency.setValueAtTime(audioProfile.ambientDroneHz || 65, now);
+
+    ambientFilter.type = 'lowpass';
+    ambientFilter.frequency.setValueAtTime(audioProfile.filterCutoff || 900, now);
+
+    ambientGain.gain.setValueAtTime(0.01, now);
+    ambientGain.gain.linearRampToValueAtTime(0.08, now + 1.0);
+
+    ambientOsc.connect(ambientFilter);
+    ambientFilter.connect(ambientGain);
+    ambientGain.connect(audioCtx.destination);
+
+    ambientOsc.start(now);
+  } else if (ambientOsc && ambientGain && ambientFilter) {
+    ambientOsc.frequency.linearRampToValueAtTime(audioProfile.ambientDroneHz || 65, now + 0.5);
+    ambientFilter.frequency.linearRampToValueAtTime(audioProfile.filterCutoff || 900, now + 0.5);
+  }
+
+  currentAmbientDroneHz = audioProfile.ambientDroneHz || 65;
+}
+
+function playBiomeFootstep(audioProfile) {
+  initAudio();
+  if (!audioCtx) return;
+
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+
+  osc.type = audioProfile.ambientWaveform === 'sawtooth' ? 'sawtooth' : 'triangle';
+  osc.frequency.setValueAtTime(audioProfile.footstepFreq || 220, now);
+  osc.frequency.exponentialRampToValueAtTime(Math.max(20, (audioProfile.footstepFreq || 220) * 0.4), now + 0.08);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(audioProfile.filterCutoff || 900, now);
+
+  gain.gain.setValueAtTime(0.2, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + (0.06 * (audioProfile.reverbDecay || 0.8)));
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start(now);
+  osc.stop(now + (0.06 * (audioProfile.reverbDecay || 0.8)));
+}
+
 // Player Entity State
 let px = 320;
 let py = 300;
@@ -87,6 +155,7 @@ let isSheathed = false;
 let bHeldTime = 0;
 let isCharging = false;
 let swordCooldown = 0;
+let bowCooldown = 0;
 let swordVariation = 0;
 let slashAnim = null;
 let spinAnim = null;
@@ -118,6 +187,51 @@ let otherProjectiles = [];
 let droppedItems = [];
 let activeYItem = 'shadow_boomerang';
 
+let currentLevelSlug = 'debug_chamber';
+
+function setDebugRoom(slug) {
+  currentLevelSlug = slug;
+  if (slug === 'forgotten_cavern' || slug === 'castle_courtyard') {
+    tilesW = 96;
+    tilesH = 96;
+  } else {
+    tilesW = 64;
+    tilesH = 64;
+  }
+  mapWorldWidth = tilesW * tileUnitPx;
+  mapWorldHeight = tilesH * tileUnitPx;
+
+  px = mapWorldWidth / 2;
+  py = mapWorldHeight / 2 + 40;
+
+  if (slug === 'debug_chamber') {
+    props = [
+      { id: 'ped_boomerang', x: px - 120, y: py - 160, type: 'pedestal', destroyed: false, itemId: 'shadow_boomerang', icon: '🪃', title: 'BOOMERANG' },
+      { id: 'ped_bow', x: px - 40, y: py - 160, type: 'pedestal', destroyed: false, itemId: 'dark_bow', icon: '🏹', title: 'DARK BOW' },
+      { id: 'p1', x: px - 160, y: py - 60, type: 'pot', destroyed: false },
+      { id: 'p2', x: px - 200, y: py - 60, type: 'bush', destroyed: false },
+      { id: 'p3', x: px + 160, y: py - 60, type: 'pot', destroyed: false },
+      { id: 'p4', x: px + 200, y: py - 60, type: 'bush', destroyed: false }
+    ];
+  } else {
+    props = [
+      { id: 'p1', x: px - 60, y: py - 50, type: 'pot', destroyed: false },
+      { id: 'p2', x: px + 60, y: py - 50, type: 'bush', destroyed: false },
+      { id: 'p3', x: px - 100, y: py + 50, type: 'pot', destroyed: false },
+      { id: 'p4', x: px + 100, y: py + 50, type: 'bush', destroyed: false }
+    ];
+  }
+
+  enemies = [
+    { id: 'e1', name: 'Guard Knight', type: 'guard', x: px - 120, y: py - 120, hp: 60, maxHp: 60, attack: 15, hurtTime: 0, knockback: { vx: 0, vy: 0 } },
+    { id: 'e2', name: 'Green Slime', type: 'slime', x: px + 120, y: py - 120, hp: 35, maxHp: 35, attack: 10, hurtTime: 0, knockback: { vx: 0, vy: 0 } }
+  ];
+
+  sfx.chime();
+  screenEffects.triggerFlash('#DE2626', 0.25, 0.15);
+  console.log(`[DEBUG ROOM] Switched to level: ${slug} (${tilesW}x${tilesH} tiles, ${mapWorldWidth}x${mapWorldHeight}px)`);
+}
+
 const keys = {};
 
 window.addEventListener('keydown', (e) => {
@@ -125,15 +239,33 @@ window.addEventListener('keydown', (e) => {
   keys[k] = true;
   initAudio();
 
+  if (k === '1') setDebugRoom('debug_chamber');
+  if (k === '2') setDebugRoom('ganon_sanctuary');
+  if (k === '3') setDebugRoom('forgotten_cavern');
+  if (k === '4') setDebugRoom('castle_courtyard');
+
+  if (k === 'q' || k === 'tab') {
+    e.preventDefault();
+    activeYItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+    sfx.chime();
+  }
+
   if (k === 'j' || k === 'z' || k === 'b') {
     executeSwordSlash();
   }
   if (k === 'y' || k === 'i') {
     executeYItem();
   }
-  if (k === 'e' || k === 'a' || e.key === ' ') {
+  if (k === 'e' || e.key === ' ') {
     executeInteract();
   }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-room-debug')?.addEventListener('click', () => setDebugRoom('debug_chamber'));
+  document.getElementById('btn-room-sanctuary')?.addEventListener('click', () => setDebugRoom('ganon_sanctuary'));
+  document.getElementById('btn-room-cavern')?.addEventListener('click', () => setDebugRoom('forgotten_cavern'));
+  document.getElementById('btn-room-courtyard')?.addEventListener('click', () => setDebugRoom('castle_courtyard'));
 });
 
 window.addEventListener('keyup', (e) => {
@@ -176,9 +308,18 @@ function executeSwordSlash() {
   if (playerFacing === 'LEFT') hitX -= reach;
   if (playerFacing === 'RIGHT') hitX += reach;
 
-  // Cut bushes / break pots
+  // Cut bushes / break pots / activate pedestals
   props = props.map(prop => {
     if (!prop.destroyed && physicsEngine.checkAABBRaw(hitX - 16, hitY - 16, 32, 32, prop.x - 10, prop.y - 10, 20, 20)) {
+      if (prop.type === 'pedestal') {
+        if (prop.itemId) {
+          activeYItem = prop.itemId;
+          shadowEngine.setSelectedYItem(prop.itemId);
+          sfx.chime();
+          screenEffects.triggerFlash('#FFFFFF', 0.3, 0.2);
+        }
+        return prop;
+      }
       if (prop.type === 'pot') sfx.potBreak();
       else sfx.bushCut();
       spawnDropItem(prop.x, prop.y);
@@ -245,23 +386,25 @@ function executeWhirlingBlade() {
 
 function executeYItem() {
   isSheathed = false;
-  sfx.boomerang();
 
   if (activeYItem === 'shadow_boomerang') {
     if (projectilePhysics.boomerangs.length > 0) return;
+    sfx.boomerang();
     projectilePhysics.spawnBoomerang(px, py, playerFacing, 0);
   } else if (activeYItem === 'dark_bow') {
+    if (bowCooldown > 0) return; // Controlled reciprocation speed limit!
+    if (shadowEngine.arrows <= 0) return;
+    shadowEngine.arrows--;
+    bowCooldown = 26; // ~0.43s reloading cooldown between shots
+    sfx.slash();
+
     let vx = 0, vy = 0;
-    if (playerFacing === 'UP') vy = -7;
-    if (playerFacing === 'DOWN') vy = 7;
-    if (playerFacing === 'LEFT') vx = -7;
-    if (playerFacing === 'RIGHT') vx = 7;
-    otherProjectiles.push({ x: px, y: py, vx, vy, type: 'arrow', timer: 50 });
-  } else if (activeYItem === 'dark_bombs') {
-    otherProjectiles.push({ x: px, y: py, vx: 0, vy: 0, type: 'bomb', timer: 60 });
-  } else {
-    playerHp = Math.min(playerMaxHp, playerHp + 40);
-    sfx.chime();
+    const arrowSpeed = 5.2; // Controlled, realistic arrow velocity
+    if (playerFacing === 'UP') vy = -arrowSpeed;
+    if (playerFacing === 'DOWN') vy = arrowSpeed;
+    if (playerFacing === 'LEFT') vx = -arrowSpeed;
+    if (playerFacing === 'RIGHT') vx = arrowSpeed;
+    otherProjectiles.push({ x: px, y: py, vx, vy, type: 'arrow', timer: 55 });
   }
 }
 
@@ -269,7 +412,14 @@ function executeInteract() {
   sfx.chime();
   screenEffects.triggerFlash('#FFFFFF', 0.2, 0.15);
   props = props.map(prop => {
-    if (!prop.destroyed && physicsEngine.checkAABBRaw(px - 16, py - 16, 32, 32, prop.x - 10, prop.y - 10, 20, 20)) {
+    if (!prop.destroyed && physicsEngine.checkAABBRaw(px - 18, py - 18, 36, 36, prop.x - 12, prop.y - 12, 24, 24)) {
+      if (prop.type === 'pedestal') {
+        if (prop.itemId) {
+          activeYItem = prop.itemId;
+          shadowEngine.setSelectedYItem(prop.itemId);
+        }
+        return prop;
+      }
       spawnDropItem(prop.x, prop.y);
       return { ...prop, destroyed: true };
     }
@@ -316,11 +466,40 @@ function updatePhysics() {
 
   isMoving = Math.hypot(dx, dy) > 0.1;
 
+  // Active Biome Audio Profile Calculation & Environmental Synth Dispatch
+  let activeBiomeSlug = 'dark_grass';
+  if (currentLevelSlug === 'debug_chamber') {
+    const pTileX = Math.floor(px / tileUnitPx);
+    const pTileY = Math.floor(py / tileUnitPx);
+    if (pTileX < 32 && pTileY < 32) activeBiomeSlug = 'dark_grass';
+    else if (pTileX >= 32 && pTileY < 32) activeBiomeSlug = 'sanctuary_obsidian';
+    else if (pTileX < 32 && pTileY >= 32) activeBiomeSlug = 'subterranean_cave';
+    else activeBiomeSlug = 'desert_sand';
+  } else if (currentLevelSlug === 'ganon_sanctuary') {
+    activeBiomeSlug = 'sanctuary_obsidian';
+  } else if (currentLevelSlug === 'forgotten_cavern') {
+    activeBiomeSlug = 'subterranean_cave';
+  }
+
+  const activeAudioProf = bejsonGaming.getAudioProfileForBiome ? bejsonGaming.getAudioProfileForBiome(activeBiomeSlug) : {
+    ambientDroneHz: 65, ambientWaveform: 'triangle', footstepFreq: 220, reverbDecay: 0.8, filterCutoff: 900
+  };
+
+  if (isMoving && tickCount % 16 === 0) {
+    playBiomeFootstep(activeAudioProf);
+  }
+
+  if (tickCount % 30 === 0) {
+    updateAmbientBiomeDrone(activeAudioProf);
+  }
+
   // Apply Player Vector Knockback Physics & Friction Decay
   dx += playerKnockback.vx;
   dy += playerKnockback.vy;
   physicsEngine.applyFriction(playerKnockback, 0.82);
 
+  if (swordCooldown > 0) swordCooldown--;
+  if (bowCooldown > 0) bowCooldown--;
   if (playerHurtTime > 0) playerHurtTime--;
 
   let nextPx = px + dx;
@@ -497,6 +676,29 @@ function render() {
         ctx.strokeStyle = '#0f1710';
         ctx.lineWidth = 1;
         ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
+      } else if (currentLevelSlug === 'debug_chamber') {
+        const isHallway = (c >= 30 && c <= 33) || (r >= 30 && r <= 33);
+        if (isHallway) {
+          const altWay = (r + c) % 2 === 0;
+          ctx.fillStyle = altWay ? '#52525b' : '#3f3f46';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+        } else if (c < 30 && r < 30) {
+          const alt = (r + c) % 2 === 0;
+          ctx.fillStyle = alt ? '#2e7d32' : '#256628';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+        } else if (c > 33 && r < 30) {
+          const alt = (r + c) % 2 === 0;
+          ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+        } else if (c < 30 && r > 33) {
+          const alt = (r + c) % 2 === 0;
+          ctx.fillStyle = alt ? '#3f3f46' : '#27272a';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+        } else {
+          const alt = (r + c) % 2 === 0;
+          ctx.fillStyle = alt ? '#b45309' : '#92400e';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+        }
       } else {
         const altGrass = (r + c) % 2 === 0;
         ctx.fillStyle = altGrass ? '#2e7d32' : '#256628';
@@ -562,7 +764,22 @@ function render() {
   renderQueue.forEach(item => {
     if (item.type === 'prop') {
       const pr = item.data;
-      if (pr.type === 'pot') {
+      if (pr.type === 'pedestal') {
+        ctx.fillStyle = '#451a03';
+        ctx.fillRect(pr.x - 14, pr.y - 2, 28, 12);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(pr.x - 12, pr.y - 12, 24, 10);
+        ctx.strokeStyle = '#DE2626';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(pr.x - 12, pr.y - 12, 24, 10);
+
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(pr.icon || '🪃', pr.x, pr.y - 16);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText(pr.title || 'ITEM', pr.x, pr.y + 18);
+      } else if (pr.type === 'pot') {
         ctx.fillStyle = '#b45309'; ctx.beginPath(); ctx.arc(pr.x, pr.y + 1, 9, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#d97706'; ctx.beginPath(); ctx.arc(pr.x - 2, pr.y - 1, 7, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#78350f'; ctx.fillRect(pr.x - 7, pr.y - 7, 14, 3);
@@ -733,12 +950,22 @@ function render() {
 
   screenEffects.renderCanvasOverlay(ctx, canvas.width, canvas.height);
 
-  // In-Canvas Top HUD Overlay
+  // In-Canvas Top & Bottom HUD Overlay
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, canvas.width, 32);
   ctx.fillStyle = '#DE2626';
   ctx.font = 'bold 11px monospace';
-  ctx.fillText(`SHADOW LINK | HP: ${playerHp}/${playerMaxHp} | BEJSON 105 PARITY ENGINE`, 12, 20);
+
+  const yItemLabel = activeYItem === 'shadow_boomerang' ? '🪃 BOOMERANG' : '🏹 DARK BOW';
+  const roomName = currentLevelSlug.replace('_', ' ').toUpperCase();
+  ctx.fillText(`SHADOW LINK | HP: ${playerHp}/${playerMaxHp} | Y: ${yItemLabel}`, 12, 20);
+
+  // Bottom HUD Status Bar with Real-Time Camera Coordinates
+  ctx.fillStyle = '#09090b';
+  ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
+  ctx.fillStyle = '#10b981';
+  ctx.font = '10px monospace';
+  ctx.fillText(`ROOM: ${roomName} (${tilesW}x${tilesH}) | CAM FOLLOW: (${Math.round(px)}, ${Math.round(py)})`, 12, canvas.height - 8);
 }
 
 function gameLoop() {
