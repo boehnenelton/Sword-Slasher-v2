@@ -452,10 +452,10 @@ if __name__ == "__main__":
     .badge { background: #DE2626; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
     .subtitle { color: #DE2626; font-size: 11px; margin-top: 2px; }
     main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #050505; position: relative; padding: 8px; overflow: hidden; }
-    #canvas-container { border: 2px solid #DE2626; box-shadow: 0 0 30px rgba(222,38,38,0.4); background: #000; position: relative; max-width: 100%; }
-    canvas { display: block; image-rendering: pixelated; max-width: 100%; height: auto; }
+    #canvas-container { border: 2px solid #DE2626; box-shadow: 0 0 30px rgba(222,38,38,0.4); background: #000; position: relative; width: 100%; max-width: 448px; aspect-ratio: 1 / 1; flex-shrink: 0; }
+    canvas { display: block; image-rendering: pixelated; width: 100%; height: 100%; }
     
-    #gamepad-deck { width: 100%; max-width: 720px; background: rgba(9, 9, 11, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 10px 20px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-shrink: 0; }
+    #gamepad-deck { width: 100%; max-width: 520px; background: rgba(9, 9, 11, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 10px 20px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-shrink: 0; }
     .joystick-outer { position: relative; width: 110px; height: 110px; background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; touch-action: none; cursor: pointer; }
     .joystick-knob { position: absolute; width: 46px; height: 46px; background: #27272a; border: 2px solid #dc2626; border-radius: 50%; box-shadow: 0 0 10px rgba(220,38,38,0.5); display: flex; align-items: center; justify-content: center; pointer-events: none; }
     .joystick-core { width: 18px; height: 18px; background: #DE2626; border-radius: 50%; border: 1px solid #f87171; }
@@ -497,7 +497,7 @@ if __name__ == "__main__":
         <button id="btn-start-game" style="padding: 12px 28px; background: #DE2626; color: #fff; font-size: 13px; font-weight: bold; font-family: monospace; border: 1px solid #f87171; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 20px rgba(222,38,38,0.6);">START GAME</button>
         <p style="font-size: 10px; color: #71717a; font-family: monospace; margin-top: 20px;">Author: Elton Boehnen · BEJSON 105 Pure Data Engine</p>
       </div>
-      <canvas id="gameCanvas" width="800" height="480"></canvas>
+      <canvas id="gameCanvas" width="448" height="448"></canvas>
     </div>
 
     <div id="gamepad-deck">
@@ -612,7 +612,7 @@ if __name__ == "__main__":
     let droppedItems = [];
 
     const mapWorldWidth = 1024;
-    const mapWorldHeight = 768;
+    const mapWorldHeight = 1024;
     const zoomScale = 1.25;
 
     let props = [
@@ -862,35 +862,106 @@ if __name__ == "__main__":
       });
     }
 
-    // Render Tilemap Terrain Floor Matrix
+    // Render Tilemap Terrain Floor Matrix from Embedded BEJSON Datasets
+    let cachedChunkMatrix = null;
+    let cachedCollisionMask = null;
+    try {
+      const chunkDoc = findDataset('cave_chunk');
+      if (chunkDoc && chunkDoc.Values && chunkDoc.Fields) {
+        const groundIdx = chunkDoc.Fields.findIndex(f => f.name === 'chk_ground_layer_matrix_json');
+        const collIdx = chunkDoc.Fields.findIndex(f => f.name === 'chk_collision_bitmask_matrix_json');
+        if (groundIdx >= 0 && chunkDoc.Values.length > 0) {
+          const rawGround = chunkDoc.Values[0][groundIdx];
+          if (rawGround) cachedChunkMatrix = typeof rawGround === 'string' ? JSON.parse(rawGround) : rawGround;
+        }
+        if (collIdx >= 0 && chunkDoc.Values.length > 0) {
+          const rawColl = chunkDoc.Values[0][collIdx];
+          if (rawColl) cachedCollisionMask = typeof rawColl === 'string' ? JSON.parse(rawColl) : rawColl;
+        }
+      }
+    } catch (e) {
+      console.warn("Chunk matrix parse note:", e);
+    }
+
     function renderTilemapTerrain() {
-      const tileSize = 32;
-      ctx.fillStyle = '#0f0b12';
-      ctx.fillRect(0, 0, mapWorldWidth, mapWorldHeight);
+      const tilesW = 64;
+      const tilesH = 64;
+      const tileUnitPx = 16;
+      const viewportWorldW = canvas.width / zoomScale;
+      const viewportWorldH = canvas.height / zoomScale;
+      const camX = Math.max(0, Math.min(mapWorldWidth - viewportWorldW, px - viewportWorldW / 2));
+      const camY = Math.max(0, Math.min(mapWorldHeight - viewportWorldH, py - viewportWorldH / 2));
+      const minCol = Math.max(0, Math.floor(camX / tileUnitPx) - 1);
+      const maxCol = Math.min(tilesW - 1, Math.ceil((camX + viewportWorldW) / tileUnitPx) + 1);
+      const minRow = Math.max(0, Math.floor(camY / tileUnitPx) - 1);
+      const maxRow = Math.min(tilesH - 1, Math.ceil((camY + viewportWorldH) / tileUnitPx) + 1);
 
-      ctx.fillStyle = '#18121e';
-      ctx.strokeStyle = '#271c30';
-      ctx.lineWidth = 1;
+      if (cachedChunkMatrix && Array.isArray(cachedChunkMatrix)) {
+        const rows = cachedChunkMatrix.length;
+        const cols = rows > 0 ? cachedChunkMatrix[0].length : 0;
+        const scaleX = mapWorldWidth / (cols * 32);
+        const scaleY = mapWorldHeight / (rows * 32);
 
-      for (let x = 0; x < mapWorldWidth; x += tileSize) {
-        for (let y = 0; y < mapWorldHeight; y += tileSize) {
-          if (x < 32 || x >= mapWorldWidth - 32 || y < 32 || y >= mapWorldHeight - 32) {
-            ctx.fillStyle = '#221526';
-            ctx.fillRect(x, y, tileSize, tileSize);
-            ctx.strokeStyle = '#3d2445';
-            ctx.strokeRect(x, y, tileSize, tileSize);
-            ctx.fillStyle = '#DE2626';
-            ctx.fillRect(x + 12, y + 12, 8, 8);
-          } else {
-            const isAlt = ((x / tileSize) + (y / tileSize)) % 2 === 0;
-            ctx.fillStyle = isAlt ? '#181120' : '#140d1a';
-            ctx.fillRect(x, y, tileSize, tileSize);
-            ctx.strokeStyle = '#23182d';
-            ctx.strokeRect(x, y, tileSize, tileSize);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const tileVal = cachedChunkMatrix[r][c];
+            const isWall = cachedCollisionMask && cachedCollisionMask[r] && cachedCollisionMask[r][c] === 1;
+            const tx = c * 32 * scaleX;
+            const ty = r * 32 * scaleY;
+            const tw = 32 * scaleX;
+            const th = 32 * scaleY;
 
-            ctx.fillStyle = '#2d1f3b';
-            ctx.fillRect(x + 4, y + 4, 6, 6);
-            ctx.fillRect(x + 18, y + 18, 8, 6);
+            if (isWall || tileVal === 2) {
+              ctx.fillStyle = '#1e1424';
+              ctx.fillRect(tx, ty, tw, th);
+              ctx.strokeStyle = '#382542'; ctx.lineWidth = 1; ctx.strokeRect(tx, ty, tw, th);
+              ctx.fillStyle = '#DE2626'; ctx.fillRect(tx + tw / 2 - 4, ty + th / 2 - 4, 8, 8);
+            } else if (tileVal === 3) {
+              ctx.fillStyle = '#1e3a8a';
+              ctx.fillRect(tx, ty, tw, th);
+              ctx.fillStyle = '#3b82f6'; ctx.fillRect(tx + 4, ty + 4, tw - 8, 4);
+            } else {
+              const isAlt = (r + c) % 2 === 0;
+              ctx.fillStyle = isAlt ? '#16101d' : '#120d18';
+              ctx.fillRect(tx, ty, tw, th);
+              ctx.strokeStyle = '#22182c'; ctx.lineWidth = 1; ctx.strokeRect(tx, ty, tw, th);
+              ctx.fillStyle = '#2b1d38'; ctx.fillRect(tx + 4, ty + 4, 6, 6);
+            }
+          }
+        }
+      } else {
+        for (let r = minRow; r <= maxRow; r++) {
+          for (let c = minCol; c <= maxCol; c++) {
+            const tx = c * tileUnitPx;
+            const ty = r * tileUnitPx;
+            const isBoundary = r === 0 || r === tilesH - 1 || c === 0 || c === tilesW - 1;
+
+            if (isBoundary) {
+              ctx.fillStyle = '#1c281e';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+              ctx.fillStyle = '#2d4232';
+              ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, 12);
+              ctx.fillRect(tx + 2, ty + 18, tileUnitPx - 4, 12);
+              ctx.strokeStyle = '#0f1710';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
+            } else {
+              const altGrass = (r + c) % 2 === 0;
+              ctx.fillStyle = altGrass ? '#2e7d32' : '#256628';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+
+              const seed = (r * 31 + c * 17) % 5;
+              ctx.fillStyle = '#4caf50';
+              if (seed === 0) {
+                ctx.fillRect(tx + 6, ty + 8, 2, 6);
+                ctx.fillRect(tx + 10, ty + 6, 2, 8);
+              } else if (seed === 1) {
+                ctx.fillRect(tx + 18, ty + 10, 2, 7);
+              } else if (seed === 2) {
+                ctx.fillStyle = '#DE2626';
+                ctx.fillRect(tx + 14, ty + 14, 2, 2);
+              }
+            }
           }
         }
       }
@@ -904,7 +975,7 @@ if __name__ == "__main__":
       pillars.forEach(p => {
         ctx.fillStyle = '#09090b';
         ctx.fillRect(p.x - 16, p.y - 16, 32, 32);
-        ctx.strokeStyle = '#DE2626';
+        ctx.strokeStyle = '#DE2626'; ctx.lineWidth = 1.5;
         ctx.strokeRect(p.x - 16, p.y - 16, 32, 32);
         ctx.fillStyle = '#ef4444';
         ctx.fillRect(p.x - 6, p.y - 6, 12, 12);

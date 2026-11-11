@@ -1,5 +1,43 @@
 # dev/change-log.md - Revision History
 
+## [2.0.0-105 / Package 143] - 2026-11-10
+- Conducted full hostile audit and final engine hardening across TypeScript (`GameViewport.tsx`), Vanilla JavaScript (`/js/main.js`), and Single-File HTML standalone game generator (`FlaskSystemModal.tsx`).
+- Standardized frustum tile grid rendering (`16px` tile unit, outer boundary walls, alternating grass tiles `#2e7d32` / `#256628`, grass tufts `#4caf50`, crimson crest flowers `#DE2626`, obsidian pillars `#09090b` / `#DE2626`, and Ganon Sanctuary platform `#7f1d1d`).
+- Verified 100% feature and visual scale parity across all 3 execution targets (`448x448` square aspect resolution / `1.25x` camera zoom scale).
+- Updated `bejson_project.json` versioning ledger to Version 1.0.43 / Package 143.
+
+## [2.0.0-105 / Package 142] - 2026-11-10
+- Upgraded sword slashing physics, directional vector knockback calculation (`8.5` force normal slash / `14.0` force 360° spin / `16.0` force bomb detonation), and AABB object collision control across both TS (React) and JS engines.
+- Implemented smooth corner-sliding box physics (`physicsEngine`) around solid wall boundaries, pillars, and pots/bushes to prevent snagging on tight corners.
+- Standardized game maps, 16px tile unit frustum grid rendering (alternating grass tiles `#2e7d32` / `#256628`, `#4caf50` grass tufts, `#DE2626` crimson flowers, stone brick boundary walls), and `1.25x` camera zoom scale between TS (`GameViewport.tsx`) and JS (`/js/main.js`).
+- Updated `bejson_project.json` versioning ledger to Version 1.0.42 / Package 142.
+
+## [2.0.0-105 / Package 141] - 2026-11-10
+- Confirmed and hardened the multi-file Vanilla JavaScript architecture for standard web browsers (`/js/index.html` & `/js/main.js`).
+- Modular ES modules in `/js/main.js` import directly from `../src/lib/lib_js/` (`lib_bejson_Core_bejson_core.js`, `lib_bejson_Gaming_engine.js`, `lib_bejson_Gaming_shadow_engine.js`, `lib_bejson_Gaming_physics_engine.js`, `lib_bejson_Gaming_projectile_physics.js`, `lib_bejson_Gaming_screen_effects.js`).
+- Updated `bejson_project.json` versioning ledger to Version 1.0.41 / Package 141.
+
+## [2.0.0-105 / Package 140] - 2026-11-10
+- Achieved 100% absolute feature and simulation parity in the Vanilla JavaScript engine mirror (`/js/main.js`).
+- Integrated procedural Web Audio retro synthesizer SFX engine (`playSfxTone` for slash, spin attack, pot break, bush cut, hit, enemy death, player hurt, rupee/heart chimes, boomerang).
+- Added destructible pots & bushes with dropped item pickup mechanics (`rupees`, `hearts`, `bombs`, `arrows`).
+- Added enemy mob AI chasing & 2D vector knockback physics with friction impulse decay (`physicsEngine`).
+- Implemented Y-Button item abilities (Boomerang trajectory & pickup retrieval, Dark Bow arrows, Dark Bombs detonation).
+- Added 2.5D Top-to-Bottom depth Y-sorting render queue sorting entities before rendering pass.
+- Updated library imports to relative paths (`../src/lib/lib_js/...`) per policy §4.8.
+- Updated `bejson_project.json` versioning ledger to Version 1.0.40 / Package 140.
+
+## [2.0.0-105 / Package 139] - 2026-11-10
+- Synchronized viewport scale, aspect ratio, tile unit sizing (`16px`), level world dimensions (`1024x1024px`), camera zoom scale (`1.25x`), and centered camera follow across React `GameViewport.tsx`, Vanilla JS Mirror (`/js/main.js` & `/js/index.html`), and standalone single-file HTML game generator (`FlaskSystemModal.tsx`).
+- Standardized canvas resolution to `448x448` square aspect ratio with pixelated rendering across all 3 execution targets.
+- Updated `bejson_project.json` versioning ledger to Version 1.0.39 / Package 139.
+
+## [2.0.0-105 / Package 138] - 2026-11-05
+- Fixed character sprite visibility bug in `sprites_manifest.105a.bejson` by replacing pure black `#000000` body paths in `shadow_link_sheet` SVG with high-visibility obsidian slate (`#1e1e2d`), dark grey tunic details (`#14141f`), crimson tunic belt (`#DE2626`), glowing eyes (`#f87171`), and white boots (`#ffffff`).
+- Upgraded `standalone_game.html` in `FlaskSystemModal.tsx` to ingest and decode BEJSON tilemap chunk matrices (`cave_chunk_0_0`) directly from embedded bundle (`EMBEDDED_BEJSON_BUNDLE.Datasets`), rendering true cavern walls, stone floors, water hazards, and red crest accents.
+- Preserved 2.5D layer ordering: when facing `UP`, shield is rendered behind Link's back before body/head; when facing `DOWN`, `LEFT`, or `RIGHT`, shield is rendered in front.
+- Updated `bejson_project.json` versioning ledger to Version 1.0.38 / Package 138.
+
 ## [2.0.0-105 / Package 137] - 2026-11-02
 - Decoupled all sound effect and BGM specs into BEJSON 105 frequency matrices (`audio_manifest.105a.bejson`).
 - Defined explicit SFX frequency data types in BEJSON: `aud_waveform_type` (`sawtooth`, `square`, `triangle`, `sine`, `noise`), `aud_start_freq_hz`, `aud_end_freq_hz`, `aud_frequency_ramp_type`, `aud_filter_type`, `aud_filter_cutoff_hz`, `aud_filter_q_factor`, and `aud_note_sequence_json`.
