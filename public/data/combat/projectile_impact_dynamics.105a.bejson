@@ -1,0 +1,202 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_projectile_physics.js",
+  "Primary_Key_Field": "imp_uuid",
+  "Type_Discriminator_Field": "imp_record_type",
+  "Domain_Type_Field": "penetration_behavior",
+  "Records_Type": [
+    "ProjectileImpactDynamics"
+  ],
+  "Schema_Name": "Projectile_Impact_Dynamics_Registry",
+  "Fields": [
+    {
+      "name": "imp_uuid",
+      "type": "string",
+      "required": true,
+      "primary_key": true,
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000000"
+    },
+    {
+      "name": "imp_record_type",
+      "type": "string",
+      "required": true,
+      "enum": [
+        "ProjectileImpactDynamics"
+      ]
+    },
+    {
+      "name": "object_type",
+      "type": "string",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000001",
+      "required": true
+    },
+    {
+      "name": "surface_hardness",
+      "type": "number",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000002",
+      "required": true
+    },
+    {
+      "name": "penetration_behavior",
+      "type": "string",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000003",
+      "required": true
+    },
+    {
+      "name": "damage_multiplier",
+      "type": "number",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000004",
+      "required": true
+    },
+    {
+      "name": "splash_particle_count",
+      "type": "integer",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000005",
+      "required": true
+    },
+    {
+      "name": "kinetic_recoil_factor",
+      "type": "number",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000006",
+      "required": true
+    },
+    {
+      "name": "primary_particle_color",
+      "type": "string",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000007",
+      "required": true
+    },
+    {
+      "name": "secondary_particle_color",
+      "type": "string",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000008",
+      "required": true
+    },
+    {
+      "name": "impact_vfx_preset",
+      "type": "string",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000009",
+      "required": true
+    },
+    {
+      "name": "sound_cue_id",
+      "type": "string",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000010",
+      "required": true
+    },
+    {
+      "name": "quiver_vibration_ms",
+      "type": "integer",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000011",
+      "required": true
+    },
+    {
+      "name": "status_debuff_inflicted",
+      "type": "string",
+      "field_uuid": "c4a5b6c7-4444-4000-8000-000000000012",
+      "required": true
+    }
+  ],
+  "Values": [
+    [
+      "a0110001-0001-4000-8000-000000000001",
+      "ProjectileImpactDynamics",
+      "flesh_organic",
+      0.15,
+      "embed",
+      1.5,
+      24,
+      0.1,
+      "#DE2626",
+      "#000000",
+      "vfx_puncture_bleed",
+      "flesh_pierce",
+      200,
+      "bleed_slow"
+    ],
+    [
+      "a0110001-0002-4000-8000-000000000002",
+      "ProjectileImpactDynamics",
+      "stone_masonry",
+      0.9,
+      "shatter",
+      0.25,
+      18,
+      0.7,
+      "#FFFFFF",
+      "#64748B",
+      "vfx_flint_shatter",
+      "pot_break",
+      0,
+      "none"
+    ],
+    [
+      "a0110001-0003-4000-8000-000000000003",
+      "ProjectileImpactDynamics",
+      "wood_barrier",
+      0.45,
+      "embed",
+      0.85,
+      14,
+      0.4,
+      "#A16207",
+      "#78350F",
+      "vfx_grain_splinter",
+      "enemy_hit",
+      350,
+      "none"
+    ],
+    [
+      "a0110001-0004-4000-8000-000000000004",
+      "ProjectileImpactDynamics",
+      "metal_shield",
+      0.98,
+      "ricochet",
+      0.05,
+      32,
+      0.95,
+      "#FDE047",
+      "#FFFFFF",
+      "vfx_shield_ricochet",
+      "enemy_hit",
+      0,
+      "stun_deflect"
+    ],
+    [
+      "a0110001-0005-4000-8000-000000000005",
+      "ProjectileImpactDynamics",
+      "holy_barrier",
+      0.75,
+      "dispel",
+      0.5,
+      28,
+      0.5,
+      "#F59E0B",
+      "#1D4ED8",
+      "vfx_holy_dispel",
+      "dark_aura",
+      0,
+      "holy_blind"
+    ],
+    [
+      "a0110001-0006-4000-8000-000000000006",
+      "ProjectileImpactDynamics",
+      "water_liquid",
+      0.05,
+      "drag_sink",
+      0.4,
+      20,
+      0.2,
+      "#38BDF8",
+      "#FFFFFF",
+      "vfx_splash_ripple",
+      "bush_cut",
+      0,
+      "drench"
+    ]
+  ]
+}

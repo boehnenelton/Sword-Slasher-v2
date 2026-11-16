@@ -1,0 +1,192 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_inventory_manager.js",
+  "Primary_Key_Field": "wpn_uuid",
+  "Type_Discriminator_Field": "wpn_record_type",
+  "Domain_Type_Field": "category",
+  "Records_Type": [
+    "GamingWeaponCombatRecord"
+  ],
+  "Schema_Name": "Weapons_Combat_Registry",
+  "Fields": [
+    {
+      "name": "wpn_uuid",
+      "type": "string",
+      "required": true,
+      "primary_key": true,
+      "field_uuid": "d2a20001-2222-4000-8000-000000000001"
+    },
+    {
+      "name": "wpn_record_type",
+      "type": "string",
+      "required": true,
+      "enum": [
+        "GamingWeaponCombatRecord"
+      ]
+    },
+    {
+      "name": "weapon_id",
+      "type": "string",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000002",
+      "required": true
+    },
+    {
+      "name": "faction",
+      "type": "string",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000003",
+      "required": true
+    },
+    {
+      "name": "category",
+      "type": "string",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000004",
+      "required": true
+    },
+    {
+      "name": "base_damage",
+      "type": "number",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000005",
+      "required": true
+    },
+    {
+      "name": "reach_px",
+      "type": "integer",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000006",
+      "required": true
+    },
+    {
+      "name": "swing_cadence_ms",
+      "type": "integer",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000007",
+      "required": true
+    },
+    {
+      "name": "block_absorption_pct",
+      "type": "number",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000008",
+      "required": true
+    },
+    {
+      "name": "elemental_affinity",
+      "type": "string",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000009",
+      "required": true
+    },
+    {
+      "name": "sprite_key",
+      "type": "string",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000010",
+      "required": true
+    },
+    {
+      "name": "projectile_ref",
+      "type": "string",
+      "field_uuid": "d2a20001-2222-4000-8000-000000000011",
+      "required": true
+    }
+  ],
+  "Values": [
+    [
+      "d2000001-0001-4000-8000-000000000001",
+      "GamingWeaponCombatRecord",
+      "shadow_blade",
+      "bad_guy_tri_color",
+      "sword",
+      40.0,
+      28,
+      320,
+      0.0,
+      "dark",
+      "item_shadow_blade_16x16",
+      "none"
+    ],
+    [
+      "d2000001-0002-4000-8000-000000000002",
+      "GamingWeaponCombatRecord",
+      "dark_bow",
+      "bad_guy_tri_color",
+      "bow",
+      25.0,
+      320,
+      260,
+      0.0,
+      "void",
+      "item_void_bow_16x16",
+      "shadow_arrow"
+    ],
+    [
+      "d2000001-0003-4000-8000-000000000003",
+      "GamingWeaponCombatRecord",
+      "obsidian_shield",
+      "bad_guy_tri_color",
+      "shield",
+      15.0,
+      16,
+      200,
+      1.0,
+      "dark",
+      "item_obsidian_shield_16x16",
+      "none"
+    ],
+    [
+      "d2000001-0004-4000-8000-000000000004",
+      "GamingWeaponCombatRecord",
+      "master_broadsword",
+      "hyrule_forces",
+      "sword",
+      45.0,
+      26,
+      340,
+      0.0,
+      "holy",
+      "item_master_broadsword_16x16",
+      "none"
+    ],
+    [
+      "d2000001-0005-4000-8000-000000000005",
+      "GamingWeaponCombatRecord",
+      "hyrule_halberd",
+      "hyrule_forces",
+      "halberd",
+      35.0,
+      38,
+      480,
+      0.2,
+      "holy",
+      "item_hyrule_halberd_16x16",
+      "none"
+    ],
+    [
+      "d2000001-0006-4000-8000-000000000006",
+      "GamingWeaponCombatRecord",
+      "royal_kite_shield",
+      "hyrule_forces",
+      "shield",
+      10.0,
+      14,
+      200,
+      0.9,
+      "holy",
+      "item_royal_kite_shield_16x16",
+      "none"
+    ],
+    [
+      "d2000001-0007-4000-8000-000000000007",
+      "GamingWeaponCombatRecord",
+      "sacred_light_staff",
+      "hyrule_forces",
+      "staff",
+      60.0,
+      240,
+      450,
+      0.0,
+      "holy_radiance",
+      "item_triforce_seal_16x16",
+      "holy_light_beam"
+    ]
+  ]
+}

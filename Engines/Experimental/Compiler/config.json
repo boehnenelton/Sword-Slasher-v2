@@ -1,0 +1,13 @@
+{
+  "engine_path": "..",
+  "game_data_path": "../../../game_data",
+  "raw_data_path": "../../../game_data/raw",
+  "use_external_raw": false,
+  "external_raw_path": "../../../public/data",
+  "compiled_data_path": "../Compiled",
+  "target_compiled_filename": "compiled_game_bundle.105.bejson",
+  "flask_host": "127.0.0.1",
+  "flask_port": 5000,
+  "python_interpreter": "python3",
+  "enable_external_keys": false
+}

@@ -1,0 +1,13 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
+  <rect width="32" height="32" fill="#0C0A10"/>
+  <!-- Top Brick Course -->
+  <rect x="1" y="1" width="14" height="13" fill="#241E2E"/>
+  <rect x="17" y="1" width="14" height="13" fill="#2D263A"/>
+  <!-- Bottom Staggered Brick Course -->
+  <rect x="1" y="16" width="22" height="14" fill="#2A2234"/>
+  <rect x="25" y="16" width="6" height="14" fill="#241E2E"/>
+  <!-- Bevel Highlights -->
+  <line x1="1" y1="1" x2="15" y2="1" stroke="#3D334E" stroke-width="1"/>
+  <line x1="17" y1="1" x2="31" y2="1" stroke="#3D334E" stroke-width="1"/>
+  <line x1="1" y1="16" x2="23" y2="16" stroke="#3D334E" stroke-width="1"/>
+</svg>

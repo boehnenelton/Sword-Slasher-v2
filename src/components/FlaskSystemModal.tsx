@@ -2,8 +2,8 @@
  * Library:         FlaskSystemModal.tsx
  * Module Purpose:  Streamlined 3-Tab System Menu, Single-File HTML Game Compiler & Gemini AI Architect Advisor Dialog
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com
- * Relational_ID:   105a0700-2026-1101-9999-000000000702
- * Version:         10031
+ * Relational_ID:   a05f192b-d02e-4820-8108-6774c1948992
+ * Version:         10032
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -37,14 +37,14 @@ export interface FlaskConfigSettings {
 
 const DEFAULT_FLASK_CONFIG: FlaskConfigSettings = {
   use_external_raw: true,
-  external_raw_path: '../../public/data',
-  local_raw_path: './data/raw',
+  external_raw_path: '../../../game_data/raw',
+  local_raw_path: '../../../game_data/raw',
   use_external_raw_lib: true,
-  external_raw_lib_path: '../../src/lib',
+  external_raw_lib_path: '../../../src/lib',
   local_raw_lib_path: './data/lib',
   use_external_compiled: false,
-  external_compiled_path: './data/compiled',
-  local_compiled_path: './data/compiled',
+  external_compiled_path: '../Compiled',
+  local_compiled_path: '../Compiled',
   target_compiled_filename: 'compiled_game_bundle.105.bejson',
   flask_host: '127.0.0.1',
   flask_port: 5000,
@@ -77,7 +77,7 @@ export const FlaskSystemModal: React.FC<Props> = ({ isOpen, onClose, initialTab 
 I have full context on your codebase, including:
 - **BEJSON 105 Schema Matrices**: 20 raw datasets in \`game_data/raw/\` (actors, object_rules, biomes, physics_world, sprites_manifest, etc.).
 - **Modular Engine Family**: \`lib_bejson_gamingss2_engine\` (core, physics, map, input, state, hud, menu, settings, intro, items, inventory, dialog, events, effects, quests, player, animations, errors).
-- **Offline Single-File HTML Compiler**: \`compiler/compiler.py\` producing \`standalone_game.html\`.
+- **Offline Single-File HTML Compiler**: \`Engines/Experimental/Compiler/Compile.py\` producing \`standalone-game.html\`.
 
 Ask me any technical question, optimization request, or schema design advice!`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -169,7 +169,7 @@ Ask me any technical question, optimization request, or schema design advice!`,
     { label: '🛡️ 2.5D Layer Ordering Rules', prompt: 'How does 2.5D top-down y-sorted depth rendering work for Shadow Link and his shield when facing UP vs DOWN?' },
     { label: '📦 BEJSON 105 Field Map Cache', prompt: 'Show the O(1) field map caching pattern and boundary-layer whitespace sanitization required for BEJSON matrix lookups.' },
     { label: '🎮 Action Deck & Touch Joystick', prompt: 'Review the virtual touch joystick deadzone filtering and gamepad action button bindings.' },
-    { label: '📜 Single-File HTML Compiler', prompt: 'How does compiler/compiler.py package raw BEJSON tables and inject them into standalone_game.html?' },
+    { label: '📜 Single-File HTML Compiler', prompt: 'How does Engines/Experimental/Compiler/Compile.py package raw BEJSON tables and inject them into standalone-game.html?' },
   ];
 
   // Persistent Settings State
@@ -230,7 +230,7 @@ Library:         compiler.py
 Family:          Flask Parity Engine Data Compiler
 Module Purpose:  BEJSON 105 Raw Data Compiler, Single-File Bundler & Standalone HTML Game Compiler
 Architecture:    Reads config.json pathing flags, compiles raw BEJSON tables into a single dataset bundle,
-                 and injects the chunked dataset & JS engine into a standalone runnable single HTML file (standalone_game.html).
+                 and injects the chunked dataset & JS engine into a standalone runnable single HTML file (standalone-game.html).
 Version:         1.1.0
 Release_Version: 300
 Date:            2026-11-01
@@ -255,19 +255,19 @@ def load_config():
 
 def resolve_paths(config):
     if config.get("use_external_raw", False):
-        raw_path = os.path.abspath(os.path.join(BASE_DIR, config.get("external_raw_path", "../../public/data")))
+        raw_path = os.path.abspath(os.path.join(BASE_DIR, config.get("external_raw_path", "../../../game_data/raw")))
     else:
-        raw_path = os.path.abspath(os.path.join(BASE_DIR, config.get("local_raw_path", "./data/raw")))
+        raw_path = os.path.abspath(os.path.join(BASE_DIR, config.get("local_raw_path", "../../../game_data/raw")))
 
     if config.get("use_external_raw_lib", False):
-        lib_path = os.path.abspath(os.path.join(BASE_DIR, config.get("external_raw_lib_path", "../../src/lib")))
+        lib_path = os.path.abspath(os.path.join(BASE_DIR, config.get("external_raw_lib_path", "../../../src/lib")))
     else:
         lib_path = os.path.abspath(os.path.join(BASE_DIR, config.get("local_raw_lib_path", "./data/lib")))
 
     if config.get("use_external_compiled", False):
-        compiled_path = os.path.abspath(os.path.join(BASE_DIR, config.get("external_compiled_path", "./data/compiled")))
+        compiled_path = os.path.abspath(os.path.join(BASE_DIR, config.get("external_compiled_path", "../Compiled")))
     else:
-        compiled_path = os.path.abspath(os.path.join(BASE_DIR, config.get("local_compiled_path", "./data/compiled")))
+        compiled_path = os.path.abspath(os.path.join(BASE_DIR, config.get("local_compiled_path", "../Compiled")))
 
     return raw_path, lib_path, compiled_path
 
@@ -321,7 +321,7 @@ def compile_bejson_datasets():
     with open(compiled_file_path, "w", encoding="utf-8") as out_f:
         json.dump(single_bundle_payload, out_f, indent=2)
 
-    standalone_html_path = os.path.join(compiled_path, "standalone_game.html")
+    standalone_html_path = os.path.join(compiled_path, "standalone-game.html")
     print(f"[SUCCESS] Compiled dataset bundle -> {{compiled_file_path}}")
     print(f"[SUCCESS] Compiled standalone single-file game -> {{standalone_html_path}}")
 
@@ -341,9 +341,9 @@ if __name__ == "__main__":
     logs.push("============================================================");
     logs.push("  BEJSON 105 COMPILER & SINGLE-FILE HTML GAME BUILDER");
     logs.push("============================================================");
-    logs.push("[*] Loading Gaming/PY/config.json...");
-    logs.push(`[*] Raw Data Path: /app/applet/public/data (External: ${flaskConfig.use_external_raw})`);
-    logs.push(`[*] Compiled Path: /app/applet/Gaming/PY/data/compiled (External: ${flaskConfig.use_external_compiled})`);
+    logs.push("[*] Loading Engines/Experimental/Compiler/config.json...");
+    logs.push(`[*] Raw Data Path: /app/applet/game_data/raw (External: ${flaskConfig.use_external_raw})`);
+    logs.push(`[*] Compiled Path: /app/applet/Engines/Experimental/Compiled (External: ${flaskConfig.use_external_compiled})`);
 
     setCompilerLogs([...logs]);
 
@@ -405,9 +405,9 @@ if __name__ == "__main__":
 
     logs.push("------------------------------------------------------------");
     logs.push(`[SUCCESS] Compiled ${Object.keys(datasetsObj).length} datasets into single-file JSON bundle:`);
-    logs.push(`          -> Gaming/PY/data/compiled/${flaskConfig.target_compiled_filename}`);
+    logs.push(`          -> Engines/Experimental/Compiled/${flaskConfig.target_compiled_filename}`);
     logs.push(`[SUCCESS] Injected BEJSON chunk & JS engine into single-file runnable HTML:`);
-    logs.push(`          -> Gaming/PY/data/compiled/standalone_game.html`);
+    logs.push(`          -> Engines/Experimental/Compiled/standalone-game.html`);
     logs.push("============================================================");
 
     setCompilerLogs([...logs]);
@@ -1122,7 +1122,7 @@ if __name__ == "__main__":
 </body>
 </html>`;
 
-    handleDownloadTextFile('standalone_game.html', htmlContent, 'text/html');
+    handleDownloadTextFile('standalone-game.html', htmlContent, 'text/html');
   };
 
   const handleDownloadCompleteFlaskZip = async () => {
@@ -1131,10 +1131,10 @@ if __name__ == "__main__":
       const zip = new JSZip();
 
       // 1. Engine Folder
-      const engineFolder = zip.folder("engine");
+      const engineFolder = zip.folder("Engines/PY");
       if (engineFolder) {
         try {
-          const appRes = await fetch('/Gaming/PY/engine/app.py');
+          const appRes = await fetch('/Engines/PY/app.py');
           if (appRes.ok) {
             const appText = await appRes.text();
             engineFolder.file("app.py", appText);
@@ -1143,16 +1143,17 @@ if __name__ == "__main__":
           console.warn('Could not fetch app.py for zip:', e);
         }
         engineFolder.file("requirements.txt", "flask>=3.0.0\nflask-cors>=4.0.0\n");
-        engineFolder.file("README.md", `# Sword Slasher RPG: Flask Parity Engine & Compiler\n\nRun offline:\n1. pip install -r engine/requirements.txt\n2. python3 compiler/compiler.py\n3. python3 engine/app.py\n`);
+        engineFolder.file("config.json", JSON.stringify({ engine_path: ".", compiler_path: "../Experimental/Compiler", raw_data_path: "../../game_data/raw", compiled_data_path: "../Experimental/Compiled", target_compiled_filename: flaskConfig.target_compiled_filename, flask_host: flaskConfig.flask_host, flask_port: flaskConfig.flask_port }, null, 2));
+        engineFolder.file("README.md", `# Sword Slasher RPG: Flask Parity Engine & Compiler\n\nRun offline:\n1. pip install -r Engines/PY/requirements.txt\n2. python3 Engines/Experimental/Compiler/Compile.py\n3. python3 Engines/PY/app.py\n`);
       }
 
       // 2. Compiler Folder
-      const compilerFolder = zip.folder("compiler");
+      const compilerFolder = zip.folder("Engines/Experimental/Compiler");
       if (compilerFolder) {
         compilerFolder.file("config.json", configJsonContent);
-        compilerFolder.file("compiler.py", compilerPyContent);
+        compilerFolder.file("Compile.py", compilerPyContent);
         try {
-          const chunkerRes = await fetch('/Gaming/PY/compiler/data_chunker.py');
+          const chunkerRes = await fetch('/Engines/Experimental/Compiler/data_chunker.py');
           if (chunkerRes.ok) {
             const chunkerText = await chunkerRes.text();
             compilerFolder.file("data_chunker.py", chunkerText);
@@ -1165,7 +1166,7 @@ if __name__ == "__main__":
       // 3. Game Data Folder
       const gameDataFolder = zip.folder("game_data");
       if (gameDataFolder) {
-        const compiledFolder = gameDataFolder.folder("compiled");
+        const compiledFolder = zip.folder("Engines/Experimental/Compiled");
         if (compiledFolder) {
           if (compiledBundle) {
             compiledFolder.file(flaskConfig.target_compiled_filename, JSON.stringify(compiledBundle, null, 2));
@@ -1358,7 +1359,7 @@ if __name__ == "__main__":
                   <div className="bg-black p-2.5 border border-zinc-900 hover:border-[#DE2626] rounded flex items-center justify-between gap-2 transition-colors">
                     <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 uppercase font-mono truncate">
                       <FileCode className="w-4 h-4 shrink-0" />
-                      <span className="truncate">standalone_game.html</span>
+                      <span className="truncate">standalone-game.html</span>
                     </div>
                     <button
                       onClick={handleDownloadStandaloneHtmlGame}
@@ -1656,7 +1657,7 @@ if __name__ == "__main__":
                     <Sliders className="w-4 h-4 text-[#DE2626]" /> Persistent System Configuration & Path Flags
                   </h3>
                   <p className="text-xs text-zinc-400 mt-1">
-                    Settings persist locally in browser storage and synchronize directly with Python <code className="text-red-400">Gaming/PY/config.json</code>
+                    Settings persist locally in browser storage and synchronize directly with Python <code className="text-red-400">Engines/Experimental/Compiler/config.json</code>
                   </p>
                 </div>
 

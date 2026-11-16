@@ -19,6 +19,21 @@
     { "name": "asst_cached_utc_timestamp", "type": "string", "required": true }
   ],
   "Values": [
-    ["ee112233-4455-6677-8899-00aabbccdd01", "RuntimeAssetCache", "AUDIO_BUFFER", "ganon_theme", "synth_procedural", true, "2026-10-25T21:04:00Z"]
+    ["ee112233-4455-6677-8899-00aabbccdd01", "RuntimeAssetCache", "AUDIO_BUFFER", "ganon_theme", "synth_procedural", true, "2026-10-25T21:04:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd02", "RuntimeAssetCache", "IMAGE_SPRITE", "shadow_link_sheet", "/assets/sprites/shadow_link_sheet_32x32.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd03", "RuntimeAssetCache", "IMAGE_SPRITE", "ganon_sheet", "/assets/sprites/ganon_sheet_48x48.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd04", "RuntimeAssetCache", "IMAGE_SPRITE", "slime_sheet", "/assets/sprites/slime_sheet_32x32.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd05", "RuntimeAssetCache", "IMAGE_SPRITE", "guard_sheet", "/assets/sprites/guard_sheet_32x32.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd06", "RuntimeAssetCache", "IMAGE_SPRITE", "item_shadow_blade", "/assets/items/item_shadow_blade_16x16.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd07", "RuntimeAssetCache", "IMAGE_SPRITE", "item_obsidian_shield", "/assets/items/item_obsidian_shield_16x16.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd08", "RuntimeAssetCache", "IMAGE_SPRITE", "item_dark_elixir", "/assets/items/item_dark_elixir_16x16.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd09", "RuntimeAssetCache", "IMAGE_SPRITE", "item_sanctuary_seal", "/assets/items/item_sanctuary_seal_16x16.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd10", "RuntimeAssetCache", "IMAGE_SPRITE", "item_boomerang", "/assets/items/item_boomerang_16x16.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd11", "RuntimeAssetCache", "IMAGE_SPRITE", "item_heart_container", "/assets/items/item_heart_container_16x16.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd12", "RuntimeAssetCache", "IMAGE_SPRITE", "item_bomb", "/assets/items/item_bomb_16x16.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd13", "RuntimeAssetCache", "IMAGE_TILESET", "tile_sanctuary_floor", "/assets/tiles/tile_sanctuary_floor_32x32.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd14", "RuntimeAssetCache", "IMAGE_TILESET", "tile_sanctuary_carpet", "/assets/tiles/tile_sanctuary_carpet_32x32.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd15", "RuntimeAssetCache", "IMAGE_TILESET", "tile_dark_grass", "/assets/tiles/tile_dark_grass_32x32.png", true, "2026-11-14T13:30:00Z"],
+    ["ee112233-4455-6677-8899-00aabbccdd16", "RuntimeAssetCache", "IMAGE_TILESET", "tile_dungeon_wall", "/assets/tiles/tile_dungeon_wall_32x32.png", true, "2026-11-14T13:30:00Z"]
   ]
 }

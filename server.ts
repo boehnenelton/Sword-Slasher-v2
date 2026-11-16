@@ -30,8 +30,8 @@ function getGameSystemContext(): string {
   context += `Architecture Mandates:\n`;
   context += `- 100% Decoupled BEJSON Game Data: All physics, tile maps, actor stats, items, audio specs, biomes, and quests exist strictly in BEJSON tables inside game_data/raw/ (or public/data/). Zero hardcoded game stats in engine code.\n`;
   context += `- Modular Subsystem Library Family: powered by lib_bejson_gamingss2_engine (core, physics, map, input, state, hud, menu, settings, intro, items, inventory, dialog, events, effects, quests, player, animations, errors).\n`;
-  context += `- Single-File HTML Injection: raw tables compiled by compiler/compiler.py into compiled_game_bundle.105.bejson, injected into standalone_game.html.\n`;
-  context += `- Experimental Testing Engine: Python/Flask server (Gaming/PY/) for real-time data testing & compilation verification.\n\n`;
+  context += `- Single-File HTML Injection: raw tables compiled by Engines/Experimental/Compiler/Compile.py into compiled_game_bundle.105.bejson, injected into standalone-game.html.\n`;
+  context += `- Experimental Testing Engine: Python/Flask server (Engines/PY/) for real-time data testing & compilation verification.\n\n`;
 
   // Read raw dataset names if available
   const publicDataDir = path.join(process.cwd(), 'public', 'data');

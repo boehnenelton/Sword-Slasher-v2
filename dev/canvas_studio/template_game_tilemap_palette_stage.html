@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<!--
+  Name: template_game_tilemap_palette_stage.html
+  Description: Blank-slate game engine tilemap palette, autotile matrix, collision flags, and Playwright capture stage.
+  Version: 105
+  Date Created: 2026-11-13
+  Author Credit: Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
+  License: PolyForm Noncommercial License 1.0.0
+  RELATIONAL_ID: 1dfbfc4d-733b-4e89-b9e2-b26284cf8f4b
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Canvas Stage — Game Tilemap Palette Stage</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #000000;
+      color: #FFFFFF;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    body.theme-light {
+      background: #FFFFFF;
+      color: #000000;
+    }
+    body.theme-transparent {
+      background: transparent !important;
+    }
+
+    /* Fixed capture stage */
+    #capture-stage {
+      position: relative;
+      width: 512px;
+      height: 512px;
+      background: #000000;
+      border: 1px solid #1c1c24;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    body.theme-light #capture-stage {
+      background: #FFFFFF;
+      border-color: #E2E2E8;
+    }
+    body.theme-transparent #capture-stage {
+      background: transparent !important;
+      border-color: transparent !important;
+    }
+
+    /* Tile grid container */
+    #tile-grid {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+    }
+
+    /* Blank-slate tile slots */
+    .tile-slot {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .tile-slot.solid {
+      background: rgba(222, 38, 38, 0.08);
+      border-color: rgba(222, 38, 38, 0.4);
+    }
+    .tile-slot.active {
+      border: 1.5px solid #DE2626;
+      box-shadow: inset 0 0 10px rgba(222, 38, 38, 0.6);
+    }
+    .tile-label {
+      font-size: 8px;
+      font-family: monospace;
+      color: rgba(255, 255, 255, 0.35);
+      user-select: none;
+      pointer-events: none;
+    }
+    body.theme-light .tile-label {
+      color: rgba(0, 0, 0, 0.35);
+    }
+    .collision-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 7px;
+      font-family: monospace;
+      padding: 1px 3px;
+      border-radius: 2px;
+      display: none;
+    }
+    body.show-collision .collision-badge {
+      display: block;
+    }
+    .collision-badge.solid {
+      background: #DE2626;
+      color: #FFFFFF;
+    }
+    .collision-badge.pass {
+      background: #181820;
+      color: #888899;
+      border: 1px solid #333340;
+    }
+
+    /* Isolated single tile view */
+    #isolated-tile {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      background: #000000;
+      overflow: hidden;
+    }
+    body.mode-isolated #capture-stage {
+      display: none;
+    }
+    body.mode-isolated #isolated-tile {
+      position: relative;
+      top: 0;
+      left: 0;
+      border: 1px solid #DE2626;
+      box-shadow: 0 0 16px rgba(222, 38, 38, 0.5);
+    }
+
+    /* Minimal studio toolbar */
+    #studio-bar {
+      position: fixed;
+      top: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(10, 10, 14, 0.85);
+      border: 1px solid #22222a;
+      padding: 6px 14px;
+      border-radius: 6px;
+      z-index: 100;
+    }
+    body.ui-hide #studio-bar {
+      display: none;
+    }
+    .bar-btn {
+      background: #181820;
+      border: 1px solid #333340;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-family: monospace;
+      padding: 4px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .bar-btn.active {
+      background: #DE2626;
+      border-color: #f87171;
+    }
+    .bar-info {
+      font-size: 11px;
+      font-family: monospace;
+      color: #888899;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="studio-bar">
+    <span style="color:#DE2626; font-weight:bold; font-size:12px; font-family:monospace;">TILE_STUDIO</span>
+    <button class="bar-btn" id="btn-size-16" onclick="setTileSize(16)">16x16</button>
+    <button class="bar-btn active" id="btn-size-32" onclick="setTileSize(32)">32x32</button>
+    <button class="bar-btn" id="btn-size-64" onclick="setTileSize(64)">64x64</button>
+    <button class="bar-btn" id="btn-col" onclick="toggleCollision()">COLLISION: OFF</button>
+    <button class="bar-btn" id="btn-theme" onclick="toggleTheme()">THEME</button>
+    <span class="bar-info" id="bar-status">512x512 | 16x16 TILES (32px)</span>
+  </div>
+
+  <div id="capture-stage">
+    <div id="tile-grid"></div>
+  </div>
+
+  <div id="isolated-tile"></div>
+
+  <script>
+    window.isReadyToCapture = false;
+
+    const params = new URLSearchParams(window.location.search);
+    let tileSize = parseInt(params.get('tilesize') || '32', 10);
+    const canvasSize = parseInt(params.get('canvas') || '512', 10);
+    const bgParam = params.get('bg') || 'dark';
+    const modeParam = params.get('mode') || 'stage';
+    const uiParam = params.get('ui') || 'show';
+    let showCollision = params.get('collision') === 'on';
+
+    const stageEl = document.getElementById('capture-stage');
+    const gridEl = document.getElementById('tile-grid');
+    const isolatedEl = document.getElementById('isolated-tile');
+
+    stageEl.style.width = `${canvasSize}px`;
+    stageEl.style.height = `${canvasSize}px`;
+
+    if (bgParam === 'light') document.body.classList.add('theme-light');
+    if (bgParam === 'transparent') document.body.classList.add('theme-transparent');
+    if (uiParam === 'hide') document.body.classList.add('ui-hide');
+    if (modeParam === 'isolated') document.body.classList.add('mode-isolated');
+    if (showCollision) document.body.classList.add('show-collision');
+
+    function rebuildTiles() {
+      gridEl.innerHTML = '';
+      const cols = Math.floor(canvasSize / tileSize);
+      const rows = Math.floor(canvasSize / tileSize);
+      gridEl.style.gridTemplateColumns = `repeat(${cols}, ${tileSize}px)`;
+      gridEl.style.gridTemplateRows = `repeat(${rows}, ${tileSize}px)`;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const tile = document.createElement('div');
+          const isBoundary = r === 0 || r === rows - 1 || c === 0 || c === cols - 1;
+          tile.className = 'tile-slot' + (isBoundary ? ' solid' : '');
+          tile.setAttribute('data-row', r);
+          tile.setAttribute('data-col', c);
+          tile.id = `tile-${r}-${c}`;
+
+          if (tileSize >= 32) {
+            const lbl = document.createElement('span');
+            lbl.className = 'tile-label';
+            lbl.textContent = `T[${r},${c}]`;
+            tile.appendChild(lbl);
+          }
+
+          const badge = document.createElement('span');
+          badge.className = `collision-badge ${isBoundary ? 'solid' : 'pass'}`;
+          badge.textContent = isBoundary ? 'X' : 'O';
+          tile.appendChild(badge);
+
+          tile.addEventListener('click', () => selectTile(r, c));
+          gridEl.appendChild(tile);
+        }
+      }
+
+      document.getElementById('bar-status').textContent = `${canvasSize}x${canvasSize} | ${cols}x${rows} (${tileSize}px)`;
+    }
+
+    function setTileSize(size) {
+      tileSize = size;
+      ['16', '32', '64'].forEach(s => {
+        document.getElementById(`btn-size-${s}`)?.classList.remove('active');
+      });
+      document.getElementById(`btn-size-${size}`)?.classList.add('active');
+      rebuildTiles();
+    }
+
+    function toggleCollision() {
+      showCollision = !showCollision;
+      document.body.classList.toggle('show-collision', showCollision);
+      const btn = document.getElementById('btn-col');
+      btn.textContent = `COLLISION: ${showCollision ? 'ON' : 'OFF'}`;
+      btn.classList.toggle('active', showCollision);
+    }
+
+    function toggleTheme() {
+      if (document.body.classList.contains('theme-light')) {
+        document.body.classList.remove('theme-light');
+        document.body.classList.add('theme-transparent');
+      } else if (document.body.classList.contains('theme-transparent')) {
+        document.body.classList.remove('theme-transparent');
+      } else {
+        document.body.classList.add('theme-light');
+      }
+    }
+
+    function selectTile(r, c) {
+      document.querySelectorAll('.tile-slot').forEach(el => el.classList.remove('active'));
+      const activeTile = document.getElementById(`tile-${r}-${c}`);
+      if (activeTile) activeTile.classList.add('active');
+
+      isolatedEl.style.width = `${tileSize}px`;
+      isolatedEl.style.height = `${tileSize}px`;
+      isolatedEl.innerHTML = activeTile ? activeTile.innerHTML : '';
+    }
+
+    // Playwright Automation API
+    window.selectTile = selectTile;
+    window.setTileSize = setTileSize;
+    window.toggleCollision = toggleCollision;
+    window.setMode = function(mode) {
+      document.body.classList.toggle('mode-isolated', mode === 'isolated');
+    };
+
+    rebuildTiles();
+    window.isReadyToCapture = true;
+  </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_grid_manager.js",
+  "Primary_Key_Field": "chk_uuid",
+  "Type_Discriminator_Field": "chk_record_type",
+  "Domain_Type_Field": "chk_storage_encoding_type",
+  "Records_Type": ["TileChunkMatrix"],
+  "Fields": [
+    { "name": "chk_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "chk_record_type", "type": "string", "required": true, "enum": ["TileChunkMatrix"] },
+    { "name": "chk_storage_encoding_type", "type": "string", "required": true, "enum": ["DENSE_MATRIX_16X16", "SPARSE_TILE_LIST"] },
+    { "name": "chk_lvl_uuid_fk", "type": "string", "required": true, "foreign_key": { "references": "levels.lvl_uuid", "on_delete": "cascade" } },
+    { "name": "chk_lvl_slug_code", "type": "string", "required": true },
+    { "name": "chk_grid_coord_x_index", "type": "integer", "required": true },
+    { "name": "chk_grid_coord_y_index", "type": "integer", "required": true },
+    { "name": "chk_width_tiles_count", "type": "integer", "required": true },
+    { "name": "chk_height_tiles_count", "type": "integer", "required": true },
+    { "name": "chk_ground_layer_matrix_json", "type": "string", "required": true },
+    { "name": "chk_decor_layer_matrix_json", "type": "string", "required": true },
+    { "name": "chk_fringe_layer_matrix_json", "type": "string", "required": true },
+    { "name": "chk_collision_bitmask_matrix_json", "type": "string", "required": true },
+    { "name": "chk_created_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    [
+      "cbe3d495-b527-4268-8b26-9df51dfeba6f",
+      "TileChunkMatrix",
+      "DENSE_MATRIX_16X16",
+      "fa8b5962-afc8-439c-966a-470241c6d3f7",
+      "forgotten_cavern",
+      0,
+      0,
+      16,
+      16,
+      "[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]",
+      "[]",
+      "[]",
+      "[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]",
+      "2026-10-25T21:04:00Z"
+    ]
+  ]
+}

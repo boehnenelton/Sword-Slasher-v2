@@ -194,5 +194,5 @@ export class BejsonGamingEngine {
 }
 
 export const bejsonGaming = new BejsonGamingEngine();
-export { BejsonGamingEngine };
 export default bejsonGaming;
+

@@ -39,6 +39,10 @@
     ["8568c5c4-ca21-4704-952b-7af6219a9cea", "MfdbManifest", "WORLD", "portals", "data/portals/", "../portals/portals.105.bejson", 60, "105", true, "2026-10-25T21:04:00Z"],
     ["bcea9610-1e3a-4ff2-909a-b3f8e65d7c5f", "MfdbManifest", "EVENT", "events", "data/events/", "../events/events.105.bejson", 70, "105", true, "2026-10-25T21:04:00Z"],
     ["f13f2303-e8d7-41f2-8f63-d20ef390f04d", "MfdbManifest", "WORLD", "objects", "data/objects/", "../objects/objects.105.bejson", 80, "105", false, "2026-10-25T21:04:00Z"],
-    ["fc6df8b6-5b73-4e7f-80f8-35d5c992f9cf", "MfdbManifest", "CHUNK", "chunks", "data/chunks/", "../chunks/cave_chunk_0_0.105.bejson", 90, "105", true, "2026-10-25T21:04:00Z"]
+    ["fc6df8b6-5b73-4e7f-80f8-35d5c992f9cf", "MfdbManifest", "CHUNK", "chunks", "data/chunks/", "../chunks/cave_chunk_0_0.105.bejson", 90, "105", true, "2026-10-25T21:04:00Z"],
+    ["d1a10001-0000-4000-8000-000000000001", "MfdbManifest", "ACTOR", "shadow_link_combat_animations", "data/combat/", "../combat/shadow_link_combat_animations.105a.bejson", 95, "105a", false, "2026-11-16T07:32:00Z"],
+    ["d2a20001-0000-4000-8000-000000000001", "MfdbManifest", "ITEM", "weapons_combat_registry", "data/combat/", "../combat/weapons_combat_registry.105a.bejson", 96, "105a", false, "2026-11-16T07:32:00Z"],
+    ["d3a30001-0000-4000-8000-000000000001", "MfdbManifest", "RUNTIME", "projectile_combat_registry", "data/combat/", "../combat/projectile_combat_registry.105a.bejson", 97, "105a", false, "2026-11-16T07:32:00Z"],
+    ["c4a5b6c7-0000-4000-8000-000000000001", "MfdbManifest", "RUNTIME", "projectile_impact_dynamics", "data/combat/", "../combat/projectile_impact_dynamics.105a.bejson", 98, "105a", false, "2026-11-16T07:32:00Z"]
   ]
 }

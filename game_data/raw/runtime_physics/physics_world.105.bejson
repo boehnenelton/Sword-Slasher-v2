@@ -1,0 +1,30 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_physics.js",
+  "Primary_Key_Field": "phys_uuid",
+  "Type_Discriminator_Field": "phys_record_type",
+  "Domain_Type_Field": "phys_kinematic_body_type",
+  "Records_Type": ["RuntimePhysicsBody"],
+  "Fields": [
+    { "name": "phys_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "phys_record_type", "type": "string", "required": true, "enum": ["RuntimePhysicsBody"] },
+    { "name": "phys_kinematic_body_type", "type": "string", "required": true, "enum": ["DYNAMIC_PLAYER", "DYNAMIC_ACTOR", "STATIC_TILE_WALL", "STATIC_PROP", "TRIGGER_SENSOR"] },
+    { "name": "phys_owner_entity_uuid_fk", "type": "string", "required": true },
+    { "name": "phys_position_x_px", "type": "number", "required": true },
+    { "name": "phys_position_y_px", "type": "number", "required": true },
+    { "name": "phys_hitbox_width_px", "type": "number", "required": true },
+    { "name": "phys_hitbox_height_px", "type": "number", "required": true },
+    { "name": "phys_velocity_x_px_per_tick_metric", "type": "number", "required": true },
+    { "name": "phys_velocity_y_px_per_tick_metric", "type": "number", "required": true },
+    { "name": "phys_is_static_collider_flag", "type": "boolean", "required": true },
+    { "name": "phys_mass_ratio_metric", "type": "number", "required": true }
+  ],
+  "Values": [
+    ["bb001122-3344-4556-8778-99aabbccddee", "RuntimePhysicsBody", "DYNAMIC_PLAYER", "2d70ddc2-4471-4d88-af8a-ec96832571ce", 192.0, 300.0, 16.0, 16.0, 0.0, 0.0, false, 1.0],
+    ["bb001122-3344-4556-8778-99aabbccddf0", "RuntimePhysicsBody", "STATIC_PROP", "3464096b-6f5b-4a48-87b4-f68e70edd6f0", 192.0, 100.0, 48.0, 48.0, 0.0, 0.0, true, 0.0]
+  ]
+}

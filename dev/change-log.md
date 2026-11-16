@@ -1,5 +1,13 @@
 # dev/change-log.md - Revision History
 
+## [2.0.0-105 / Package 152] - 2026-11-12
+- Restructured engine locations to the AGENTS.md Part 1 layout: `js/` -> `Engines/JS/`; `Gaming/PY/engine/` -> `Engines/PY/`; `Gaming/PY/compiler/` -> `Engines/Experimental/Compiler/` (`compiler.py` renamed `Compile.py`); compiled artifacts -> `Engines/Experimental/Compiled/` (`standalone_game.html` renamed `standalone-game.html`). `Gaming/` removed.
+- Added root `game_data/raw/` (20 BEJSON datasets, identical to `public/data/`, which is retained for the React client). Each engine now has its own `config.json` routing relatively to it (`Engines/JS`, `Engines/PY`, `Engines/Experimental/Compiler`).
+- `Engines/JS/main.js`: library imports re-based to `../../src/lib/lib_js/`; dataset URLs now resolve from `config.json` `raw_data_path` instead of hardcoded `/data/...`.
+- `Engines/PY/app.py`: reads its own `config.json`, imports `Compile`, resolves compiled output relative to the engine. `Compile.py` / `data_chunker.py` defaults re-pointed to `game_data/raw` and `../Compiled`.
+- `FlaskSystemModal.tsx` / `server.ts` / `GEMINI.md`: updated paths, labels and the export ZIP layout (`Engines/PY`, `Engines/Experimental/{Compiler,Compiled}`, `game_data/raw`).
+- Verified: py_compile, `Compile.py --batch` (20 datasets), chunker, Flask test client (`/`, `/api/data/config`, `/api/data/bundle`), JS syntax + import/data path resolution.
+
 ## [2.0.0-105 / Package 143] - 2026-11-10
 - Conducted full hostile audit and final engine hardening across TypeScript (`GameViewport.tsx`), Vanilla JavaScript (`/js/main.js`), and Single-File HTML standalone game generator (`FlaskSystemModal.tsx`).
 - Standardized frustum tile grid rendering (`16px` tile unit, outer boundary walls, alternating grass tiles `#2e7d32` / `#256628`, grass tufts `#4caf50`, crimson crest flowers `#DE2626`, obsidian pillars `#09090b` / `#DE2626`, and Ganon Sanctuary platform `#7f1d1d`).

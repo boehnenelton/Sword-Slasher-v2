@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sword Slasher RPG: Shadow Link's Awakening - Vanilla JS Parity Engine</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    body {
+      background-color: #000000;
+      color: #FFFFFF;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    header {
+      padding: 8px 16px;
+      text-align: center;
+      background: #09090b;
+      border-bottom: 2px solid #DE2626;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    h1 {
+      color: #DE2626;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+    .subtitle {
+      color: #aaaaaa;
+      font-size: 10px;
+      margin-top: 2px;
+    }
+    #viewport-container {
+      position: relative;
+      margin: 6px auto;
+      border: 3px solid #DE2626;
+      box-shadow: 0 0 25px rgba(222, 38, 38, 0.4);
+      background: #050505;
+      width: 448px;
+      height: 448px;
+      max-width: 90vw;
+      max-height: 90vw;
+      aspect-ratio: 1 / 1;
+    }
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+      width: 100%;
+      height: 100%;
+    }
+    #controls-bar {
+      margin-top: 4px;
+      font-size: 10px;
+      color: #888;
+      text-align: center;
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      z-index: 10;
+    }
+    .room-btn {
+      background: #18181b;
+      color: #f4f4f5;
+      border: 1px solid #3f3f46;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: monospace;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all 0.15s;
+    }
+    .room-btn:hover {
+      border-color: #DE2626;
+    }
+    .room-btn.active {
+      background: #DE2626;
+      border-color: #f87171;
+      color: #fff;
+      font-weight: bold;
+    }
+    .badge {
+      background: #DE2626;
+      color: #FFF;
+      padding: 2px 6px;
+      font-weight: bold;
+      border-radius: 2px;
+    }
+
+    #gamepad-deck {
+      width: 100%;
+      max-width: 640px;
+      background: rgba(9, 9, 11, 0.95);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 6px 12px;
+      margin: 6px 0 8px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      flex-shrink: 0;
+      touch-action: none !important;
+    }
+    .joystick-outer {
+      position: relative;
+      width: 116px;
+      height: 116px;
+      background: #18181b;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none !important;
+      cursor: pointer;
+      transition: border-color 0.1s, box-shadow 0.1s;
+    }
+    .joystick-outer.active {
+      border-color: #DE2626;
+      box-shadow: 0 0 16px rgba(222,38,38,0.45);
+    }
+    .joystick-knob {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      background: #FFFFFF;
+      border: 2px solid #FFFFFF;
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: background 0.1s, border-color 0.1s, box-shadow 0.1s;
+    }
+    .joystick-core {
+      width: 18px;
+      height: 18px;
+      background: #000000;
+      border-radius: 50%;
+      border: 1px solid #71717a;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .joystick-knob.active,
+    .joystick-outer.active .joystick-knob {
+      background: #DE2626 !important;
+      border-color: #f87171 !important;
+      box-shadow: 0 0 18px rgba(222,38,38,0.9) !important;
+    }
+    .joystick-knob.active .joystick-core,
+    .joystick-outer.active .joystick-core {
+      background: #FFFFFF !important;
+      border-color: #FFFFFF !important;
+    }
+    
+    .center-pills {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: rgba(24, 24, 27, 0.85);
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+    }
+    .pill-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none !important;
+    }
+    .pill-btn {
+      width: 32px;
+      height: 10px;
+      background: #FFFFFF;
+      border: 1px solid #FFFFFF;
+      border-radius: 8px;
+      transform: rotate(-15deg);
+      cursor: pointer;
+      touch-action: none !important;
+      transition: background 0.08s, border-color 0.08s, box-shadow 0.08s;
+    }
+    .pill-row:active .pill-btn,
+    .pill-btn:active,
+    .pill-btn.active {
+      background: #DE2626 !important;
+      border-color: #f87171 !important;
+      box-shadow: 0 0 10px rgba(222,38,38,0.85) !important;
+    }
+    .pill-label {
+      font-size: 8px;
+      font-weight: bold;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      pointer-events: none;
+      transition: color 0.08s;
+    }
+    .pill-row:active .pill-label,
+    .pill-row.active .pill-label {
+      color: #DE2626 !important;
+    }
+    
+    .action-cluster {
+      position: relative;
+      width: 128px;
+      height: 128px;
+      background: rgba(24, 24, 27, 0.85);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none !important;
+    }
+    .act-btn {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 16px;
+      font-weight: 900;
+      color: #000000;
+      background: #FFFFFF;
+      border: 2px solid #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      box-shadow: 0 4px 12px rgba(255,255,255,0.25);
+      transition: transform 0.08s, background 0.08s, color 0.08s, border-color 0.08s, box-shadow 0.08s;
+      touch-action: none !important;
+    }
+    .btn-x { top: 2px; left: 42px; }
+    .btn-y { top: 42px; left: 2px; }
+    .btn-b { bottom: 2px; left: 42px; }
+    .btn-a { top: 42px; right: 2px; }
+    .act-btn:active,
+    .act-btn.active {
+      background: #DE2626 !important;
+      color: #FFFFFF !important;
+      border-color: #f87171 !important;
+      box-shadow: 0 0 18px rgba(222,38,38,0.9) !important;
+      transform: scale(0.92);
+    }
+
+    footer {
+      background: #09090b;
+      border-top: 1px solid #27272a;
+      padding: 6px 16px;
+      font-size: 10px;
+      color: #71717a;
+      text-align: center;
+      width: 100%;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Sword Slasher RPG: Shadow Link's Awakening</h1>
+      <div class="subtitle">Vanilla JavaScript Parity Engine Mirror · Powered by <span class="badge">BEJSON 105</span></div>
+    </div>
+    <div style="font-size: 11px; color: #10b981; font-weight: bold;">
+      ● PARITY RUNNING
+    </div>
+  </header>
+
+  <div id="viewport-container">
+    <canvas id="gameCanvas" width="448" height="448"></canvas>
+  </div>
+
+  <div id="controls-bar">
+    <span style="color: #fbbf24; font-weight: bold; align-self: center;">ROOM:</span>
+    <button id="btn-room-debug" class="room-btn active">🔧 Debug Chamber [1]</button>
+    <button id="btn-room-sanctuary" class="room-btn">🏛️ Ganon Sanctuary [2]</button>
+    <button id="btn-room-cavern" class="room-btn">🦇 Forgotten Cavern [3]</button>
+    <button id="btn-room-courtyard" class="room-btn">🏰 Castle Courtyard [4]</button>
+  </div>
+
+  <div id="gamepad-deck">
+    <div id="joystick" class="joystick-outer">
+      <div id="joystick-knob" class="joystick-knob">
+        <div class="joystick-core"></div>
+      </div>
+    </div>
+
+    <div class="center-pills">
+      <div id="row-start" class="pill-row">
+        <button id="btn-start" class="pill-btn"></button>
+        <span class="pill-label">START</span>
+      </div>
+      <div id="row-select" class="pill-row">
+        <button id="btn-select" class="pill-btn"></button>
+        <span class="pill-label">SELECT</span>
+      </div>
+    </div>
+
+    <div class="action-cluster">
+      <button id="btn-x" class="act-btn btn-x">X</button>
+      <button id="btn-y" class="act-btn btn-y">Y</button>
+      <button id="btn-b" class="act-btn btn-b">B</button>
+      <button id="btn-a" class="act-btn btn-a">A</button>
+    </div>
+  </div>
+
+  <footer>
+    Author: Elton Boehnen · boehnenelton2024@gmail.com · Vanilla JS Parity Simulation Engine
+  </footer>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;shape-rendering:crispEdges;">
+  <rect width="192" height="192" fill="none"/>
+
+  <!-- ==================== ROW 0: FLESH / ORGANIC ==================== -->
+  <!-- Col 0: Puncture Entrance -->
+  <g transform="translate(0, 0)">
+    <circle cx="24" cy="24" r="3" fill="#DE2626"/>
+    <line x1="24" y1="24" x2="12" y2="24" stroke="#000000" stroke-width="2"/>
+    <polygon points="24,24 21,22 21,26" fill="#FFFFFF"/>
+    <circle cx="26" cy="22" r="1" fill="#DE2626"/>
+    <circle cx="26" cy="26" r="1" fill="#DE2626"/>
+  </g>
+  <!-- Col 1: Radial Blood Burst Splatter -->
+  <g transform="translate(48, 0)">
+    <circle cx="24" cy="24" r="5" fill="#DE2626"/>
+    <circle cx="24" cy="24" r="2" fill="#000000"/>
+    <!-- Droplet bursts -->
+    <circle cx="34" cy="18" r="2" fill="#DE2626"/>
+    <circle cx="36" cy="28" r="1.5" fill="#DE2626"/>
+    <circle cx="28" cy="34" r="2" fill="#DE2626"/>
+    <circle cx="22" cy="12" r="1.5" fill="#DE2626"/>
+    <circle cx="16" cy="16" r="1" fill="#DE2626"/>
+    <line x1="24" y1="24" x2="10" y2="24" stroke="#000000" stroke-width="2"/>
+  </g>
+  <!-- Col 2: Arterial Spray Dispersal -->
+  <g transform="translate(96, 0)">
+    <circle cx="24" cy="24" r="4" fill="#DE2626"/>
+    <path d="M26,20 Q36,16 42,20" stroke="#DE2626" stroke-width="1.5" fill="none"/>
+    <path d="M26,28 Q38,32 40,38" stroke="#DE2626" stroke-width="1.5" fill="none"/>
+    <circle cx="44" cy="20" r="1" fill="#DE2626"/>
+    <circle cx="42" cy="38" r="1" fill="#DE2626"/>
+    <circle cx="30" cy="10" r="1" fill="#DE2626"/>
+  </g>
+  <!-- Col 3: Lingering Blood Stain & Motes -->
+  <g transform="translate(144, 0)">
+    <ellipse cx="25" cy="25" rx="6" ry="4" fill="#DE2626" opacity="0.8"/>
+    <circle cx="24" cy="24" r="2" fill="#000000"/>
+    <circle cx="38" cy="22" r="1" fill="#DE2626"/>
+    <circle cx="36" cy="32" r="1" fill="#DE2626"/>
+  </g>
+
+  <!-- ==================== ROW 1: STONE / MASONRY ==================== -->
+  <!-- Col 0: High-Impact Flint Spark -->
+  <g transform="translate(0, 48)">
+    <line x1="24" y1="24" x2="12" y2="24" stroke="#000000" stroke-width="2"/>
+    <polygon points="24,24 20,21 20,27" fill="#FFFFFF"/>
+    <!-- Intense spark cross -->
+    <line x1="24" y1="18" x2="24" y2="30" stroke="#FFFFFF" stroke-width="2"/>
+    <line x1="18" y1="24" x2="30" y2="24" stroke="#FFFFFF" stroke-width="2"/>
+    <circle cx="24" cy="24" r="3" fill="#DE2626"/>
+  </g>
+  <!-- Col 1: Shattered Flint Explosion -->
+  <g transform="translate(48, 48)">
+    <!-- Shattered arrow shards -->
+    <line x1="22" y1="22" x2="16" y2="18" stroke="#000000" stroke-width="1.5"/>
+    <line x1="22" y1="26" x2="16" y2="30" stroke="#000000" stroke-width="1.5"/>
+    <!-- White flint sparks flying -->
+    <polygon points="28,20 32,21 29,23" fill="#FFFFFF"/>
+    <polygon points="30,28 34,26 31,30" fill="#FFFFFF"/>
+    <polygon points="26,14 28,16 24,17" fill="#FFFFFF"/>
+    <!-- Grey stone dust puffs -->
+    <circle cx="28" cy="24" r="5" fill="#64748B" opacity="0.6"/>
+    <circle cx="22" cy="24" r="4" fill="#64748B" opacity="0.6"/>
+  </g>
+  <!-- Col 2: Expanding Stone Dust Cloud -->
+  <g transform="translate(96, 48)">
+    <circle cx="28" cy="22" r="8" fill="#64748B" opacity="0.5"/>
+    <circle cx="32" cy="28" r="7" fill="#64748B" opacity="0.5"/>
+    <circle cx="20" cy="26" r="6" fill="#64748B" opacity="0.5"/>
+    <rect x="36" y="16" width="2" height="2" fill="#FFFFFF"/>
+    <rect x="38" y="32" width="2" height="2" fill="#FFFFFF"/>
+    <rect x="14" y="34" width="2" height="2" fill="#64748B"/>
+  </g>
+  <!-- Col 3: Settling Stone Dust Embers -->
+  <g transform="translate(144, 48)">
+    <circle cx="30" cy="24" r="10" stroke="#64748B" stroke-width="1" stroke-dasharray="2,3" fill="none"/>
+    <circle cx="26" cy="18" r="1.5" fill="#64748B"/>
+    <circle cx="34" cy="26" r="1" fill="#FFFFFF"/>
+    <circle cx="22" cy="30" r="1" fill="#64748B"/>
+  </g>
+
+  <!-- ==================== ROW 2: WOOD / BARRIER ==================== -->
+  <!-- Col 0: Deep Wood Puncture Thud -->
+  <g transform="translate(0, 96)">
+    <!-- Wood barrier surface at x=24 -->
+    <line x1="24" y1="12" x2="24" y2="36" stroke="#78350F" stroke-width="3"/>
+    <!-- Arrow penetrating -->
+    <line x1="8" y1="24" x2="26" y2="24" stroke="#000000" stroke-width="2"/>
+    <polygon points="28,24 24,22 24,26" fill="#FFFFFF"/>
+    <!-- Tiny entry crack -->
+    <line x1="24" y1="20" x2="28" y2="18" stroke="#A16207" stroke-width="1"/>
+    <line x1="24" y1="28" x2="28" y2="30" stroke="#A16207" stroke-width="1"/>
+  </g>
+  <!-- Col 1: Wood Splinter Eruption -->
+  <g transform="translate(48, 96)">
+    <line x1="24" y1="12" x2="24" y2="36" stroke="#78350F" stroke-width="3"/>
+    <line x1="8" y1="24" x2="28" y2="24" stroke="#000000" stroke-width="2"/>
+    <!-- Erupting grain splinters -->
+    <line x1="24" y1="22" x2="18" y2="16" stroke="#A16207" stroke-width="1.5"/>
+    <line x1="24" y1="26" x2="18" y2="32" stroke="#A16207" stroke-width="1.5"/>
+    <polygon points="20,14 22,13 21,16" fill="#A16207"/>
+    <polygon points="20,34 22,35 21,32" fill="#A16207"/>
+  </g>
+  <!-- Col 2: Quivering Embedded Shaft (Vibration) -->
+  <g transform="translate(96, 96)">
+    <line x1="24" y1="12" x2="24" y2="36" stroke="#78350F" stroke-width="3"/>
+    <!-- Arrow embedded at slight tilt -->
+    <line x1="6" y1="22" x2="28" y2="24" stroke="#000000" stroke-width="2"/>
+    <!-- Vibration blur streaks -->
+    <line x1="8" y1="20" x2="20" y2="22" stroke="#DE2626" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <line x1="8" y1="26" x2="20" y2="24" stroke="#DE2626" stroke-width="0.8" stroke-dasharray="2,2"/>
+    <!-- Falling splinters -->
+    <rect x="20" y="32" width="2" height="1" fill="#A16207"/>
+    <rect x="22" y="38" width="1" height="2" fill="#78350F"/>
+  </g>
+  <!-- Col 3: Shaft Settles Firm in Grain -->
+  <g transform="translate(144, 96)">
+    <line x1="24" y1="12" x2="24" y2="36" stroke="#78350F" stroke-width="3"/>
+    <!-- Arrow firmly planted -->
+    <line x1="8" y1="24" x2="28" y2="24" stroke="#000000" stroke-width="2"/>
+    <polygon points="8,24 5,22 7,24" fill="#DE2626"/>
+    <polygon points="8,24 5,26 7,24" fill="#DE2626"/>
+    <rect x="22" y="40" width="2" height="1" fill="#78350F"/>
+  </g>
+
+  <!-- ==================== ROW 3: METAL / SHIELD ==================== -->
+  <!-- Col 0: White-Hot Ricochet Flash -->
+  <g transform="translate(0, 144)">
+    <!-- Metal shield rim at x=24 -->
+    <path d="M24,10 Q28,24 24,38" stroke="#1D4ED8" stroke-width="3" fill="none"/>
+    <line x1="8" y1="24" x2="24" y2="24" stroke="#000000" stroke-width="2"/>
+    <!-- Blinding impact flash -->
+    <circle cx="24" cy="24" r="6" fill="#FFFFFF"/>
+    <circle cx="24" cy="24" r="2" fill="#FDE047"/>
+  </g>
+  <!-- Col 1: Violent 120-Degree Spark Shower -->
+  <g transform="translate(48, 144)">
+    <path d="M24,10 Q28,24 24,38" stroke="#1D4ED8" stroke-width="3" fill="none"/>
+    <!-- Ricocheting sparks -->
+    <line x1="24" y1="24" x2="12" y2="12" stroke="#FDE047" stroke-width="2"/>
+    <line x1="24" y1="24" x2="10" y2="18" stroke="#FFFFFF" stroke-width="1.5"/>
+    <line x1="24" y1="24" x2="10" y2="30" stroke="#FFFFFF" stroke-width="1.5"/>
+    <line x1="24" y1="24" x2="12" y2="36" stroke="#FDE047" stroke-width="2"/>
+    <circle cx="10" cy="11" r="1.5" fill="#FDE047"/>
+    <circle cx="10" cy="37" r="1.5" fill="#FDE047"/>
+    <!-- Snapped arrowhead bouncing back -->
+    <line x1="20" y1="22" x2="14" y2="20" stroke="#000000" stroke-width="1.5"/>
+  </g>
+  <!-- Col 2: Kinetic Shock Ring & Deflection Arc -->
+  <g transform="translate(96, 144)">
+    <path d="M24,10 Q28,24 24,38" stroke="#1D4ED8" stroke-width="3" fill="none"/>
+    <!-- Concentric shock ring rippling on shield -->
+    <circle cx="24" cy="24" r="12" stroke="#FDE047" stroke-width="1.5" fill="none"/>
+    <circle cx="24" cy="24" r="16" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="3,3" fill="none"/>
+    <!-- Arrow bouncing away -->
+    <line x1="16" y1="16" x2="8" y2="8" stroke="#000000" stroke-width="2"/>
+    <polygon points="17,17 14,14 19,15" fill="#FFFFFF"/>
+  </g>
+  <!-- Col 3: Dissipating Ricochet Sparks -->
+  <g transform="translate(144, 144)">
+    <path d="M24,10 Q28,24 24,38" stroke="#1D4ED8" stroke-width="3" fill="none"/>
+    <circle cx="14" cy="12" r="1" fill="#FDE047"/>
+    <circle cx="8" cy="20" r="1" fill="#FFFFFF"/>
+    <circle cx="12" cy="34" r="1" fill="#FDE047"/>
+    <circle cx="24" cy="24" r="2" fill="#FDE047"/>
+  </g>
+</svg>

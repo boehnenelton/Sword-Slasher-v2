@@ -1,0 +1,10 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
+  <rect width="16" height="16" fill="none"/>
+  <!-- Outer Shield Rim -->
+  <polygon points="2,2 14,2 14,10 8,15 2,10" fill="#0C0C12" stroke="#FFFFFF" stroke-width="1"/>
+  <!-- Inner Obsidian Body -->
+  <polygon points="4,4 12,4 12,9 8,13 4,9" fill="#161622"/>
+  <!-- Crimson Crest Core -->
+  <polygon points="8,5 10,8 8,11 6,8" fill="#DE2626"/>
+  <circle cx="8" cy="8" r="1" fill="#FFFFFF"/>
+</svg>

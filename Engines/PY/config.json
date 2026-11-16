@@ -1,0 +1,9 @@
+{
+  "engine_path": ".",
+  "compiler_path": "../Experimental/Compiler",
+  "raw_data_path": "../../game_data/raw",
+  "compiled_data_path": "../Experimental/Compiled",
+  "target_compiled_filename": "compiled_game_bundle.105.bejson",
+  "flask_host": "127.0.0.1",
+  "flask_port": 5000
+}

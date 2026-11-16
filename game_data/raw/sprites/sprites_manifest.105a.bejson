@@ -1,0 +1,40 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_bejson_assets.js",
+  "Primary_Key_Field": "spr_uuid",
+  "Type_Discriminator_Field": "spr_record_type",
+  "Domain_Type_Field": "spr_animation_sheet_type",
+  "Records_Type": ["SpriteAssetManifest"],
+  "Fields": [
+    { "name": "spr_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "spr_record_type", "type": "string", "required": true, "enum": ["SpriteAssetManifest"] },
+    { "name": "spr_animation_sheet_type", "type": "string", "required": true, "enum": ["DIRECTIONAL_4WAY", "STATIC_SINGLE", "SLASH_VFX_STRIP", "PROJECTILE_LOOP"] },
+    { "name": "spr_slug_code", "type": "string", "required": true },
+    { "name": "spr_frame_width_px", "type": "integer", "required": true },
+    { "name": "spr_frame_height_px", "type": "integer", "required": true },
+    { "name": "spr_total_frames_count", "type": "integer", "required": true },
+    { "name": "spr_walk_frame_duration_ms_metric", "type": "integer", "required": true },
+    { "name": "spr_attack_frame_duration_ms_metric", "type": "integer", "required": true },
+    { "name": "spr_palette_tint_hex", "type": "string", "required": true },
+    { "name": "spr_image_source_data_uri", "type": "string", "required": false },
+    { "name": "spr_created_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["5f2bd77b-4cbb-49d7-9580-bd04e736fff4", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "shadow_link_sheet", 32, 32, 16, 120, 80, "#DE2626", "/assets/sprites/shadow_link_sheet_32x32.png", "2026-11-14T13:30:00Z"],
+    ["80662083-3d23-4ea2-9d47-890cb96a61a0", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "ganon_sheet", 48, 48, 4, 150, 100, "#DE2626", "/assets/sprites/ganon_sheet_48x48.png", "2026-11-14T13:30:00Z"],
+    ["80662083-3d23-4ea2-9d47-890cb96a61a2", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "zelda_sheet", 32, 32, 4, 200, 0, "#FFFFFF", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><rect width='32' height='32' fill='none'/><polygon points='12,6 14,3 16,6 18,3 20,6' fill='%23f59e0b'/><circle cx='16' cy='10' r='4' fill='%23fde047'/><rect x='12' y='14' width='8' height='14' fill='%23ffffff'/><rect x='10' y='18' width='12' height='12' fill='%23f472b6'/></svg>", "2026-10-25T21:04:00Z"],
+    ["80662083-3d23-4ea2-9d47-890cb96a61a3", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "hermit_npc_sheet", 32, 32, 8, 125, 0, "#1a1a1a", "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><rect width='32' height='32' fill='none'/><rect x='10' y='8' width='12' height='20' fill='%231a1a1a'/><rect x='13' y='12' width='6' height='6' fill='%23ffffff'/><rect x='24' y='6' width='2' height='22' fill='%23b45309'/></svg>", "2026-10-25T21:04:00Z"],
+    ["38b093d3-ee7c-462b-a18e-b9f989e0833f", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "slime_sheet", 32, 32, 4, 150, 100, "#15803d", "/assets/sprites/slime_sheet_32x32.png", "2026-11-14T13:30:00Z"],
+    ["38b093d3-ee7c-462b-a18e-b9f989e0833e", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "guard_sheet", 32, 32, 4, 120, 90, "#2563eb", "/assets/sprites/guard_sheet_32x32.png", "2026-11-14T13:30:00Z"],
+    ["5f2bd77b-4cbb-49d7-9580-bd04e736fff5", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "shadow_link_bow_sheet", 32, 32, 16, 120, 65, "#DE2626", "/assets/sprites/shadow_link_bow_sheet_32x32.png", "2026-11-16T07:32:00Z"],
+    ["5f2bd77b-4cbb-49d7-9580-bd04e736fff6", "SpriteAssetManifest", "PROJECTILE_LOOP", "shadow_arrow_flight", 32, 32, 4, 65, 65, "#DE2626", "/assets/sprites/shadow_arrow_flight_32x32.png", "2026-11-16T07:32:00Z"],
+    ["5f2bd77b-4cbb-49d7-9580-bd04e736fff7", "SpriteAssetManifest", "SLASH_VFX_STRIP", "vfx_arrow_impact_dynamics", 48, 48, 16, 50, 50, "#DE2626", "/assets/vfx/vfx_arrow_impact_dynamics_48x48.png", "2026-11-16T07:32:00Z"],
+    ["38b093d3-ee7c-462b-a18e-b9f989e08340", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "hyrule_knight_sheet", 32, 32, 4, 130, 90, "#1D4ED8", "/assets/sprites/hyrule_knight_sheet_32x32.png", "2026-11-16T07:57:00Z"],
+    ["38b093d3-ee7c-462b-a18e-b9f989e08341", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "hyrule_archer_sheet", 32, 32, 4, 120, 80, "#2563EB", "/assets/sprites/hyrule_archer_sheet_32x32.png", "2026-11-16T07:57:00Z"],
+    ["38b093d3-ee7c-462b-a18e-b9f989e08342", "SpriteAssetManifest", "DIRECTIONAL_4WAY", "hyrule_mage_sheet", 32, 32, 4, 140, 100, "#F59E0B", "/assets/sprites/hyrule_mage_sheet_32x32.png", "2026-11-16T07:57:00Z"]
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105a",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_projectile_physics.js",
+  "Primary_Key_Field": "proj_uuid",
+  "Type_Discriminator_Field": "proj_record_type",
+  "Domain_Type_Field": "faction",
+  "Records_Type": [
+    "GamingProjectileRecord"
+  ],
+  "Schema_Name": "Projectile_Combat_Registry",
+  "Fields": [
+    {
+      "name": "proj_uuid",
+      "type": "string",
+      "required": true,
+      "primary_key": true,
+      "field_uuid": "d3a30001-3333-4000-8000-000000000001"
+    },
+    {
+      "name": "proj_record_type",
+      "type": "string",
+      "required": true,
+      "enum": [
+        "GamingProjectileRecord"
+      ]
+    },
+    {
+      "name": "projectile_id",
+      "type": "string",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000002",
+      "required": true
+    },
+    {
+      "name": "faction",
+      "type": "string",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000003",
+      "required": true
+    },
+    {
+      "name": "flight_speed_px_s",
+      "type": "number",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000004",
+      "required": true
+    },
+    {
+      "name": "collision_radius_px",
+      "type": "integer",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000005",
+      "required": true
+    },
+    {
+      "name": "max_range_px",
+      "type": "integer",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000006",
+      "required": true
+    },
+    {
+      "name": "pierce_limit",
+      "type": "integer",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000007",
+      "required": true
+    },
+    {
+      "name": "topdown_elevation_z",
+      "type": "number",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000008",
+      "required": true
+    },
+    {
+      "name": "wake_particle_color",
+      "type": "string",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000009",
+      "required": true
+    },
+    {
+      "name": "impact_dynamics_key",
+      "type": "string",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000010",
+      "required": true
+    },
+    {
+      "name": "sfx_flight",
+      "type": "string",
+      "field_uuid": "d3a30001-3333-4000-8000-000000000011",
+      "required": true
+    }
+  ],
+  "Values": [
+    [
+      "d3000001-0001-4000-8000-000000000001",
+      "GamingProjectileRecord",
+      "shadow_arrow",
+      "bad_guy_tri_color",
+      480.0,
+      6,
+      360,
+      1,
+      8.0,
+      "#DE2626",
+      "projectile_impact_dynamics",
+      "arrow_whistle"
+    ],
+    [
+      "d3000001-0002-4000-8000-000000000002",
+      "GamingProjectileRecord",
+      "blood_slash_wave",
+      "bad_guy_tri_color",
+      320.0,
+      14,
+      120,
+      99,
+      4.0,
+      "#DE2626",
+      "projectile_impact_dynamics",
+      "sword_slash"
+    ],
+    [
+      "d3000001-0003-4000-8000-000000000003",
+      "GamingProjectileRecord",
+      "void_bomb_lob",
+      "bad_guy_tri_color",
+      180.0,
+      10,
+      140,
+      0,
+      16.0,
+      "#000000",
+      "projectile_impact_dynamics",
+      "enemy_death"
+    ],
+    [
+      "d3000001-0004-4000-8000-000000000004",
+      "GamingProjectileRecord",
+      "royal_arrow",
+      "hyrule_forces",
+      460.0,
+      6,
+      340,
+      1,
+      8.0,
+      "#F59E0B",
+      "projectile_impact_dynamics",
+      "arrow_whistle"
+    ],
+    [
+      "d3000001-0005-4000-8000-000000000005",
+      "GamingProjectileRecord",
+      "holy_light_beam",
+      "hyrule_forces",
+      640.0,
+      12,
+      280,
+      5,
+      10.0,
+      "#FFFFFF",
+      "projectile_impact_dynamics",
+      "dark_aura"
+    ]
+  ]
+}

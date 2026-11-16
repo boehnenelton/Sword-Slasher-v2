@@ -163,5 +163,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { ProjectilePhysicsEngineJS };
 }
 
+export const projectilePhysics = new ProjectilePhysicsEngineJS();
 export { ProjectilePhysicsEngineJS };
-export default ProjectilePhysicsEngineJS;
+export default projectilePhysics;
+

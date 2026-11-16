@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<!--
+  Name: template_game_sprite_sheet_studio.html
+  Description: Blank-slate game engine sprite sheet design, grid alignment, and Playwright capture stage.
+  Version: 105
+  Date Created: 2026-11-13
+  Author Credit: Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
+  License: PolyForm Noncommercial License 1.0.0
+  RELATIONAL_ID: 1dfbfc4d-733b-4e89-b9e2-b26284cf8f4b
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Canvas Stage — Game Sprite Sheet Studio</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #000000;
+      color: #FFFFFF;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    body.theme-light {
+      background: #FFFFFF;
+      color: #000000;
+    }
+    body.theme-transparent {
+      background: transparent !important;
+    }
+
+    /* Fixed capture stage */
+    #capture-stage {
+      position: relative;
+      width: 512px;
+      height: 512px;
+      background: #000000;
+      border: 1px solid #1c1c24;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    body.theme-light #capture-stage {
+      background: #FFFFFF;
+      border-color: #E2E2E8;
+    }
+    body.theme-transparent #capture-stage {
+      background: transparent !important;
+      border-color: transparent !important;
+    }
+
+    /* Sprite sheet grid container */
+    #sprite-grid {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+    }
+
+    /* Blank-slate sprite cell slots */
+    .sprite-cell {
+      position: relative;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .sprite-cell.has-grid {
+      border: 1px solid rgba(222, 38, 38, 0.35);
+    }
+    .sprite-cell.active {
+      border: 1px solid #DE2626;
+      box-shadow: inset 0 0 8px rgba(222, 38, 38, 0.5);
+    }
+    .cell-label {
+      font-size: 8px;
+      font-family: monospace;
+      color: rgba(255, 255, 255, 0.3);
+      user-select: none;
+      pointer-events: none;
+    }
+    body.theme-light .cell-label {
+      color: rgba(0, 0, 0, 0.3);
+    }
+    .cell-pivot {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #DE2626;
+      border-radius: 50%;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* Isolated cell view for single sprite export */
+    #isolated-cell {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      background: #000000;
+      overflow: hidden;
+    }
+    body.mode-isolated #capture-stage {
+      display: none;
+    }
+    body.mode-isolated #isolated-cell {
+      position: relative;
+      top: 0;
+      left: 0;
+      border: 1px solid #DE2626;
+      box-shadow: 0 0 16px rgba(222, 38, 38, 0.5);
+    }
+
+    /* Minimal studio toolbar */
+    #studio-bar {
+      position: fixed;
+      top: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(10, 10, 14, 0.85);
+      border: 1px solid #22222a;
+      padding: 6px 14px;
+      border-radius: 6px;
+      z-index: 100;
+    }
+    body.ui-hide #studio-bar {
+      display: none;
+    }
+    .bar-btn {
+      background: #181820;
+      border: 1px solid #333340;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-family: monospace;
+      padding: 4px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .bar-btn.active {
+      background: #DE2626;
+      border-color: #f87171;
+    }
+    .bar-info {
+      font-size: 11px;
+      font-family: monospace;
+      color: #888899;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="studio-bar">
+    <span style="color:#DE2626; font-weight:bold; font-size:12px; font-family:monospace;">SPRITE_STUDIO</span>
+    <button class="bar-btn active" id="btn-grid" onclick="toggleGrid()">GRID: ON</button>
+    <button class="bar-btn" id="btn-size-16" onclick="setCellSize(16)">16x16</button>
+    <button class="bar-btn active" id="btn-size-32" onclick="setCellSize(32)">32x32</button>
+    <button class="bar-btn" id="btn-size-48" onclick="setCellSize(48)">48x48</button>
+    <button class="bar-btn" id="btn-size-64" onclick="setCellSize(64)">64x64</button>
+    <button class="bar-btn" id="btn-theme" onclick="toggleTheme()">THEME</button>
+    <span class="bar-info" id="bar-status">512x512 | 16x16 CELLS</span>
+  </div>
+
+  <div id="capture-stage">
+    <div id="sprite-grid"></div>
+  </div>
+
+  <div id="isolated-cell"></div>
+
+  <script>
+    window.isReadyToCapture = false;
+
+    // URL Query Parameters
+    const params = new URLSearchParams(window.location.search);
+    let cellSize = parseInt(params.get('cell') || '32', 10);
+    const canvasSize = parseInt(params.get('canvas') || '512', 10);
+    const bgParam = params.get('bg') || 'dark';
+    const modeParam = params.get('mode') || 'stage'; // 'stage' or 'isolated'
+    const uiParam = params.get('ui') || 'show';
+    let showGrid = params.get('grid') !== 'off';
+
+    const stageEl = document.getElementById('capture-stage');
+    const gridEl = document.getElementById('sprite-grid');
+    const isolatedEl = document.getElementById('isolated-cell');
+
+    stageEl.style.width = `${canvasSize}px`;
+    stageEl.style.height = `${canvasSize}px`;
+
+    if (bgParam === 'light') document.body.classList.add('theme-light');
+    if (bgParam === 'transparent') document.body.classList.add('theme-transparent');
+    if (uiParam === 'hide') document.body.classList.add('ui-hide');
+    if (modeParam === 'isolated') document.body.classList.add('mode-isolated');
+
+    function rebuildGrid() {
+      gridEl.innerHTML = '';
+      const cols = Math.floor(canvasSize / cellSize);
+      const rows = Math.floor(canvasSize / cellSize);
+      gridEl.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+      gridEl.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'sprite-cell' + (showGrid ? ' has-grid' : '');
+          cell.setAttribute('data-row', r);
+          cell.setAttribute('data-col', c);
+          cell.id = `cell-${r}-${c}`;
+
+          if (cellSize >= 32) {
+            const lbl = document.createElement('span');
+            lbl.className = 'cell-label';
+            lbl.textContent = `[${r},${c}]`;
+            cell.appendChild(lbl);
+          }
+
+          const pivot = document.createElement('div');
+          pivot.className = 'cell-pivot';
+          cell.appendChild(pivot);
+
+          cell.addEventListener('click', () => selectCell(r, c));
+          gridEl.appendChild(cell);
+        }
+      }
+
+      document.getElementById('bar-status').textContent = `${canvasSize}x${canvasSize} | ${cols}x${rows} (${cellSize}px)`;
+    }
+
+    function setCellSize(size) {
+      cellSize = size;
+      ['16', '32', '48', '64'].forEach(s => {
+        document.getElementById(`btn-size-${s}`)?.classList.remove('active');
+      });
+      document.getElementById(`btn-size-${size}`)?.classList.add('active');
+      rebuildGrid();
+    }
+
+    function toggleGrid() {
+      showGrid = !showGrid;
+      document.getElementById('btn-grid').classList.toggle('active', showGrid);
+      document.getElementById('btn-grid').textContent = `GRID: ${showGrid ? 'ON' : 'OFF'}`;
+      document.querySelectorAll('.sprite-cell').forEach(c => c.classList.toggle('has-grid', showGrid));
+    }
+
+    function toggleTheme() {
+      if (document.body.classList.contains('theme-light')) {
+        document.body.classList.remove('theme-light');
+        document.body.classList.add('theme-transparent');
+      } else if (document.body.classList.contains('theme-transparent')) {
+        document.body.classList.remove('theme-transparent');
+      } else {
+        document.body.classList.add('theme-light');
+      }
+    }
+
+    function selectCell(r, c) {
+      document.querySelectorAll('.sprite-cell').forEach(el => el.classList.remove('active'));
+      const activeCell = document.getElementById(`cell-${r}-${c}`);
+      if (activeCell) activeCell.classList.add('active');
+
+      isolatedEl.style.width = `${cellSize}px`;
+      isolatedEl.style.height = `${cellSize}px`;
+      isolatedEl.innerHTML = activeCell ? activeCell.innerHTML : '';
+    }
+
+    // Playwright Automation API
+    window.selectCell = selectCell;
+    window.setCellSize = setCellSize;
+    window.toggleGrid = toggleGrid;
+    window.setMode = function(mode) {
+      document.body.classList.toggle('mode-isolated', mode === 'isolated');
+    };
+    window.seekProgress = function(ratio) {};
+    window.pauseAnimation = function() {};
+    window.playAnimation = function() {};
+
+    rebuildGrid();
+    window.isReadyToCapture = true;
+  </script>
+</body>
+</html>

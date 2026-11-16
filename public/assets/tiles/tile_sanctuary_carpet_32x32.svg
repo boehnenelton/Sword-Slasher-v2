@@ -1,0 +1,10 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
+  <rect width="32" height="32" fill="#991B1B"/>
+  <rect x="2" y="2" width="28" height="28" fill="#7F1D1D"/>
+  <!-- Gold Braided Borders -->
+  <rect x="0" y="0" width="3" height="32" fill="#F59E0B"/>
+  <rect x="29" y="0" width="3" height="32" fill="#F59E0B"/>
+  <!-- Inner Velvet Diamond Motif -->
+  <polygon points="16,6 24,16 16,26 8,16" fill="#991B1B"/>
+  <circle cx="16" cy="16" r="3" fill="#B91C1C"/>
+</svg>

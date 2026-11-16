@@ -42,7 +42,7 @@ export class GamingSS2EngineMap {
     }
   }
 
-  public getVisibleTiles(viewport: MapViewport, tileSize: number = 32): TileCell[] {
+  public getVisibleTiles(viewport: MapViewport, tileSize: number = 16): TileCell[] {
     const minTileX = Math.floor(viewport.cameraX / tileSize) - 1;
     const maxTileX = Math.ceil((viewport.cameraX + viewport.width) / tileSize) + 1;
     const minTileY = Math.floor(viewport.cameraY / tileSize) - 1;

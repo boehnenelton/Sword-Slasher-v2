@@ -1,0 +1,35 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "105",
+  "Format_Creator": "Elton Boehnen",
+  "Schema_Version": "2.0.0-105",
+  "Parent_Hierarchy": "../manifest/105a.mfdb.bejson",
+  "Write_Owner_Module": "lib_bejson_Gaming_inventory_manager.js",
+  "Primary_Key_Field": "item_uuid",
+  "Type_Discriminator_Field": "item_record_type",
+  "Domain_Type_Field": "item_category_type",
+  "Records_Type": ["ItemDefinition"],
+  "Fields": [
+    { "name": "item_uuid", "type": "string", "required": true, "primary_key": true },
+    { "name": "item_record_type", "type": "string", "required": true, "enum": ["ItemDefinition"] },
+    { "name": "item_category_type", "type": "string", "required": true, "enum": ["WEAPON", "ARMOR", "SHIELD", "TOOL", "CONSUMABLE", "KEY_ITEM"] },
+    { "name": "item_sub_category_type", "type": "string", "required": true, "enum": ["BROADSWORD", "DAGGER", "BOW", "HEAL_POTION", "BUFF_ELIXIR", "PORTAL_KEY"] },
+    { "name": "item_equipment_slot_type", "type": "string", "required": true, "enum": ["SLOT_SWORD", "SLOT_SHIELD", "SLOT_ARMOR", "SLOT_TOOL", "NONE"] },
+    { "name": "item_rarity_tier_type", "type": "string", "required": true, "enum": ["COMMON", "UNCOMMON", "RARE", "LEGENDARY"] },
+    { "name": "item_slug_code", "type": "string", "required": true },
+    { "name": "item_display_name", "type": "string", "required": true },
+    { "name": "item_attack_bonus_metric", "type": "integer", "required": true },
+    { "name": "item_defense_bonus_metric", "type": "integer", "required": true },
+    { "name": "item_heal_potency_count", "type": "integer", "required": true },
+    { "name": "item_color_badge_hex", "type": "string", "required": true },
+    { "name": "item_description_text", "type": "string", "required": true },
+    { "name": "item_created_utc_timestamp", "type": "string", "required": true }
+  ],
+  "Values": [
+    ["d7efa941-b0b8-4f8f-bd00-72d0277a1b0d", "ItemDefinition", "WEAPON", "BROADSWORD", "SLOT_SWORD", "LEGENDARY", "shadow_blade", "Shadow Blade", 25, 0, 0, "#DE2626", "A dark sword forged in Ganon's flame with crimson slash energy.", "2026-10-25T21:04:00Z"],
+    ["6ff5b8c1-466e-44fb-8592-41f44cbbf8c5", "ItemDefinition", "CONSUMABLE", "HEAL_POTION", "NONE", "COMMON", "dark_elixir", "Dark Elixir", 0, 0, 50, "#8b5cf6", "Restores 50 health points for Shadow Link.", "2026-10-25T21:04:00Z"],
+    ["6ff5b8c1-466e-44fb-8592-41f44cbbf8c6", "ItemDefinition", "KEY_ITEM", "PORTAL_KEY", "NONE", "RARE", "sanctuary_seal", "Sanctuary Seal", 0, 0, 0, "#f59e0b", "Unlocks the portal exit from Ganon's Dark Sanctuary.", "2026-10-25T21:04:00Z"],
+    ["6ff5b8c1-466e-44fb-8592-41f44cbbf8c7", "ItemDefinition", "KEY_ITEM", "PORTAL_KEY", "NONE", "LEGENDARY", "princess_zelda", "Princess Zelda", 0, 0, 0, "#ec4899", "The royal captive required by Ganon to fulfill the dark prophecy.", "2026-10-25T21:04:00Z"],
+    ["d2000001-0002-4000-8000-000000000002", "ItemDefinition", "WEAPON", "BOW", "SLOT_TOOL", "RARE", "dark_bow", "Dark Bow", 25, 0, 0, "#DE2626", "Fires shadow piercing arrows across distances.", "2026-11-16T07:32:00Z"]
+  ]
+}

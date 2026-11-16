@@ -19,5 +19,5 @@
    - Zero hardcoded game stats, maps, or actor physics in React code—all game structures are loaded from BEJSON 105 data matrices.
 
 5. **Vanilla JavaScript Parity Engine**:
-   - A complete 1:1 vanilla JavaScript application is maintained in `/js/` resolving libraries from `src/lib/lib_js/`.
+   - A complete 1:1 vanilla JavaScript application is maintained in `Engines/JS/` (data via `Engines/JS/config.json` -> `game_data/raw`) resolving libraries from `src/lib/lib_js/`.
    - The About/Meta-UI tab allows downloading the full required JS Parity Engine and Core JS library suite.
