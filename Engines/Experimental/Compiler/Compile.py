@@ -3,25 +3,36 @@ Library:         Compile.py
 Family:          Flask Parity Engine Data Compiler
 Module Purpose:  BEJSON 105 Raw Data Compiler, Single-File Bundler & Standalone HTML Game Compiler with Relative Config Menu
 Architecture:    Reads Engines/Experimental/Compiler/config.json; raw data from root game_data/raw, output to ../Compiled.
-Version:         1.4.0
+Version:         1.4.1
 Release_Version: 300
 Date:            2026-11-13
 Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
 License:         PolyForm-Noncommercial-1.0.0
 Format_Creator:  Elton Boehnen
-RELATIONAL_ID:   d876f3f8-cb95-4683-8b89-7d5cbc6ab3fa
+RELATIONAL_ID:   250f0e4d-aa0d-4002-9e80-a76bb352dec2
 """
 
 import os
 import json
 import sys
+import logging
+import subprocess
+
+log = logging.getLogger("ss2.compiler")
+
+
+def _ui(text: str = "") -> None:
+    """Interactive-menu rendering (user-facing UI, not diagnostics)."""
+    sys.stdout.write(text + "\n")
+    sys.stdout.flush()
+
 
 COMPILER_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(COMPILER_DIR, "config.json")
 
 def load_config():
     if not os.path.exists(CONFIG_PATH):
-        print(f"[Compiler Error] config.json not found at {CONFIG_PATH}")
+        log.error(f"config.json not found at {CONFIG_PATH}")
         sys.exit(1)
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -38,17 +49,17 @@ def resolve_paths(config):
     return raw_path, compiled_path, engine_path
 
 def compile_bejson_datasets():
-    print("=" * 60)
-    print("  BEJSON 105 FLASK PARITY DATA COMPILER & SINGLE-FILE HTML BUILDER")
-    print("=" * 60)
+    log.info("=" * 60)
+    log.info("  BEJSON 105 FLASK PARITY DATA COMPILER & SINGLE-FILE HTML BUILDER")
+    log.info("=" * 60)
 
     config = load_config()
     raw_path, compiled_path, engine_path = resolve_paths(config)
 
-    print(f"[*] Config Loaded:  {CONFIG_PATH}")
-    print(f"[*] Engine Root:    {engine_path}")
-    print(f"[*] Raw Data Root:  {raw_path}")
-    print(f"[*] Compiled Root:  {compiled_path}")
+    log.info(f"Config Loaded:  {CONFIG_PATH}")
+    log.info(f"Engine Root:    {engine_path}")
+    log.info(f"Raw Data Root:  {raw_path}")
+    log.info(f"Compiled Root:  {compiled_path}")
 
     os.makedirs(compiled_path, exist_ok=True)
 
@@ -67,11 +78,11 @@ def compile_bejson_datasets():
                             rec_count = len(doc.get("Values", [])) if isinstance(doc, dict) else 0
                             collected_datasets[rel_name] = doc
                             total_records += rec_count
-                            print(f"  + Scanned dataset: {rel_name} ({rec_count} records)")
+                            log.info(f"Scanned dataset: {rel_name} ({rec_count} records)")
                     except Exception as err:
-                        print(f"  ! Warning: Failed reading {rel_name}: {err}")
+                        log.warning(f"Warning: Failed reading {rel_name}: {err}")
     else:
-        print(f"[!] Target raw path does not exist: {raw_path}")
+        log.warning(f"Target raw path does not exist: {raw_path}")
 
     target_filename = config.get("target_compiled_filename", "compiled_game_bundle.105.bejson")
     compiled_file_path = os.path.join(compiled_path, target_filename)
@@ -257,7 +268,292 @@ def compile_bejson_datasets():
     let swordVariation = 0;
     let tickCount = 0;
 
-    let activeYItem = 'shadow_boomerang';
+    // 10-Slot Parallel Ancilla Engine (ALttP $0C4A Parallel Slot Architecture)
+    class AncillaEngineJS {{
+      constructor() {{
+        this.TOTAL_SLOTS = 10;
+        this.FRONT_SLOT_MAX = 4;
+        this.BACK_SLOT_MIN = 5;
+        this.slots = new Array(this.TOTAL_SLOTS).fill(null);
+        this.searchIndex = 9;
+      }}
+
+      clearAll() {{
+        for (let i = 0; i < this.TOTAL_SLOTS; i++) {{
+          this.slots[i] = null;
+        }}
+      }}
+
+      getActiveQuotaCount(itemId) {{
+        if (!itemId) return 0;
+        let count = 0;
+        for (let i = 0; i <= this.FRONT_SLOT_MAX; i++) {{
+          const slot = this.slots[i];
+          if (slot && slot.active && slot.itemId === itemId) count++;
+        }}
+        return count;
+      }}
+
+      allocateSlot(slotCategory, itemId, quota = 1) {{
+        if (slotCategory === 'primary') {{
+          if (itemId && quota > 0) {{
+            if (this.getActiveQuotaCount(itemId) >= quota) return -1;
+          }}
+          for (let i = this.FRONT_SLOT_MAX; i >= 0; i--) {{
+            if (!this.slots[i] || !this.slots[i].active) return i;
+          }}
+          let startIdx = Math.min(this.searchIndex, this.TOTAL_SLOTS - 1);
+          for (let i = startIdx; i >= 0; i--) {{
+            const slot = this.slots[i];
+            if (slot && slot.active && slot.evictable) {{
+              this.slots[i] = null;
+              return i;
+            }}
+          }}
+          return -1;
+        }} else {{
+          for (let i = this.TOTAL_SLOTS - 1; i >= this.BACK_SLOT_MIN; i--) {{
+            if (!this.slots[i] || !this.slots[i].active) return i;
+          }}
+          for (let i = this.FRONT_SLOT_MAX; i >= 0; i--) {{
+            if (!this.slots[i] || !this.slots[i].active) return i;
+          }}
+          return -1;
+        }}
+      }}
+
+      spawnAncilla(def) {{
+        const category = def.category || (def.type === 'particle' ? 'particle' : 'primary');
+        const slotIdx = this.allocateSlot(category, def.itemId, def.quota ?? 1);
+        if (slotIdx === -1) return -1;
+        this.slots[slotIdx] = {{
+          slotId: slotIdx,
+          active: true,
+          category,
+          itemId: def.itemId || 'generic',
+          type: def.type || 'generic',
+          x: def.x || 0,
+          y: def.y || 0,
+          vx: def.vx || 0,
+          vy: def.vy || 0,
+          angle: def.angle || 0,
+          timer: def.timer ?? 60,
+          maxTimer: def.timer ?? 60,
+          layer: def.layer ?? 0,
+          evictable: def.evictable ?? (category === 'particle'),
+          state: def.state || {{}},
+          onUpdate: def.onUpdate || null,
+          onRender: def.onRender || null
+        }};
+        return slotIdx;
+      }}
+
+      updateAll(context) {{
+        for (let i = 0; i < this.TOTAL_SLOTS; i++) {{
+          const slot = this.slots[i];
+          if (!slot || !slot.active) continue;
+          slot.x += slot.vx;
+          slot.y += slot.vy;
+          slot.timer--;
+          if (typeof slot.onUpdate === 'function') {{
+            const keepAlive = slot.onUpdate(slot, context);
+            if (keepAlive === false) {{
+              slot.active = false;
+              this.slots[i] = null;
+              continue;
+            }}
+          }}
+          if (slot.timer <= 0) {{
+            slot.active = false;
+            this.slots[i] = null;
+          }}
+        }}
+      }}
+
+      getActiveAncillae() {{
+        const list = [];
+        for (let i = 0; i < this.TOTAL_SLOTS; i++) {{
+          const slot = this.slots[i];
+          if (slot && slot.active) list.push(slot);
+        }}
+        return list;
+      }}
+    }}
+
+    // Decoupled Item Registry Interface
+    class ItemRegistry {{
+      constructor() {{
+        this.itemMap = new Map();
+      }}
+      registerItem(itemDef) {{
+        if (!itemDef || !itemDef.id) return;
+        this.itemMap.set(itemDef.id, {{
+          quota: 1,
+          cooldownFrames: 20,
+          useAnimationFrames: 14,
+          ammoType: null,
+          ammoCost: 0,
+          category: 'Y_ITEM',
+          ...itemDef
+        }});
+      }}
+      getItem(id) {{ return this.itemMap.get(id) || null; }}
+      getAllItems() {{ return Array.from(this.itemMap.values()); }}
+    }}
+
+    // 24-Slot Inventory & Player State Machine Coordinator ($7EF340+ & $0202 Parity)
+    class InventoryState {{
+      constructor(registry) {{
+        this.registry = registry;
+        this.SLOT_COUNT = 24;
+        this.slots = new Array(this.SLOT_COUNT).fill(null);
+        this.equippedYItemId = null;
+        this.swordLockout = false;
+        this.actionLockoutTimer = 0;
+        this.activeItemCooldown = 0;
+      }}
+      setSwordLockout(isLocked) {{ this.swordLockout = !!isLocked; }}
+      tickLockouts() {{
+        if (this.actionLockoutTimer > 0) this.actionLockoutTimer--;
+        if (this.activeItemCooldown > 0) this.activeItemCooldown--;
+      }}
+      setEquippedYItem(itemId) {{
+        const item = this.registry.getItem(itemId);
+        if (item) this.equippedYItemId = item.id;
+      }}
+      getEquippedYItem() {{ return this.registry.getItem(this.equippedYItemId); }}
+      setSlot(idx, data) {{ if (idx >= 0 && idx < this.SLOT_COUNT) this.slots[idx] = data; }}
+      executeEquippedYItem(context, ancilla) {{
+        if (this.swordLockout) return {{ success: false, reason: 'SWORD_LOCKOUT' }};
+        if (this.actionLockoutTimer > 0 || this.activeItemCooldown > 0) return {{ success: false, reason: 'ACTION_LOCKED' }};
+        const item = this.getEquippedYItem();
+        if (!item) return {{ success: false, reason: 'NO_ITEM_EQUIPPED' }};
+        if (typeof item.onExecute === 'function') {{
+          const res = item.onExecute(context, ancilla);
+          if (res === false || res === -1) return {{ success: false, reason: 'EXECUTION_REJECTED' }};
+        }}
+        this.actionLockoutTimer = item.useAnimationFrames || 14;
+        this.activeItemCooldown = item.cooldownFrames || 20;
+        return {{ success: true }};
+      }}
+    }}
+
+    const ancillaEngine = new AncillaEngineJS();
+    const itemRegistry = new ItemRegistry();
+    const inventoryState = new InventoryState(itemRegistry);
+
+    // Register Items through Decoupled Interface
+    itemRegistry.registerItem({{
+      id: 'shadow_boomerang',
+      name: 'Shadow Boomerang',
+      icon: '🪃',
+      quota: 1,
+      cooldownFrames: 16,
+      useAnimationFrames: 12,
+      onExecute: (ctx, engine) => {{
+        if (engine.getActiveQuotaCount('shadow_boomerang') > 0) return false;
+        let vx = 0, vy = 0;
+        if (ctx.playerFacing === 'UP') vy = -8;
+        if (ctx.playerFacing === 'DOWN') vy = 8;
+        if (ctx.playerFacing === 'LEFT') vx = -8;
+        if (ctx.playerFacing === 'RIGHT') vx = 8;
+
+        return engine.spawnAncilla({{
+          type: 'boomerang',
+          itemId: 'shadow_boomerang',
+          category: 'primary',
+          x: ctx.px,
+          y: ctx.py,
+          vx,
+          vy,
+          timer: 100,
+          state: {{ outwardTimer: 25, returning: false, startX: ctx.px, startY: ctx.py }},
+          onUpdate: (slot, c) => {{
+            if (!slot.state.returning) {{
+              slot.state.outwardTimer--;
+              if (slot.x < 30 || slot.x > mapWorldWidth - 30 || slot.y < 30 || slot.y > mapWorldHeight - 30 || slot.state.outwardTimer <= 0) {{
+                slot.state.returning = true;
+              }}
+            }} else {{
+              const dist = Math.hypot(c.px - slot.x, c.py - slot.y);
+              if (dist < 18) return false;
+              slot.vx = ((c.px - slot.x) / dist) * 9;
+              slot.vy = ((c.py - slot.y) / dist) * 9;
+            }}
+            if (typeof c.onBoomerangStep === 'function') c.onBoomerangStep(slot);
+            return true;
+          }},
+          onRender: (slot, rCtx) => {{
+            rCtx.fillStyle = '#f59e0b';
+            rCtx.beginPath();
+            rCtx.arc(slot.x, slot.y, 5, 0, Math.PI * 2);
+            rCtx.fill();
+          }}
+        }});
+      }}
+    }});
+
+    itemRegistry.registerItem({{
+      id: 'dark_bow',
+      name: 'Dark Bow & Arrows',
+      icon: '🏹',
+      quota: 2,
+      cooldownFrames: 24,
+      useAnimationFrames: 14,
+      onExecute: (ctx, engine) => {{
+        let vx = 0, vy = 0;
+        const arrowSpeed = 5.5;
+        if (ctx.playerFacing === 'UP') vy = -arrowSpeed;
+        if (ctx.playerFacing === 'DOWN') vy = arrowSpeed;
+        if (ctx.playerFacing === 'LEFT') vx = -arrowSpeed;
+        if (ctx.playerFacing === 'RIGHT') vx = arrowSpeed;
+
+        const slotIdx = engine.spawnAncilla({{
+          type: 'arrow',
+          itemId: 'dark_bow',
+          category: 'primary',
+          x: ctx.px,
+          y: ctx.py,
+          vx,
+          vy,
+          timer: 55,
+          onUpdate: (slot, c) => {{
+            if (typeof c.onArrowStep === 'function') {{
+              const hit = c.onArrowStep(slot);
+              if (hit) return false;
+            }}
+            return slot.x > 10 && slot.x < mapWorldWidth - 10 && slot.y > 10 && slot.y < mapWorldHeight - 10;
+          }},
+          onRender: (slot, rCtx) => {{
+            rCtx.fillStyle = '#ffffff';
+            rCtx.fillRect(slot.x - 2, slot.y - 2, 5, 5);
+          }}
+        }});
+
+        engine.spawnAncilla({{
+          type: 'particle',
+          category: 'particle',
+          itemId: 'dark_bow',
+          x: ctx.px + (Math.random() - 0.5) * 6,
+          y: ctx.py + (Math.random() - 0.5) * 6,
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: (Math.random() - 0.5) * 1.5,
+          timer: 16,
+          evictable: true,
+          onRender: (slot, rCtx) => {{
+            rCtx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+            rCtx.fillRect(slot.x - 2, slot.y - 2, 4, 4);
+          }}
+        }});
+
+        return slotIdx;
+      }}
+    }});
+
+    inventoryState.setSlot(0, {{ itemId: 'shadow_boomerang', unlocked: true, tier: 1 }});
+    inventoryState.setSlot(1, {{ itemId: 'dark_bow', unlocked: true, tier: 1 }});
+    inventoryState.setEquippedYItem('shadow_boomerang');
+    let activeYItem = inventoryState.equippedYItemId || 'shadow_boomerang';
     let currentLevelSlug = 'debug_chamber';
 
     let boomerangs = [];
@@ -267,6 +563,7 @@ def compile_bejson_datasets():
     let enemies = [];
 
     function setDebugRoom(slug) {{
+      ancillaEngine.clearAll();
       currentLevelSlug = slug;
       if (slug === 'forgotten_cavern' || slug === 'castle_courtyard') {{
         tilesW = 96;
@@ -328,7 +625,9 @@ def compile_bejson_datasets():
       if (k === '4') setDebugRoom('castle_courtyard');
       if (k === 'q' || k === 'tab') {{
         e.preventDefault();
-        activeYItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+        const nextItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+        inventoryState.setEquippedYItem(nextItem);
+        activeYItem = inventoryState.equippedYItemId || nextItem;
       }}
       if (k === 'w' || k === 'a' || k === 's' || k === 'd' || k.startsWith('arrow')) {{
         document.getElementById('joystick')?.classList.add('active');
@@ -522,7 +821,9 @@ def compile_bejson_datasets():
       dismissIntro();
       document.getElementById('btn-select')?.classList.add('active');
       document.getElementById('row-select')?.classList.add('active');
-      activeYItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+      const nextItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+      inventoryState.setEquippedYItem(nextItem);
+      activeYItem = inventoryState.equippedYItemId || nextItem;
       setTimeout(() => {{
         document.getElementById('btn-select')?.classList.remove('active');
         document.getElementById('row-select')?.classList.remove('active');
@@ -565,7 +866,10 @@ def compile_bejson_datasets():
       props.forEach(p => {{
         if (!p.destroyed && Math.hypot(p.x - hx, p.y - hy) < 36) {{
           if (p.type === 'pedestal') {{
-            if (p.itemId) activeYItem = p.itemId;
+            if (p.itemId) {{
+              inventoryState.setEquippedYItem(p.itemId);
+              activeYItem = inventoryState.equippedYItemId || p.itemId;
+            }}
             return;
           }}
           p.destroyed = true;
@@ -606,30 +910,52 @@ def compile_bejson_datasets():
 
     function executeYItem() {{
       isSheathed = false;
-      if (activeYItem === 'shadow_boomerang') {{
-        if (boomerangs.length > 0) return;
-        let vx = 0, vy = 0;
-        if (playerFacing === 'UP') vy = -8;
-        if (playerFacing === 'DOWN') vy = 8;
-        if (playerFacing === 'LEFT') vx = -8;
-        if (playerFacing === 'RIGHT') vx = 8;
-        boomerangs.push({{ x: px, y: py, vx, vy, life: 0, returning: false, startX: px, startY: py }});
-      }} else {{
-        let vx = 0, vy = 0;
-        const arrowSpeed = 5.5;
-        if (playerFacing === 'UP') vy = -arrowSpeed;
-        if (playerFacing === 'DOWN') vy = arrowSpeed;
-        if (playerFacing === 'LEFT') vx = -arrowSpeed;
-        if (playerFacing === 'RIGHT') vx = arrowSpeed;
-        otherProjectiles.push({{ x: px, y: py, vx, vy, type: 'arrow', timer: 55 }});
-      }}
+      const isSwordBusy = bHeldTime > 0 || isCharging || (slashAnim && slashAnim.timer > 0) || swordCooldown > 0;
+      inventoryState.setSwordLockout(isSwordBusy);
+
+      const context = {{
+        px,
+        py,
+        playerFacing,
+        onBoomerangStep: (slot) => {{
+          props.forEach(p => {{
+            if (!p.destroyed && Math.hypot(p.x - slot.x, p.y - slot.y) < 24) {{
+              if (p.type === 'pedestal') return;
+              p.destroyed = true;
+              droppedItems.push({{ x: p.x, y: p.y, type: 'rupee', timer: 300 }});
+            }}
+          }});
+          enemies.forEach(e => {{
+            if (e.hp > 0 && Math.hypot(e.x - slot.x, e.y - slot.y) < 26) {{
+              e.hp = Math.max(0, e.hp - 15);
+              e.hurtTime = 18;
+              if (slot.state) slot.state.returning = true;
+            }}
+          }});
+        }},
+        onArrowStep: (slot) => {{
+          let hit = false;
+          enemies.forEach(e => {{
+            if (e.hp > 0 && Math.hypot(e.x - slot.x, e.y - slot.y) < 22) {{
+              e.hp = Math.max(0, e.hp - 20);
+              e.hurtTime = 18;
+              hit = true;
+            }}
+          }});
+          return hit;
+        }}
+      }};
+
+      const res = inventoryState.executeEquippedYItem(context, ancillaEngine);
+      if (!res.success) return;
     }}
 
     function executeInteract() {{
       props.forEach(p => {{
         if (!p.destroyed && Math.hypot(px - p.x, py - p.y) < 32) {{
           if (p.type === 'pedestal' && p.itemId) {{
-            activeYItem = p.itemId;
+            inventoryState.setEquippedYItem(p.itemId);
+            activeYItem = inventoryState.equippedYItemId || p.itemId;
           }}
         }}
       }});
@@ -710,6 +1036,44 @@ def compile_bejson_datasets():
 
       if (swordCooldown > 0) swordCooldown--;
       if (playerHurtTime > 0) playerHurtTime--;
+
+      // Step inventory lockout timers ($3C sword lockout & $0301 action commit)
+      const isSwordBusy = bHeldTime > 0 || isCharging || (slashAnim && slashAnim.timer > 0);
+      inventoryState.setSwordLockout(isSwordBusy);
+      inventoryState.tickLockouts();
+
+      // Step 10-Slot Ancilla Engine (ALttP $0C4A Parallel Slot Architecture)
+      ancillaEngine.updateAll({{
+        px,
+        py,
+        onBoomerangStep: (slot) => {{
+          props.forEach(p => {{
+            if (!p.destroyed && Math.hypot(p.x - slot.x, p.y - slot.y) < 24) {{
+              if (p.type === 'pedestal') return;
+              p.destroyed = true;
+              droppedItems.push({{ x: p.x, y: p.y, type: 'rupee', timer: 300 }});
+            }}
+          }});
+          enemies.forEach(e => {{
+            if (e.hp > 0 && Math.hypot(e.x - slot.x, e.y - slot.y) < 26) {{
+              e.hp = Math.max(0, e.hp - 15);
+              e.hurtTime = 18;
+              if (slot.state) slot.state.returning = true;
+            }}
+          }});
+        }},
+        onArrowStep: (slot) => {{
+          let hit = false;
+          enemies.forEach(e => {{
+            if (e.hp > 0 && Math.hypot(e.x - slot.x, e.y - slot.y) < 22) {{
+              e.hp = Math.max(0, e.hp - 20);
+              e.hurtTime = 18;
+              hit = true;
+            }}
+          }});
+          return hit;
+        }}
+      }});
 
       boomerangs = boomerangs.filter(b => {{
         if (!b.returning) {{
@@ -1086,6 +1450,11 @@ def compile_bejson_datasets():
         renderQueue.push({{ sortY: p.y, type: 'projectile', data: p }});
       }});
 
+      // 10-Slot Parallel Ancilla Engine Entities & Particles (ALttP $0C4A Parity)
+      ancillaEngine.getActiveAncillae().forEach(anc => {{
+        renderQueue.push({{ sortY: anc.y, type: 'ancilla', data: anc }});
+      }});
+
       boomerangs.forEach(b => {{
         renderQueue.push({{ sortY: b.y, type: 'boomerang', data: b }});
       }});
@@ -1137,12 +1506,8 @@ def compile_bejson_datasets():
           const e = item.data;
           const sprKey = e.type === 'guard' ? 'guard_sheet' : 'slime_sheet';
           const img = spriteImages[sprKey];
-          if (img && img.complete && img.naturalWidth > 0) {{
-            const eCol = Math.floor(tickCount / 10) % 4;
-            ctx.save();
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(img, eCol * 32, 0, 32, 32, Math.round(e.x - 16), Math.round(e.y - 16), 32, 32);
-            ctx.restore();
+          if (img && img.complete) {{
+            ctx.drawImage(img, e.x - 16, e.y - 16, 32, 32);
           }} else {{
             ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : (e.type === 'guard' ? '#2563eb' : '#16a34a');
             ctx.fillRect(e.x - 10, e.y - 10, 20, 20);
@@ -1182,22 +1547,13 @@ def compile_bejson_datasets():
           }}
         }} else if (item.type === 'projectile') {{
           const p = item.data;
-          const arrowImg = spriteImages['shadow_arrow_flight'];
-          if (p.type === 'arrow' && arrowImg && arrowImg.complete && arrowImg.naturalWidth > 0) {{
-            let arrowCol = 0;
-            if (p.vy < 0) arrowCol = 1;
-            else if (p.vx < 0) arrowCol = 2;
-            else if (p.vx > 0) arrowCol = 3;
-            ctx.save();
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(arrowImg, arrowCol * 32, 0, 32, 32, Math.round(p.x - 16), Math.round(p.y - 16), 32, 32);
-            ctx.restore();
-          }} else {{
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x - 2, p.y - 2, 5, 5);
-          }}
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x - 2, p.y - 2, 5, 5);
         }} else if (item.type === 'boomerang') {{
           const b = item.data;
           ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, Math.PI * 2); ctx.fill();
+        }} else if (item.type === 'ancilla') {{
+          const anc = item.data;
+          if (typeof anc.onRender === 'function') anc.onRender(anc, ctx);
         }} else if (item.type === 'player') {{
           const isHurt = playerHurtTime > 0 && Math.floor(playerHurtTime / 3) % 2 === 0;
 
@@ -1217,17 +1573,8 @@ def compile_bejson_datasets():
           if (playerFacing === 'UP') renderShield();
 
           const linkImg = spriteImages['shadow_link_sheet'];
-          if (linkImg && linkImg.complete && linkImg.naturalWidth > 0 && !isHurt) {{
-            let row = 0;
-            if (playerFacing === 'UP') row = 1;
-            else if (playerFacing === 'LEFT') row = 2;
-            else if (playerFacing === 'RIGHT') row = 3;
-            const moving = Boolean(keys['w'] || keys['a'] || keys['s'] || keys['d'] || keys['arrowup'] || keys['arrowdown'] || keys['arrowleft'] || keys['arrowright']);
-            const col = moving ? (Math.floor(tickCount / 8) % 4) : 0;
-            ctx.save();
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(linkImg, col * 32, row * 32, 32, 32, Math.round(px - 16), Math.round(py - 20), 32, 32);
-            ctx.restore();
+          if (linkImg && linkImg.complete && !isHurt) {{
+            ctx.drawImage(linkImg, px - 16, py - 16, 32, 32);
           }} else {{
             ctx.fillStyle = isHurt ? '#ffffff' : '#000000'; ctx.fillRect(px - 9, py - 10, 18, 20);
             ctx.fillStyle = '#DE2626'; ctx.fillRect(px - 3, py, 6, 4);
@@ -1240,47 +1587,18 @@ def compile_bejson_datasets():
           if (playerFacing !== 'UP') renderShield();
 
           if (slashAnim && slashAnim.timer > 0) {{
-            const maxT = slashAnim.maxTimer || 18;
-            const progress = 1 - slashAnim.timer / maxT;
             let baseAngle = Math.PI / 2;
             if (slashAnim.dir === 'UP') baseAngle = -Math.PI / 2;
             if (slashAnim.dir === 'LEFT') baseAngle = Math.PI;
             if (slashAnim.dir === 'RIGHT') baseAngle = 0;
 
             const sweepSpan = Math.PI * 1.2;
-            const frameIdx = Math.min(3, Math.floor(progress * 4));
-            const phaseAngles = [-0.48, -0.08, 0.32, 0.50];
-            const phaseLengths = [0.68, 1.0, 1.12, 0.82];
-            const phaseAlpha = [0.25, 0.55, 0.45, 0.18];
+            ctx.fillStyle = 'rgba(222, 38, 38, 0.45)'; ctx.beginPath();
+            ctx.arc(px, py, 44, baseAngle - sweepSpan * 0.5, baseAngle + sweepSpan * 0.5);
+            ctx.lineTo(px, py); ctx.fill();
 
-            const currentBladeAngle = baseAngle + phaseAngles[frameIdx] * sweepSpan;
-            const bladeLength = 42 * phaseLengths[frameIdx];
-            const bladeX = px + Math.cos(currentBladeAngle) * bladeLength;
-            const bladeY = py + Math.sin(currentBladeAngle) * bladeLength;
-
-            if (frameIdx >= 1) {{
-              const prevAngle = baseAngle + phaseAngles[frameIdx - 1] * sweepSpan;
-              ctx.fillStyle = `rgba(222, 38, 38, ${{phaseAlpha[frameIdx]}})`;
-              ctx.beginPath();
-              ctx.arc(px, py, bladeLength + 2, prevAngle, currentBladeAngle);
-              ctx.arc(px, py, Math.max(10, bladeLength * 0.45), currentBladeAngle, prevAngle, true);
-              ctx.closePath();
-              ctx.fill();
-
-              const prevLen = 42 * phaseLengths[frameIdx - 1];
-              ctx.strokeStyle = 'rgba(222, 38, 38, 0.45)';
-              ctx.lineWidth = 2;
-              ctx.beginPath();
-              ctx.moveTo(px + Math.cos(prevAngle) * 6, py + Math.sin(prevAngle) * 6);
-              ctx.lineTo(px + Math.cos(prevAngle) * prevLen, py + Math.sin(prevAngle) * prevLen);
-              ctx.stroke();
-            }}
-
-            ctx.strokeStyle = '#DE2626'; ctx.lineWidth = frameIdx === 0 ? 3 : 5;
-            ctx.beginPath(); ctx.moveTo(px + Math.cos(currentBladeAngle) * 5, py + Math.sin(currentBladeAngle) * 5); ctx.lineTo(bladeX, bladeY); ctx.stroke();
-            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.moveTo(px + Math.cos(currentBladeAngle) * 4, py + Math.sin(currentBladeAngle) * 4); ctx.lineTo(bladeX, bladeY); ctx.stroke();
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(bladeX - 1.5, bladeY - 1.5, 3, 3);
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath();
+            ctx.arc(px, py, 40, baseAngle - sweepSpan * 0.5, baseAngle + sweepSpan * 0.5); ctx.stroke();
             slashAnim.timer--;
           }}
 
@@ -1299,7 +1617,8 @@ def compile_bejson_datasets():
       // Top In-Canvas HUD
       ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, 32);
       ctx.fillStyle = '#DE2626'; ctx.font = 'bold 11px monospace';
-      const yItemLabel = activeYItem === 'shadow_boomerang' ? '🪃 BOOMERANG' : '🏹 DARK BOW';
+      const curItem = inventoryState.getEquippedYItem();
+      const yItemLabel = curItem ? `${{curItem.icon}} ${{curItem.name.toUpperCase()}}` : (activeYItem === 'shadow_boomerang' ? '🪃 BOOMERANG' : '🏹 DARK BOW');
       const roomName = currentLevelSlug.replace('_', ' ').toUpperCase();
       ctx.fillText(`SHADOW LINK | HP: ${{playerHp}}/${{playerMaxHp}} | Y: ${{yItemLabel}}`, 12, 20);
 
@@ -1324,34 +1643,34 @@ def compile_bejson_datasets():
     with open(standalone_html_path, "w", encoding="utf-8") as html_out:
         html_out.write(html_template)
 
-    print("-" * 60)
-    print(f"[SUCCESS] Compiled {len(collected_datasets)} raw BEJSON datasets into standalone files:")
-    print(f"          1. Dataset Bundle JSON: -> {compiled_file_path}")
-    print(f"          2. Single-File HTML Game: -> {standalone_html_path}")
-    print("=" * 60)
+    log.info("-" * 60)
+    log.info(f"[SUCCESS] Compiled {len(collected_datasets)} raw BEJSON datasets into standalone files:")
+    log.info(f"          1. Dataset Bundle JSON: -> {compiled_file_path}")
+    log.info(f"          2. Single-File HTML Game: -> {standalone_html_path}")
+    log.info("=" * 60)
 
 def show_compiler_menu():
     config = load_config()
     raw_path, compiled_path, engine_path = resolve_paths(config)
     while True:
-        print("\n" + "=" * 60)
-        print("  SWORD SLASHER RPG: BEJSON COMPILER & ENGINE MENU")
-        print("=" * 60)
-        print(f"  Config Path:    {CONFIG_PATH}")
-        print(f"  Engine Root:    {engine_path}")
-        print(f"  Game Data Raw:  {raw_path}")
-        print(f"  Compiled Path:  {compiled_path}")
-        print("-" * 60)
-        print("  [1] Compile BEJSON Data & Build Standalone HTML Game")
-        print("  [2] Run Standalone BEJSON Chunker (data_chunker.py)")
-        print("  [3] Print Persistent Config Details")
-        print("  [0] Exit Menu")
-        print("=" * 60)
+        _ui("\n" + "=" * 60)
+        _ui("  SWORD SLASHER RPG: BEJSON COMPILER & ENGINE MENU")
+        _ui("=" * 60)
+        _ui(f"  Config Path:    {CONFIG_PATH}")
+        _ui(f"  Engine Root:    {engine_path}")
+        _ui(f"  Game Data Raw:  {raw_path}")
+        _ui(f"  Compiled Path:  {compiled_path}")
+        _ui("-" * 60)
+        _ui("  [1] Compile BEJSON Data & Build Standalone HTML Game")
+        _ui("  [2] Run Standalone BEJSON Chunker (data_chunker.py)")
+        _ui("  [3] Print Persistent Config Details")
+        _ui("  [0] Exit Menu")
+        _ui("=" * 60)
 
         try:
             choice = input("Select an option [0-3]: ").strip()
         except (KeyboardInterrupt, EOFError):
-            print("\nExiting compiler menu.")
+            _ui("\nExiting compiler menu.")
             break
 
         if choice == "1":
@@ -1359,18 +1678,19 @@ def show_compiler_menu():
         elif choice == "2":
             chunker_script = os.path.join(COMPILER_DIR, "data_chunker.py")
             if os.path.exists(chunker_script):
-                os.system(f"python3 {chunker_script}")
+                subprocess.run([sys.executable, chunker_script], check=False)
             else:
-                print(f"[!] Chunker script not found at {chunker_script}")
+                log.error(f"Chunker script not found at {chunker_script}")
         elif choice == "3":
-            print(json.dumps(config, indent=2))
+            _ui(json.dumps(config, indent=2))
         elif choice == "0":
-            print("Exiting compiler menu.")
+            _ui("Exiting compiler menu.")
             break
         else:
-            print("[!] Invalid selection. Please choose 0-3.")
+            log.warning("Invalid selection. Please choose 0-3.")
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     if len(sys.argv) > 1 and sys.argv[1] in ["--batch", "--compile", "-c"]:
         compile_bejson_datasets()
     else:

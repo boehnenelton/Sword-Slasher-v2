@@ -2,12 +2,12 @@
  * Library:         MetaUIModal.tsx
  * Module Purpose:  Mandatory Three-Tab Architecture Meta-UI Modal & AI Architect Launch
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com
- * Relational_ID:   105a0007-2026-1025-9999-000000000111
- * Version:         300102
+ * Relational_ID:   22b2f168-9cc9-486d-a188-3403065a4ea2
+ * Version:         300103
  */
 
 import React, { useState } from 'react';
-import { X, Copy, Download, Archive, User, FileText, Code2, Check, ExternalLink, Cpu, Sparkles } from 'lucide-react';
+import { X, Copy, Download, Archive, User, FileText, Code2, Check } from 'lucide-react';
 import { bejsonEngine } from '../engine/bejsonEngine';
 
 interface Props {

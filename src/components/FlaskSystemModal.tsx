@@ -2,12 +2,12 @@
  * Library:         FlaskSystemModal.tsx
  * Module Purpose:  Streamlined 3-Tab System Menu, Single-File HTML Game Compiler & Gemini AI Architect Advisor Dialog
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com
- * Relational_ID:   a05f192b-d02e-4820-8108-6774c1948992
- * Version:         10032
+ * Relational_ID:   c89189ca-04cd-49d9-91a8-685cd660960c
+ * Version:         10033
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Download, Terminal, Database, FileText, Cpu, CheckCircle2, RefreshCw, FolderDown, Archive, Settings, Save, Key, Sliders, RotateCcw, PackageCheck, FileCode, Play, Sparkles, Send, Bot, Code2, AlertCircle, Check } from 'lucide-react';
+import { X, Download, Terminal, Database, FileText, Cpu, CheckCircle2, RefreshCw, FolderDown, Archive, Settings, Save, Key, Sliders, RotateCcw, PackageCheck, FileCode, Play, Sparkles, Send, Bot, AlertCircle } from 'lucide-react';
 import JSZip from 'jszip';
 import { gamingDataChunker, BejsonChunkDocument } from '../lib/lib_bejson_Gaming_data_chunker';
 
@@ -60,9 +60,7 @@ export const FlaskSystemModal: React.FC<Props> = ({ isOpen, onClose, initialTab 
   const [compilerLogs, setCompilerLogs] = useState<string[]>([]);
   const [isCompiling, setIsCompiling] = useState(false);
   const [compiledBundle, setCompiledBundle] = useState<any>(null);
-  const [bundleSize, setBundleSize] = useState<number>(0);
   const [mfdbChunkDoc, setMfdbChunkDoc] = useState<BejsonChunkDocument | null>(null);
-  const [chunkDocSize, setChunkDocSize] = useState<number>(0);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState<boolean>(false);
   const [isZipping, setIsZipping] = useState<boolean>(false);
   const [rawSearchFilter, setRawSearchFilter] = useState<string>('');
@@ -390,9 +388,7 @@ if __name__ == "__main__":
       Datasets: datasetsObj
     };
 
-    const jsonStr = JSON.stringify(compiledObj, null, 2);
     setCompiledBundle(compiledObj);
-    setBundleSize(jsonStr.length);
 
     // Generate MFDB Chunk Document
     const chunkDoc = await gamingDataChunker.createChunkPayload(
@@ -401,7 +397,6 @@ if __name__ == "__main__":
       "Sword Slasher RPG: Shadow Link's Awakening"
     );
     setMfdbChunkDoc(chunkDoc);
-    setChunkDocSize(JSON.stringify(chunkDoc, null, 2).length);
 
     logs.push("------------------------------------------------------------");
     logs.push(`[SUCCESS] Compiled ${Object.keys(datasetsObj).length} datasets into single-file JSON bundle:`);

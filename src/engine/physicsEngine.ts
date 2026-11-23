@@ -2,8 +2,8 @@
  * Library:         physicsEngine.ts
  * Module Purpose:  BEJSON 105 High-Performance AABB Bounding Box Physics & Vector Knockback Engine
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com
- * Relational_ID:   105a0044-2026-1025-9999-000000000404
- * Version:         200105
+ * Relational_ID:   88a0a212-5e93-4712-bcca-24792e786d03
+ * Version:         200106
  */
 
 export interface AABBBox {
@@ -18,11 +18,7 @@ export interface KnockbackState {
   vy: number;
 }
 
-// Pre-allocated AABB collision boxes for Zero-GC runtime memory optimization
 class PhysicsEngine {
-  private boxPoolA: AABBBox = { x: 0, y: 0, width: 0, height: 0 };
-  private boxPoolB: AABBBox = { x: 0, y: 0, width: 0, height: 0 };
-
   /**
    * Fast Axis-Aligned Bounding Box (AABB) intersection check
    */

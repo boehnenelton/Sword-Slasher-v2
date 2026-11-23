@@ -513,58 +513,10 @@ function bejson_core_delete_record(doc, recordUuid) {
     doc.Values.splice(row, 1);
 }
 
-class BejsonCoreEngine {
-    constructor() {
-        this.fieldMapCache = new Map();
-    }
-
-    sanitizeString(val) {
-        return typeof val === 'string' ? val.trim() : val;
-    }
-
-    buildFieldMapCache(docKey, fields) {
-        const map = new Map();
-        if (Array.isArray(fields)) {
-            fields.forEach((f, idx) => {
-                const cleanName = this.sanitizeString(f.name);
-                map.set(cleanName, idx);
-            });
-        }
-        this.fieldMapCache.set(docKey, map);
-        return map;
-    }
-
-    getFieldValue(docKey, row, fieldName) {
-        const map = this.fieldMapCache.get(docKey);
-        if (!map) {
-            return null;
-        }
-        const cleanFieldName = this.sanitizeString(fieldName);
-        const colIdx = map.get(cleanFieldName);
-        if (colIdx === undefined || colIdx < 0 || colIdx >= row.length) {
-            return null;
-        }
-        const val = row[colIdx];
-        return typeof val === 'string' ? this.sanitizeString(val) : val;
-    }
-
-    validateDocument(doc) {
-        const errors = [];
-        if (!doc || doc.Format !== 'BEJSON') {
-            errors.push("Invalid format");
-        }
-        return { valid: errors.length === 0, errors };
-    }
-}
-
-export const bejsonCore = new BejsonCoreEngine();
-
 const CoreExports = {
     RELEASE_VERSION,
     BEJSONCoreError,
     BEJSONEngine,
-    BejsonCoreEngine,
-    bejsonCore,
     Crypto: CryptoUtils,
     clearKeyCache,
     bejson_core_is_valid,
@@ -601,4 +553,4 @@ if (typeof window !== 'undefined') {
 }
 
 export default CoreExports;
-export { CoreExports, BEJSONEngine, BejsonCoreEngine };
+export { CoreExports, BEJSONEngine };

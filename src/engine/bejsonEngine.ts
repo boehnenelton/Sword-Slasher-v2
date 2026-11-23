@@ -79,10 +79,6 @@ export class Bejson105Engine {
       { key: 'runtime_events', url: '/data/runtime_events/event_bus_log.105.bejson' },
       { key: 'runtime_grid', url: '/data/runtime_grid/grid_cells.105.bejson' },
       { key: 'runtime_telemetry', url: '/data/runtime_telemetry/frame_telemetry.105.bejson' },
-      { key: 'combat_animations', url: '/data/combat/shadow_link_combat_animations.105a.bejson' },
-      { key: 'weapons_combat', url: '/data/combat/weapons_combat_registry.105a.bejson' },
-      { key: 'projectile_combat', url: '/data/combat/projectile_combat_registry.105a.bejson' },
-      { key: 'projectile_impact', url: '/data/combat/projectile_impact_dynamics.105a.bejson' },
       { key: 'engine_config', url: '/config/engine_config/engine_config.105a.bejson' },
       { key: 'project_meta', url: '/config/project_meta/bejson_project.105a.bejson' }
     ];

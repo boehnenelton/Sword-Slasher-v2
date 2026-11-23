@@ -15,7 +15,6 @@ import { soundEngine } from '../engine/soundEngine';
 import { physicsEngine, KnockbackState } from '../engine/physicsEngine';
 import { screenEffects } from '../lib/lib_bejson_Gaming_screen_effects';
 import { spritePerspectiveEngine } from '../lib/lib_bejson_Viewport_sprites';
-import { canvasSpriteManager } from '../lib/lib_bejson_Gaming_sprite_canvas';
 import { GamepadDeck } from './GamepadDeck';
 
 interface Props {
@@ -181,7 +180,6 @@ export const GameViewport: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    canvasSpriteManager.preloadAll();
     syncEnemiesForLevel(bejsonEngine.currentLevelSlug);
     syncPropsForLevel(bejsonEngine.currentLevelSlug);
   }, [syncEnemiesForLevel, syncPropsForLevel]);
@@ -842,18 +840,16 @@ export const GameViewport: React.FC<Props> = ({
           const isBoundary = r === 0 || r === tilesH - 1 || c === 0 || c === tilesW - 1;
 
           if (isBoundary) {
-            if (!canvasSpriteManager.drawTile(ctx, 'dungeon_wall', tx, ty, tileUnitPx)) {
-              ctx.fillStyle = isSanctuary ? '#1f1924' : '#1c281e';
-              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+            ctx.fillStyle = isSanctuary ? '#1f1924' : '#1c281e';
+            ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
 
-              ctx.fillStyle = isSanctuary ? '#2d2436' : '#2d4232';
-              ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, 12);
-              ctx.fillRect(tx + 2, ty + 18, tileUnitPx - 4, 12);
+            ctx.fillStyle = isSanctuary ? '#2d2436' : '#2d4232';
+            ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, 12);
+            ctx.fillRect(tx + 2, ty + 18, tileUnitPx - 4, 12);
 
-              ctx.strokeStyle = isSanctuary ? '#110c17' : '#0f1710';
-              ctx.lineWidth = 1;
-              ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
-            }
+            ctx.strokeStyle = isSanctuary ? '#110c17' : '#0f1710';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
           } else if (bejsonEngine.currentLevelSlug === 'debug_chamber') {
             const isHallway = (c >= 30 && c <= 33) || (r >= 30 && r <= 33);
             if (isHallway) {
@@ -866,28 +862,22 @@ export const GameViewport: React.FC<Props> = ({
               ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
             } else if (c < 30 && r < 30) {
               // Zone A: Dark Grassland Biome
-              if (!canvasSpriteManager.drawTile(ctx, 'dark_grass', tx, ty, tileUnitPx)) {
-                const alt = (r + c) % 2 === 0;
-                ctx.fillStyle = alt ? '#2e7d32' : '#256628';
-                ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-              }
+              const alt = (r + c) % 2 === 0;
+              ctx.fillStyle = alt ? '#2e7d32' : '#256628';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
             } else if (c > 33 && r < 30) {
               // Zone B: Obsidian Sanctuary Biome
-              if (!canvasSpriteManager.drawTile(ctx, 'sanctuary_floor', tx, ty, tileUnitPx)) {
-                const alt = (r + c) % 2 === 0;
-                ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
-                ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-                ctx.strokeStyle = '#333338';
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
-              }
+              const alt = (r + c) % 2 === 0;
+              ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+              ctx.strokeStyle = '#333338';
+              ctx.lineWidth = 0.5;
+              ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
             } else if (c < 30 && r > 33) {
               // Zone C: Subterranean Cavern Biome
-              if (!canvasSpriteManager.drawTile(ctx, 'dungeon_wall', tx, ty, tileUnitPx)) {
-                const alt = (r + c) % 2 === 0;
-                ctx.fillStyle = alt ? '#3f3f46' : '#27272a';
-                ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-              }
+              const alt = (r + c) % 2 === 0;
+              ctx.fillStyle = alt ? '#3f3f46' : '#27272a';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
             } else {
               // Zone D: Gerudo Dark Sands Biome
               const alt = (r + c) % 2 === 0;
@@ -897,50 +887,44 @@ export const GameViewport: React.FC<Props> = ({
           } else if (isSanctuary) {
             const isCenterCarpet = c >= 14 && c <= 17;
             if (isCenterCarpet) {
-              if (!canvasSpriteManager.drawTile(ctx, 'sanctuary_carpet', tx, ty, tileUnitPx)) {
-                ctx.fillStyle = '#991b1b';
-                ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-
-                ctx.fillStyle = '#7f1d1d';
-                ctx.fillRect(tx + 4, ty + 4, tileUnitPx - 8, tileUnitPx - 8);
-
-                if (c === 14) {
-                  ctx.fillStyle = '#f59e0b';
-                  ctx.fillRect(tx, ty, 3, tileUnitPx);
-                }
-                if (c === 17) {
-                  ctx.fillStyle = '#f59e0b';
-                  ctx.fillRect(tx + tileUnitPx - 3, ty, 3, tileUnitPx);
-                }
-              }
-            } else {
-              if (!canvasSpriteManager.drawTile(ctx, 'sanctuary_floor', tx, ty, tileUnitPx)) {
-                const alt = (r + c) % 2 === 0;
-                ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
-                ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-
-                ctx.strokeStyle = '#333338';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
-              }
-            }
-          } else {
-            if (!canvasSpriteManager.drawTile(ctx, 'dark_grass', tx, ty, tileUnitPx)) {
-              const altGrass = (r + c) % 2 === 0;
-              ctx.fillStyle = altGrass ? '#2e7d32' : '#256628';
+              ctx.fillStyle = '#991b1b';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
 
-              const seed = (r * 31 + c * 17) % 5;
-              ctx.fillStyle = '#4caf50';
-              if (seed === 0) {
-                ctx.fillRect(tx + 6, ty + 8, 2, 6);
-                ctx.fillRect(tx + 10, ty + 6, 2, 8);
-              } else if (seed === 1) {
-                ctx.fillRect(tx + 18, ty + 10, 2, 7);
-              } else if (seed === 2) {
-                ctx.fillStyle = '#DE2626';
-                ctx.fillRect(tx + 14, ty + 14, 2, 2);
+              ctx.fillStyle = '#7f1d1d';
+              ctx.fillRect(tx + 4, ty + 4, tileUnitPx - 8, tileUnitPx - 8);
+
+              if (c === 14) {
+                ctx.fillStyle = '#f59e0b';
+                ctx.fillRect(tx, ty, 3, tileUnitPx);
               }
+              if (c === 17) {
+                ctx.fillStyle = '#f59e0b';
+                ctx.fillRect(tx + tileUnitPx - 3, ty, 3, tileUnitPx);
+              }
+            } else {
+              const alt = (r + c) % 2 === 0;
+              ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+
+              ctx.strokeStyle = '#333338';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
+            }
+          } else {
+            const altGrass = (r + c) % 2 === 0;
+            ctx.fillStyle = altGrass ? '#2e7d32' : '#256628';
+            ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+
+            const seed = (r * 31 + c * 17) % 5;
+            ctx.fillStyle = '#4caf50';
+            if (seed === 0) {
+              ctx.fillRect(tx + 6, ty + 8, 2, 6);
+              ctx.fillRect(tx + 10, ty + 6, 2, 8);
+            } else if (seed === 1) {
+              ctx.fillRect(tx + 18, ty + 10, 2, 7);
+            } else if (seed === 2) {
+              ctx.fillStyle = '#DE2626';
+              ctx.fillRect(tx + 14, ty + 14, 2, 2);
             }
           }
         }
@@ -1052,46 +1036,36 @@ export const GameViewport: React.FC<Props> = ({
           const drop: DroppedItem = item.data;
           if (drop.x < camX - 20 || drop.x > camX + viewportWorldW + 20 || drop.y < camY - 20 || drop.y > camY + viewportWorldH + 20) return;
 
-          let itemSlug = '';
-          if (drop.type === 'rupee') itemSlug = 'dark_elixir';
-          else if (drop.type === 'heart') itemSlug = 'heart_container';
-          else if (drop.type === 'bomb') itemSlug = 'bomb';
-          else if (drop.type === 'arrow') itemSlug = 'shadow_blade';
-
-          if (itemSlug && canvasSpriteManager.drawItem(ctx, itemSlug, drop.x - 8, drop.y - 8, 16)) {
-            // Rendered successfully from sprite texture atlas
+          if (drop.type === 'rupee') {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(drop.x, drop.y - 7);
+            ctx.lineTo(drop.x + 5, drop.y);
+            ctx.lineTo(drop.x, drop.y + 7);
+            ctx.lineTo(drop.x - 5, drop.y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#a7f3d0';
+            ctx.fillRect(drop.x - 1, drop.y - 4, 2, 4);
+          } else if (drop.type === 'heart') {
+            ctx.fillStyle = '#DE2626';
+            ctx.beginPath();
+            ctx.arc(drop.x - 3, drop.y - 2, 3, 0, Math.PI * 2);
+            ctx.arc(drop.x + 3, drop.y - 2, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(drop.x - 6, drop.y - 1);
+            ctx.lineTo(drop.x, drop.y + 6);
+            ctx.lineTo(drop.x + 6, drop.y - 1);
+            ctx.fill();
+          } else if (drop.type === 'bomb') {
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(drop.x, drop.y, 5, 0, Math.PI * 2);
+            ctx.fill();
           } else {
-            if (drop.type === 'rupee') {
-              ctx.fillStyle = '#10b981';
-              ctx.beginPath();
-              ctx.moveTo(drop.x, drop.y - 7);
-              ctx.lineTo(drop.x + 5, drop.y);
-              ctx.lineTo(drop.x, drop.y + 7);
-              ctx.lineTo(drop.x - 5, drop.y);
-              ctx.closePath();
-              ctx.fill();
-              ctx.fillStyle = '#a7f3d0';
-              ctx.fillRect(drop.x - 1, drop.y - 4, 2, 4);
-            } else if (drop.type === 'heart') {
-              ctx.fillStyle = '#DE2626';
-              ctx.beginPath();
-              ctx.arc(drop.x - 3, drop.y - 2, 3, 0, Math.PI * 2);
-              ctx.arc(drop.x + 3, drop.y - 2, 3, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.beginPath();
-              ctx.moveTo(drop.x - 6, drop.y - 1);
-              ctx.lineTo(drop.x, drop.y + 6);
-              ctx.lineTo(drop.x + 6, drop.y - 1);
-              ctx.fill();
-            } else if (drop.type === 'bomb') {
-              ctx.fillStyle = '#38bdf8';
-              ctx.beginPath();
-              ctx.arc(drop.x, drop.y, 5, 0, Math.PI * 2);
-              ctx.fill();
-            } else {
-              ctx.fillStyle = '#f59e0b';
-              ctx.fillRect(drop.x - 2, drop.y - 5, 4, 10);
-            }
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(drop.x - 2, drop.y - 5, 4, 10);
           }
         } else if (item.type === 'portal') {
           const port = item.data;
@@ -1124,71 +1098,58 @@ export const GameViewport: React.FC<Props> = ({
           // GANON Demon Pig King
           const gx = 512;
           const gy = 135;
-          const gFrame = Math.floor(tick / 15) % 4;
 
-          if (!canvasSpriteManager.drawGanon(ctx, gFrame, gx, gy)) {
-            ctx.fillStyle = '#991b1b';
-            ctx.fillRect(gx - 20, gy - 10, 40, 30);
-            ctx.fillStyle = '#312e81';
-            ctx.fillRect(gx - 14, gy - 8, 28, 24);
+          ctx.fillStyle = '#991b1b';
+          ctx.fillRect(gx - 20, gy - 10, 40, 30);
+          ctx.fillStyle = '#312e81';
+          ctx.fillRect(gx - 14, gy - 8, 28, 24);
 
-            ctx.fillStyle = '#f59e0b';
-            ctx.fillRect(gx - 18, gy - 12, 8, 8);
-            ctx.fillRect(gx + 10, gy - 12, 8, 8);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(gx - 18, gy - 12, 8, 8);
+          ctx.fillRect(gx + 10, gy - 12, 8, 8);
 
-            ctx.fillStyle = '#1e1b4b';
-            ctx.beginPath();
-            ctx.arc(gx, gy - 16, 12, 0, Math.PI * 2);
-            ctx.fill();
+          ctx.fillStyle = '#1e1b4b';
+          ctx.beginPath();
+          ctx.arc(gx, gy - 16, 12, 0, Math.PI * 2);
+          ctx.fill();
 
-            ctx.fillStyle = '#4338ca';
-            ctx.fillRect(gx - 5, gy - 14, 10, 6);
+          ctx.fillStyle = '#4338ca';
+          ctx.fillRect(gx - 5, gy - 14, 10, 6);
 
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(gx - 7, gy - 19, 4, 3);
-            ctx.fillRect(gx + 3, gy - 19, 4, 3);
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(gx - 7, gy - 19, 4, 3);
+          ctx.fillRect(gx + 3, gy - 19, 4, 3);
 
-            ctx.fillStyle = '#f59e0b';
-            ctx.fillRect(gx - 22, gy - 26, 3, 42);
-          }
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(gx - 22, gy - 26, 3, 42);
         } else if (item.type === 'enemy') {
           const e: EnemyState = item.data;
           if (e.x < camX - 20 || e.x > camX + viewportWorldW + 20 || e.y < camY - 20 || e.y > camY + viewportWorldH + 20) return;
 
-          const eFrame = Math.floor(tick / 12) % 4;
-          let drewEnemy = false;
           if (e.type === 'slime') {
-            drewEnemy = canvasSpriteManager.drawSlime(ctx, eFrame, e.x, e.y, e.hurtTime > 0);
-          } else if (e.type === 'guard') {
-            drewEnemy = canvasSpriteManager.drawGuard(ctx, eFrame, e.x, e.y, e.hurtTime > 0);
-          }
+            const squish = Math.sin(tick * 0.2) * 2;
+            ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : '#16a34a';
+            ctx.beginPath();
+            ctx.ellipse(e.x, e.y, 11 + squish, 9 - squish, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-          if (!drewEnemy) {
-            if (e.type === 'slime') {
-              const squish = Math.sin(tick * 0.2) * 2;
-              ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : '#16a34a';
-              ctx.beginPath();
-              ctx.ellipse(e.x, e.y, 11 + squish, 9 - squish, 0, 0, Math.PI * 2);
-              ctx.fill();
+            ctx.fillStyle = '#86efac';
+            ctx.fillRect(e.x - 4, e.y - 5, 3, 3);
 
-              ctx.fillStyle = '#86efac';
-              ctx.fillRect(e.x - 4, e.y - 5, 3, 3);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(e.x - 5, e.y - 1, 3, 3);
+            ctx.fillRect(e.x + 2, e.y - 1, 3, 3);
+          } else {
+            ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : '#2563eb';
+            ctx.fillRect(e.x - 10, e.y - 10, 20, 20);
 
-              ctx.fillStyle = '#000000';
-              ctx.fillRect(e.x - 5, e.y - 1, 3, 3);
-              ctx.fillRect(e.x + 2, e.y - 1, 3, 3);
-            } else {
-              ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : '#2563eb';
-              ctx.fillRect(e.x - 10, e.y - 10, 20, 20);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(e.x - 8, e.y - 14, 16, 8);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(e.x - 6, e.y - 11, 12, 2);
 
-              ctx.fillStyle = '#94a3b8';
-              ctx.fillRect(e.x - 8, e.y - 14, 16, 8);
-              ctx.fillStyle = '#0f172a';
-              ctx.fillRect(e.x - 6, e.y - 11, 12, 2);
-
-              ctx.fillStyle = '#cbd5e1';
-              ctx.fillRect(e.x + 10, e.y - 16, 2, 28);
-            }
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(e.x + 10, e.y - 16, 2, 28);
           }
 
           // HP Bar
@@ -1199,14 +1160,8 @@ export const GameViewport: React.FC<Props> = ({
         } else if (item.type === 'projectile') {
           const p: OtherProjectile = item.data;
           if (p.type === 'arrow') {
-            let arrowCol = 0;
-            if (p.vy < 0) arrowCol = 1;
-            else if (p.vx < 0) arrowCol = 2;
-            else if (p.vx > 0) arrowCol = 3;
-            if (!canvasSpriteManager.drawCell(ctx, 'shadow_arrow_flight', arrowCol, 0, Math.round(p.x - 16), Math.round(p.y - 16), 32, 32)) {
-              ctx.fillStyle = '#ffffff';
-              ctx.fillRect(p.x - 2, p.y - 2, 5, 5);
-            }
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(p.x - 2, p.y - 2, 5, 5);
           } else if (p.type === 'bomb') {
             ctx.fillStyle = tick % 10 < 5 ? '#DE2626' : '#18181b';
             ctx.beginPath();
@@ -1252,52 +1207,32 @@ export const GameViewport: React.FC<Props> = ({
                 extensionBonus = 2;
               }
 
-              // 4-Frame Phased Sword Slash: 0=Wind-up, 1=Strike, 2=Peak Cleave, 3=Follow-through
-              const frameIdx = Math.min(3, Math.floor(progress * 4));
-              const phaseAngles = [-0.48, -0.08, 0.32, 0.50];
-              const phaseLengths = [0.68, 1.0, 1.12, 0.82];
-              const phaseAlpha = [0.25, 0.55, 0.45, 0.18];
+              const startAngle = baseAngle - sweepSpan * 0.5;
+              const currentSweep = (progress - 0.5) * sweepSpan;
+              const currentBladeAngle = baseAngle + currentSweep;
 
-              const currentBladeAngle = baseAngle + phaseAngles[frameIdx] * sweepSpan;
-              const bladeLength = (28 + extensionBonus) * phaseLengths[frameIdx];
+              const bladeLength = 28 + extensionBonus;
               const bladeX = px + Math.cos(currentBladeAngle) * bladeLength;
               const bladeY = py + Math.sin(currentBladeAngle) * bladeLength;
 
-              // 1. Stepped Crescent Trail (only during active/follow-through frames 1..3)
-              if (frameIdx >= 1) {
-                const prevAngle = baseAngle + phaseAngles[frameIdx - 1] * sweepSpan;
-                ctx.fillStyle = varIdx === 1 ? `rgba(255, 255, 255, ${phaseAlpha[frameIdx]})` : `rgba(222, 38, 38, ${phaseAlpha[frameIdx]})`;
-                ctx.beginPath();
-                ctx.arc(px, py, bladeLength + 2, prevAngle, currentBladeAngle);
-                ctx.arc(px, py, Math.max(8, bladeLength * 0.45), currentBladeAngle, prevAngle, true);
-                ctx.closePath();
-                ctx.fill();
-
-                // Ghost afterimage of previous frame blade
-                const prevLen = (28 + extensionBonus) * phaseLengths[frameIdx - 1];
-                ctx.strokeStyle = 'rgba(222, 38, 38, 0.45)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(px + Math.cos(prevAngle) * 6, py + Math.sin(prevAngle) * 6);
-                ctx.lineTo(px + Math.cos(prevAngle) * prevLen, py + Math.sin(prevAngle) * prevLen);
-                ctx.stroke();
-              }
-
-              // 2. Dark Crimson Edge Aura (#DE2626)
-              ctx.strokeStyle = '#DE2626';
-              ctx.lineWidth = frameIdx === 0 ? 3 : 5;
+              // 1. Dynamic Crescent Trail
+              const trailStartAngle = Math.max(startAngle, currentBladeAngle - Math.PI * 0.55);
+              ctx.fillStyle = varIdx === 1 ? 'rgba(255, 255, 255, 0.45)' : 'rgba(222, 38, 38, 0.4)';
               ctx.beginPath();
-              ctx.moveTo(px + Math.cos(currentBladeAngle) * 5, py + Math.sin(currentBladeAngle) * 5);
-              ctx.lineTo(bladeX, bladeY);
-              ctx.stroke();
+              ctx.arc(px, py, bladeLength + 2, trailStartAngle, currentBladeAngle);
+              ctx.lineTo(px, py);
+              ctx.closePath();
+              ctx.fill();
 
-              // 3. White Blade Core
+              // 2. White Blade Core
               ctx.strokeStyle = '#ffffff';
-              ctx.lineWidth = 2.5;
+              ctx.lineWidth = 3;
               ctx.beginPath();
-              ctx.moveTo(px + Math.cos(currentBladeAngle) * 4, py + Math.sin(currentBladeAngle) * 4);
+              ctx.moveTo(px, py);
               ctx.lineTo(bladeX, bladeY);
               ctx.stroke();
+
+              // 3. Dark Crimson Edge Aura (#DE2626)
               ctx.strokeStyle = '#DE2626';
               ctx.lineWidth = 5;
               ctx.beginPath();
@@ -1476,61 +1411,23 @@ export const GameViewport: React.FC<Props> = ({
             renderSwordSlash();
           }
 
-          // 3. RENDER SHADOW LINK BODY (Sprite Sheet with Procedural Fallback)
+          // 3. RENDER SHADOW LINK BODY (Boots, Tunic, Belt, Sheath, Cap, Face)
           const isHurt = playerHurtRef.current > 0 && Math.floor(playerHurtRef.current / 3) % 2 === 0;
-          const walkFrame = isMoving ? Math.floor(tick / 8) % 4 : 0;
-          const drewSprite = canvasSpriteManager.drawShadowLink(ctx, facing, walkFrame, px, py, isHurt);
+          const legBob = isMoving ? Math.sin(tick * 0.4) * 2.5 : 0;
 
-          if (!drewSprite) {
-            const legBob = isMoving ? Math.sin(tick * 0.4) * 2.5 : 0;
+          // Dark Boots (#000000)
+          ctx.fillStyle = isHurt ? '#ffffff' : '#000000';
+          ctx.fillRect(px - 7 + legBob, py + 10, 5, 5);
+          ctx.fillRect(px + 2 - legBob, py + 10, 5, 5);
 
-            // Dark Boots (#000000)
-            ctx.fillStyle = isHurt ? '#ffffff' : '#000000';
-            ctx.fillRect(px - 7 + legBob, py + 10, 5, 5);
-            ctx.fillRect(px + 2 - legBob, py + 10, 5, 5);
+          // Dark Tunic & Belt (#000000 tunic, #DE2626 belt buckle)
+          ctx.fillStyle = isHurt ? '#ffffff' : '#000000';
+          ctx.fillRect(px - 9, py - 10, 18, 20);
 
-            // Dark Tunic & Belt (#000000 tunic, #DE2626 belt buckle)
-            ctx.fillStyle = isHurt ? '#ffffff' : '#000000';
-            ctx.fillRect(px - 9, py - 10, 18, 20);
-
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(px - 9, py, 18, 4);
-            ctx.fillStyle = '#DE2626'; // Subtle red buckle
-            ctx.fillRect(px - 3, py, 6, 4);
-
-            // Shadow Cap (#000000 pure black with subtle #DE2626 red fold)
-            ctx.fillStyle = isHurt ? '#ffffff' : '#000000';
-            ctx.fillRect(px - 10, py - 16, 20, 8);
-            ctx.fillStyle = '#DE2626';
-            if (facing === 'LEFT') {
-              ctx.fillRect(px + 2, py - 18, 8, 4);
-            } else if (facing === 'RIGHT') {
-              ctx.fillRect(px - 10, py - 18, 8, 4);
-            } else {
-              ctx.fillRect(px - 4, py - 19, 8, 4);
-            }
-
-            // Dark Face & Crimson Eyes with White Pupil Highlight Speck
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(px - 8, py - 9, 16, 7);
-
-            ctx.fillStyle = '#DE2626';
-            if (facing === 'DOWN') {
-              ctx.fillRect(px - 6, py - 7, 4, 3);
-              ctx.fillRect(px + 2, py - 7, 4, 3);
-              ctx.fillStyle = '#ffffff';
-              ctx.fillRect(px - 5, py - 6, 2, 1);
-              ctx.fillRect(px + 3, py - 6, 2, 1);
-            } else if (facing === 'LEFT') {
-              ctx.fillRect(px - 7, py - 7, 4, 3);
-              ctx.fillStyle = '#ffffff';
-              ctx.fillRect(px - 6, py - 6, 2, 1);
-            } else if (facing === 'RIGHT') {
-              ctx.fillRect(px + 3, py - 7, 4, 3);
-              ctx.fillStyle = '#ffffff';
-              ctx.fillRect(px + 4, py - 6, 2, 1);
-            }
-          }
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(px - 9, py, 18, 4);
+          ctx.fillStyle = '#DE2626'; // Subtle red buckle
+          ctx.fillRect(px - 3, py, 6, 4);
 
           // Dark Sheath & Sword Hilt on back (ONLY visible when sheathed & sword is NOT active)
           if (!isSwordActive && isSheathed) {
@@ -1567,6 +1464,39 @@ export const GameViewport: React.FC<Props> = ({
               ctx.fillStyle = '#DE2626';
               ctx.fillRect(px + 3, py - 21, 4, 2);
             }
+          }
+
+          // Shadow Cap (#000000 pure black with subtle #DE2626 red fold)
+          ctx.fillStyle = isHurt ? '#ffffff' : '#000000';
+          ctx.fillRect(px - 10, py - 16, 20, 8);
+          ctx.fillStyle = '#DE2626';
+          if (facing === 'LEFT') {
+            ctx.fillRect(px + 2, py - 18, 8, 4);
+          } else if (facing === 'RIGHT') {
+            ctx.fillRect(px - 10, py - 18, 8, 4);
+          } else {
+            ctx.fillRect(px - 4, py - 19, 8, 4);
+          }
+
+          // Dark Face & Crimson Eyes with White Pupil Highlight Speck
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(px - 8, py - 9, 16, 7);
+
+          ctx.fillStyle = '#DE2626';
+          if (facing === 'DOWN') {
+            ctx.fillRect(px - 6, py - 7, 4, 3);
+            ctx.fillRect(px + 2, py - 7, 4, 3);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(px - 5, py - 6, 2, 1);
+            ctx.fillRect(px + 3, py - 6, 2, 1);
+          } else if (facing === 'LEFT') {
+            ctx.fillRect(px - 7, py - 7, 4, 3);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(px - 6, py - 6, 2, 1);
+          } else if (facing === 'RIGHT') {
+            ctx.fillRect(px + 3, py - 7, 4, 3);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(px + 4, py - 6, 2, 1);
           }
 
           // 4. IF IN FRONT BODY: Render Shield AFTER Body

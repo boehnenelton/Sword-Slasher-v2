@@ -3,15 +3,15 @@
  * Family:          Gaming
  * Module Purpose:  JavaScript Mirror - BEJSON Gaming Specification Engine & Field Map Cache Provider
  * Architecture:    BEJSON 105 game data layout, O(1) column resolution, string sanitization, archetype lookups
- * Version:         3.0.0
+ * Version:         3.0.1
  * Release_Version: 300
- * Date:            2026-10-27
+ * Date:            2026-11-15
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
  * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   105a0401-2026-1027-9999-000000000401
+ * RELATIONAL_ID:   9d89add8-1e7f-48ec-8b01-a3e68d1048d7
  */
 
-import { bejsonCore } from './lib_bejson_Core_bejson_core.js';
+import { bejsonCore } from './lib_bejson_Gaming_core_adapter.js';
 import {
   E_GAMING_LEVEL_NOT_FOUND,
   E_GAMING_ITEM_DEFINITION_MISSING

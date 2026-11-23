@@ -2,11 +2,11 @@
  * Library:         GamepadDeck.tsx
  * Module Purpose:  360° Analog Virtual Joystick & Scaled Action Deck (Vertical Select/Start & Larger Buttons)
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com
- * Relational_ID:   105a0022-2026-1025-9999-000000000303
- * Version:         200103
+ * Relational_ID:   a08d9f22-171d-4a71-98f1-37eef6a4d605
+ * Version:         200104
  */
 
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 
 interface Props {
   onJoystickMove: (x: number, y: number) => void;

@@ -3,20 +3,22 @@ Library:         app.py
 Family:          Flask Parity Engine Server
 Module Purpose:  Standalone Flask Web Engine & API Server for Sword Slasher RPG (Shadow Link's Awakening)
 Architecture:    Loads compiled BEJSON 105 data bundle (or auto-compiles on startup via ../Experimental/Compiler/Compile.py)
-Version:         1.2.1
+Version:         1.2.2
 Release_Version: 300
 Date:            2026-11-12
 Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
 Format_Creator:  Elton Boehnen
-RELATIONAL_ID:   b4911e9b-7561-4d55-bc3e-705429c77db5
+RELATIONAL_ID:   e80ac59c-4c0b-4dad-b993-5bc4eeb1ff33
 """
 
 import os
 import json
 import sys
+import logging
 from flask import Flask, jsonify, request, send_from_directory, render_template_string
 
 ENGINE_DIR = os.path.dirname(os.path.abspath(__file__))
+log = logging.getLogger("ss2.engine")
 CONFIG_PATH = os.path.join(ENGINE_DIR, "config.json")
 
 
@@ -26,7 +28,7 @@ def _read_config_file():
             with open(CONFIG_PATH, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
-            print(f"[!] Error reading Engines/PY/config.json: {e}")
+            log.error(f"Error reading Engines/PY/config.json: {e}")
     return {}
 
 
@@ -88,11 +90,11 @@ def get_compiled_bundle_path():
 def ensure_compiled_bundle():
     bundle_path = get_compiled_bundle_path()
     if not os.path.exists(bundle_path):
-        print(f"[*] Compiled bundle not found at {bundle_path}. Invoking compiler...")
+        log.info(f"Compiled bundle not found at {bundle_path}. Invoking compiler...")
         if compiler and hasattr(compiler, "compile_bejson_datasets"):
             compiler.compile_bejson_datasets()
         else:
-            print("[!] Warning: compiler module missing. Cannot auto-compile.")
+            log.warning("compiler module missing. Cannot auto-compile.")
 
 @app.route("/")
 def index_html():
@@ -288,6 +290,7 @@ def api_data_config():
     return jsonify(get_config())
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     import argparse
     import threading
     import subprocess
@@ -324,6 +327,6 @@ if __name__ == "__main__":
                     pass
         threading.Thread(target=_launch, daemon=True).start()
 
-    print(f"[*] Starting Flask Parity Engine on http://{host}:{port}")
+    log.info(f"Starting Flask Parity Engine on http://{host}:{port}")
     app.run(host=host, port=port, debug=False)
 

@@ -1,20 +1,22 @@
-#!/data/data/com.termux/files/usr/bin/env python3
+#!/usr/bin/env python3
 """
 # Name:           server_manager.py
 # Description:    Async background server lifecycle manager for Sword Slasher Flask Engine
-# Version:        100
+# Version:        102
 # Date Created:   2026-11-13
 # Author:         Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
 # License:        PolyForm-Noncommercial-1.0.0
-# RELATIONAL_ID:  py-flask-server-manager-001
+# RELATIONAL_ID:  0d26c846-2783-42fa-9efc-259ae0544742
 """
 
 from __future__ import annotations
+import logging
 import os
 import signal
 import subprocess
 import sys
 import time
+import urllib.request
 from pathlib import Path
 
 SCRIPT_PATH: Path = Path(__file__).resolve()
@@ -37,12 +39,36 @@ DIV   = "=" * 49
 SUB   = "-" * 49
 
 
-def print_ok(msg: str) -> None:
-    print(f"{WHITE}[✓] {msg.lower()}{RESET}")
+log = logging.getLogger("ss2.server_manager")
 
 
-def print_fail(msg: str) -> None:
-    print(f"{RED}[✗] {msg.upper()}{RESET}", file=sys.stderr)
+def _setup_logging() -> None:
+    """INFO to stdout, ERROR+ to stderr, message-only format (colours are in the message)."""
+    if log.handlers:
+        return
+    out = logging.StreamHandler(sys.stdout)
+    out.addFilter(lambda r: r.levelno < logging.ERROR)
+    err = logging.StreamHandler(sys.stderr)
+    err.setLevel(logging.ERROR)
+    for h in (out, err):
+        h.setFormatter(logging.Formatter("%(message)s"))
+        log.addHandler(h)
+    log.setLevel(logging.INFO)
+    log.propagate = False
+
+
+def _ui(text: str = "") -> None:
+    """Interactive banner/menu rendering (user-facing UI, not diagnostics)."""
+    sys.stdout.write(text + "\n")
+    sys.stdout.flush()
+
+
+def log_ok(msg: str) -> None:
+    log.info(f"{WHITE}[✓] {msg.lower()}{RESET}")
+
+
+def log_fail(msg: str) -> None:
+    log.error(f"{RED}[✗] {msg.upper()}{RESET}")
 
 
 def read_pid() -> int | None:
@@ -59,14 +85,23 @@ def is_running(pid: int | None) -> bool:
         return False
     try:
         os.kill(pid, 0)
-        return True
-    except (ProcessLookupError, PermissionError):
+    except ProcessLookupError:
         return False
+    except PermissionError:
+        return True
+    # Guard against PID reuse after a crash: confirm the PID is still our app.py.
+    cmdline = Path(f"/proc/{pid}/cmdline")
+    try:
+        if cmdline.exists():
+            return "app.py" in cmdline.read_bytes().decode("utf-8", errors="ignore")
+    except OSError:
+        pass
+    return True
 
 
 def start(host: str, port: int) -> None:
     if is_running(read_pid()):
-        print_fail(f"server already running on port {port}")
+        log_fail(f"server already running on port {port}")
         return
 
     LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -78,12 +113,41 @@ def start(host: str, port: int) -> None:
         stderr=log_fh,
         start_new_session=True,
     )
+    log_fh.close()
     PID_FILE.write_text(str(proc.pid))
-    time.sleep(1.2)
+
+    # Wait for the port to accept connections (first run may compile the bundle).
+    probe_host = "127.0.0.1" if host in ("", "0.0.0.0") else host
+    ready = False
+    deadline = time.time() + 20
+    while time.time() < deadline:
+        if proc.poll() is not None:
+            break
+        try:
+            # Probe the app's own endpoint, not just the port, so a foreign listener
+            # on the same port is never mistaken for our server.
+            with urllib.request.urlopen(f"http://{probe_host}:{port}/api/data/config", timeout=1) as resp:
+                if resp.status == 200:
+                    ready = True
+                    break
+        except (OSError, ValueError):
+            pass
+        time.sleep(0.3)
+
+    if not ready:
+        if proc.poll() is None:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+            except OSError:
+                pass
+        PID_FILE.unlink(missing_ok=True)
+        log_fail("server failed to start - last log lines:")
+        tail_log(15)
+        return
 
     url = f"http://localhost:{port}"
-    print_ok(f"server started — pid {proc.pid}")
-    print_ok(f"url: {url}")
+    log_ok(f"server started — pid {proc.pid}")
+    log_ok(f"url: {url}")
 
     # Copy URL to Termux clipboard
     try:
@@ -91,7 +155,7 @@ def start(host: str, port: int) -> None:
             ["termux-clipboard-set", url],
             timeout=3, check=False, capture_output=True,
         )
-        print_ok("url copied to clipboard")
+        log_ok("url copied to clipboard")
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
 
@@ -106,7 +170,7 @@ def start(host: str, port: int) -> None:
         )
         if res.returncode == 0:
             opened = True
-            print_ok("chrome launched")
+            log_ok("chrome launched")
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
 
@@ -114,7 +178,7 @@ def start(host: str, port: int) -> None:
         try:
             subprocess.run(["termux-open-url", url],
                            timeout=4, check=False, capture_output=True)
-            print_ok("browser opened via termux-open-url")
+            log_ok("browser opened via termux-open-url")
         except (FileNotFoundError, subprocess.TimeoutExpired):
             try:
                 subprocess.run(["xdg-open", url],
@@ -126,7 +190,7 @@ def start(host: str, port: int) -> None:
 def stop() -> None:
     pid = read_pid()
     if not is_running(pid):
-        print_fail("no server running")
+        log_fail("no server running")
         PID_FILE.unlink(missing_ok=True)
         return
     try:
@@ -135,9 +199,9 @@ def stop() -> None:
         if is_running(pid):
             os.killpg(os.getpgid(pid), signal.SIGKILL)
         PID_FILE.unlink(missing_ok=True)
-        print_ok("server stopped")
+        log_ok("server stopped")
     except Exception as exc:
-        print_fail(f"stop failed: {exc}")
+        log_fail(f"stop failed: {exc}")
 
 
 def status_banner(port: int) -> None:
@@ -146,40 +210,40 @@ def status_banner(port: int) -> None:
     state   = f"{WHITE}RUNNING{RESET}" if running else f"{RED}STOPPED{RESET}"
     pid_str = str(pid) if running else "—"
     url     = f"http://localhost:{port}" if running else "—"
-    print(f"{DIM}{DIV}{RESET}")
-    print(f" {RED}SS2 FLASK ENGINE SERVER{RESET}")
-    print(f"{DIM}{SUB}{RESET}")
-    print(f" {RED}Status:{RESET}  {state}")
-    print(f" {RED}PID:{RESET}     {DIM}{pid_str}{RESET}")
-    print(f" {RED}URL:{RESET}     {DIM}{url}{RESET}")
-    print(f" {RED}Log:{RESET}     {DIM}{LOG_FILE.name}{RESET}")
-    print(f"{DIM}{DIV}{RESET}")
+    _ui(f"{DIM}{DIV}{RESET}")
+    _ui(f" {RED}SS2 FLASK ENGINE SERVER{RESET}")
+    _ui(f"{DIM}{SUB}{RESET}")
+    _ui(f" {RED}Status:{RESET}  {state}")
+    _ui(f" {RED}PID:{RESET}     {DIM}{pid_str}{RESET}")
+    _ui(f" {RED}URL:{RESET}     {DIM}{url}{RESET}")
+    _ui(f" {RED}Log:{RESET}     {DIM}{LOG_FILE.name}{RESET}")
+    _ui(f"{DIM}{DIV}{RESET}")
 
 
 def tail_log(lines: int = 30) -> None:
     if not LOG_FILE.exists():
-        print_fail("no server.log yet")
+        log_fail("no server.log yet")
         return
     all_lines = LOG_FILE.read_text(encoding="utf-8", errors="replace").splitlines()
     for line in all_lines[-lines:]:
-        print(line)
+        _ui(line)
 
 
 def tui_menu(host: str, port: int) -> None:
     while True:
         status_banner(port)
-        print(f"{DIM}{SUB}{RESET}")
-        print(f"  [{RED}1{RESET}] {WHITE}Start{RESET}")
-        print(f"  [{RED}2{RESET}] {WHITE}Stop{RESET}")
-        print(f"  [{RED}3{RESET}] {WHITE}Restart{RESET}")
-        print(f"  [{RED}4{RESET}] {WHITE}View log (last 30){RESET}")
-        print(f"  [{RED}5{RESET}] {WHITE}Refresh status{RESET}")
-        print(f"  [{RED}0{RESET}] {WHITE}Exit{RESET}")
-        print(f"{DIM}{DIV}{RESET}")
+        _ui(f"{DIM}{SUB}{RESET}")
+        _ui(f"  [{RED}1{RESET}] {WHITE}Start{RESET}")
+        _ui(f"  [{RED}2{RESET}] {WHITE}Stop{RESET}")
+        _ui(f"  [{RED}3{RESET}] {WHITE}Restart{RESET}")
+        _ui(f"  [{RED}4{RESET}] {WHITE}View log (last 30){RESET}")
+        _ui(f"  [{RED}5{RESET}] {WHITE}Refresh status{RESET}")
+        _ui(f"  [{RED}0{RESET}] {WHITE}Exit{RESET}")
+        _ui(f"{DIM}{DIV}{RESET}")
         try:
             choice = input(f"{RED}>{RESET} ").strip()
         except (EOFError, KeyboardInterrupt):
-            print()
+            _ui()
             break
         if choice == "1":
             start(host, port)
@@ -194,11 +258,12 @@ def tui_menu(host: str, port: int) -> None:
         elif choice == "0":
             break
         else:
-            print_fail("unknown option")
+            log_fail("unknown option")
 
 
 def main() -> int:
     import argparse
+    _setup_logging()
     parser = argparse.ArgumentParser(prog="server_manager")
     parser.add_argument("command", nargs="?", default="menu",
                         choices=["start", "stop", "restart", "status", "log", "menu"])

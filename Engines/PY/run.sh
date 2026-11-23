@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/usr/bin/env bash
 # Engines/PY/run.sh - Async background server manager launcher for Flask Parity Engine
 # PolyForm-Noncommercial-1.0.0 · Elton Boehnen
 

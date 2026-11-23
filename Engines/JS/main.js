@@ -3,22 +3,21 @@
  * Family:          Vanilla JS Mirror Application
  * Module Purpose:  Standalone Vanilla JS Game Engine Client for BEJSON 105 (Absolute Parity Edition) - Engines/JS
  * Architecture:    BEJSON 105 Pure Data Engine, Web Audio Synthesis, AABB Physics & 2.5D Canvas Renderer Mirror
- * Version:         3.3.1
+ * Version:         3.3.2
  * Release_Version: 300
- * Date:            2026-11-12
+ * Date:            2026-11-15
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
  * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   475ea885-62c7-47ba-be17-d6758ccc7d23
+ * RELATIONAL_ID:   3b39b835-95d1-4398-a13f-cee1ea129c56
  */
 
-import { bejsonCore } from '../../src/lib/lib_js/lib_bejson_Core_bejson_core.js';
+import { bejsonCore } from '../../src/lib/lib_js/lib_bejson_Gaming_core_adapter.js';
 import { bejsonGaming } from '../../src/lib/lib_js/lib_bejson_Gaming_engine.js';
 import { shadowEngine } from '../../src/lib/lib_js/lib_bejson_Gaming_shadow_engine.js';
 import { BEJSONGamingScreenEffects } from '../../src/lib/lib_js/lib_bejson_Gaming_screen_effects.js';
 import { physicsEngine } from '../../src/lib/lib_js/lib_bejson_Gaming_physics_engine.js';
 import { projectilePhysics } from '../../src/lib/lib_js/lib_bejson_Gaming_projectile_physics.js';
-import { canvasSpriteManager } from './lib_bejson_Gaming_sprite_canvas.js';
-import { updateStandardNpcCombatAI, isFrontalShieldBlock } from './lib_bejson_Gaming_npc_combat_ai.js';
+import { ancillaEngine, itemRegistry, inventoryState } from '../../src/lib/lib_js/lib_bejson_Gaming_ancilla_item_engine.js';
 
 console.log("initializing...");
 
@@ -184,14 +183,152 @@ let enemies = [
   { id: 'e4', name: 'Green Slime', type: 'slime', x: 750, y: 450, hp: 35, maxHp: 35, attack: 10, hurtTime: 0, knockback: { vx: 0, vy: 0 } }
 ];
 
-// Non-Boomerang Projectiles (Arrows, Bombs)
+// Register items through decoupled Item System Interface (ALttP Subsystem Parity)
+itemRegistry.registerItem({
+  id: 'shadow_boomerang',
+  name: 'Shadow Boomerang',
+  icon: '🪃',
+  category: 'Y_ITEM',
+  quota: 1, // ALttP: Only 1 active boomerang allowed in front slots (Slots 0-4)
+  cooldownFrames: 16,
+  useAnimationFrames: 12,
+  onExecute: (ctx, engine) => {
+    if (engine.getActiveQuotaCount('shadow_boomerang') > 0) return false;
+    sfx.boomerang();
+    const speed = 6.0;
+    let vx = 0, vy = 0;
+    if (ctx.playerFacing === 'UP') vy = -speed;
+    else if (ctx.playerFacing === 'DOWN') vy = speed;
+    else if (ctx.playerFacing === 'LEFT') vx = -speed;
+    else if (ctx.playerFacing === 'RIGHT') vx = speed;
+
+    return engine.spawnAncilla({
+      type: 'boomerang',
+      itemId: 'shadow_boomerang',
+      category: 'primary',
+      x: ctx.px,
+      y: ctx.py,
+      vx,
+      vy,
+      angle: Math.atan2(vy, vx),
+      timer: 100,
+      state: { outwardTimer: 25 },
+      onUpdate: (slot, c) => {
+        if (slot.state.outwardTimer > 0) {
+          slot.state.outwardTimer--;
+        } else {
+          const dx = c.px - slot.x;
+          const dy = c.py - slot.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 18) return false; // Return completed
+          const returnSpeed = 7.0;
+          slot.vx = (dx / dist) * returnSpeed;
+          slot.vy = (dy / dist) * returnSpeed;
+        }
+        slot.angle += 0.3;
+        if (typeof c.onBoomerangStep === 'function') {
+          c.onBoomerangStep(slot);
+        }
+        return true;
+      },
+      onRender: (slot, renderCtx) => {
+        renderCtx.save();
+        renderCtx.translate(slot.x, slot.y);
+        renderCtx.rotate(slot.angle);
+        renderCtx.font = '16px monospace';
+        renderCtx.textAlign = 'center';
+        renderCtx.textBaseline = 'middle';
+        renderCtx.fillText('🪃', 0, 0);
+        renderCtx.restore();
+      }
+    });
+  }
+});
+
+itemRegistry.registerItem({
+  id: 'dark_bow',
+  name: 'Dark Bow & Arrows',
+  icon: '🏹',
+  category: 'Y_ITEM',
+  quota: 2, // ALttP: Quota of 2 active arrow projectiles in front slots (Slots 0-4)
+  cooldownFrames: 24,
+  useAnimationFrames: 14,
+  ammoType: 'arrows',
+  ammoCost: 1,
+  onExecute: (ctx, engine) => {
+    sfx.slash();
+    let vx = 0, vy = 0;
+    const arrowSpeed = 5.2;
+    if (ctx.playerFacing === 'UP') vy = -arrowSpeed;
+    else if (ctx.playerFacing === 'DOWN') vy = arrowSpeed;
+    else if (ctx.playerFacing === 'LEFT') vx = -arrowSpeed;
+    else if (ctx.playerFacing === 'RIGHT') vx = arrowSpeed;
+
+    const slotIdx = engine.spawnAncilla({
+      type: 'arrow',
+      itemId: 'dark_bow',
+      category: 'primary',
+      x: ctx.px,
+      y: ctx.py,
+      vx,
+      vy,
+      angle: Math.atan2(vy, vx),
+      timer: 55,
+      onUpdate: (slot, c) => {
+        if (typeof c.onArrowStep === 'function') {
+          const hit = c.onArrowStep(slot);
+          if (hit) return false;
+        }
+        return true;
+      },
+      onRender: (slot, renderCtx) => {
+        renderCtx.save();
+        renderCtx.translate(slot.x, slot.y);
+        renderCtx.rotate(slot.angle);
+        renderCtx.strokeStyle = '#38bdf8';
+        renderCtx.lineWidth = 2;
+        renderCtx.beginPath();
+        renderCtx.moveTo(-8, 0);
+        renderCtx.lineTo(8, 0);
+        renderCtx.stroke();
+        renderCtx.restore();
+      }
+    });
+
+    // Spawn back-slot visual particle in slots 5-9
+    engine.spawnAncilla({
+      type: 'particle',
+      itemId: 'dark_bow',
+      category: 'particle',
+      x: ctx.px + (Math.random() - 0.5) * 6,
+      y: ctx.py + (Math.random() - 0.5) * 6,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5,
+      timer: 16,
+      evictable: true,
+      onRender: (slot, renderCtx) => {
+        renderCtx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+        renderCtx.fillRect(slot.x - 2, slot.y - 2, 4, 4);
+      }
+    });
+
+    return slotIdx;
+  }
+});
+
+// 24-slot inventory initialization ($7EF340+ SRAM parity)
+inventoryState.setSlot(0, { itemId: 'shadow_boomerang', unlocked: true, tier: 1 });
+inventoryState.setSlot(1, { itemId: 'dark_bow', unlocked: true, tier: 1 });
+inventoryState.setEquippedYItem('shadow_boomerang');
+let activeYItem = inventoryState.equippedYItemId || 'shadow_boomerang';
+
 let otherProjectiles = [];
 let droppedItems = [];
-let activeYItem = 'shadow_boomerang';
 
 let currentLevelSlug = 'debug_chamber';
 
 function setDebugRoom(slug) {
+  ancillaEngine.clearAll();
   currentLevelSlug = slug;
   if (slug === 'forgotten_cavern' || slug === 'castle_courtyard') {
     tilesW = 96;
@@ -225,11 +362,8 @@ function setDebugRoom(slug) {
   }
 
   enemies = [
-    { id: 'e1', name: 'Guard Knight', type: 'guard', facing: 'DOWN', x: px - 120, y: py - 120, hp: 60, maxHp: 60, attack: 15, hurtTime: 0, stunTimer: 0, iframeTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 60, targetX: px - 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
-    { id: 'e2', name: 'Green Slime', type: 'slime', facing: 'DOWN', x: px + 120, y: py - 120, hp: 35, maxHp: 35, attack: 10, hurtTime: 0, stunTimer: 0, iframeTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 40, targetX: px + 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
-    { id: 'e3', name: 'Hyrule Royal Knight', type: 'hyrule_knight', facing: 'DOWN', x: px - 90, y: py + 90, hp: 80, maxHp: 80, attack: 18, hurtTime: 0, stunTimer: 0, iframeTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 50, targetX: px - 90, targetY: py + 90, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
-    { id: 'e4', name: 'Hyrule Archer', type: 'hyrule_archer', facing: 'LEFT', x: px + 130, y: py + 70, hp: 45, maxHp: 45, attack: 12, hurtTime: 0, stunTimer: 0, iframeTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 45, targetX: px + 130, targetY: py + 70, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
-    { id: 'e5', name: 'Hyrule Light Mage', type: 'hyrule_mage', facing: 'RIGHT', x: px - 140, y: py + 20, hp: 50, maxHp: 50, attack: 16, hurtTime: 0, stunTimer: 0, iframeTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 55, targetX: px - 140, targetY: py + 20, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 }
+    { id: 'e1', name: 'Guard Knight', type: 'guard', x: px - 120, y: py - 120, hp: 60, maxHp: 60, attack: 15, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 60, targetX: px - 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
+    { id: 'e2', name: 'Green Slime', type: 'slime', x: px + 120, y: py - 120, hp: 35, maxHp: 35, attack: 10, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 40, targetX: px + 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 }
   ];
 
   sfx.chime();
@@ -412,7 +546,10 @@ function initGamepadDeck() {
     initAudio();
     document.getElementById('btn-select')?.classList.add('active');
     document.getElementById('row-select')?.classList.add('active');
-    activeYItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+    const nextItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+    inventoryState.setEquippedYItem(nextItem);
+    activeYItem = inventoryState.equippedYItemId || nextItem;
+    shadowEngine.setSelectedYItem(activeYItem);
     sfx.chime();
     setTimeout(() => {
       document.getElementById('btn-select')?.classList.remove('active');
@@ -459,7 +596,10 @@ window.addEventListener('keydown', (e) => {
 
   if (k === 'q' || k === 'tab') {
     e.preventDefault();
-    activeYItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+    const nextItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
+    inventoryState.setEquippedYItem(nextItem);
+    activeYItem = inventoryState.equippedYItemId || nextItem;
+    shadowEngine.setSelectedYItem(activeYItem);
     sfx.chime();
   }
 
@@ -538,24 +678,13 @@ function executeSwordSlash() {
   const varIdx = swordVariation % 3;
   swordVariation = (swordVariation + 1) % 3;
 
-  // 13-frame (~216.7ms) slash commitment with zero post-swing recovery lock
-  slashAnim = { x: px, y: py, dir: playerFacing, timer: 13, maxTimer: 13, variation: varIdx };
-  swordCooldown = 13;
-
-  // Full-health Sword Beam projectile along cardinal facing axis
-  if (playerHp >= playerMaxHp) {
-    let bvx = 0, bvy = 0;
-    const beamSpeed = 5.5;
-    if (playerFacing === 'UP') bvy = -beamSpeed;
-    else if (playerFacing === 'DOWN') bvy = beamSpeed;
-    else if (playerFacing === 'LEFT') bvx = -beamSpeed;
-    else if (playerFacing === 'RIGHT') bvx = beamSpeed;
-    otherProjectiles.push({ x: px, y: py, vx: bvx, vy: bvy, type: 'sword_beam', damage: 12, timer: 55 });
-  }
+  // 18-frame (~0.3s) attack animation commit & delay
+  slashAnim = { x: px, y: py, dir: playerFacing, timer: 18, maxTimer: 18, variation: varIdx };
+  swordCooldown = 20;
 
   let hitX = px;
   let hitY = py;
-  const reach = 48;
+  const reach = 48; // Extended sword reach (from 35 -> 48px)
   if (playerFacing === 'UP') hitY -= reach;
   if (playerFacing === 'DOWN') hitY += reach;
   if (playerFacing === 'LEFT') hitX -= reach;
@@ -566,8 +695,9 @@ function executeSwordSlash() {
     if (!prop.destroyed && physicsEngine.checkAABBRaw(hitX - 20, hitY - 20, 40, 40, prop.x - 10, prop.y - 10, 20, 20)) {
       if (prop.type === 'pedestal') {
         if (prop.itemId) {
-          activeYItem = prop.itemId;
-          shadowEngine.setSelectedYItem(prop.itemId);
+          inventoryState.setEquippedYItem(prop.itemId);
+          activeYItem = inventoryState.equippedYItemId || prop.itemId;
+          shadowEngine.setSelectedYItem(activeYItem);
           sfx.chime();
           screenEffects.triggerFlash('#FFFFFF', 0.3, 0.2);
         }
@@ -586,11 +716,6 @@ function executeSwordSlash() {
     if (enemy.hp <= 0) return enemy;
     const isHit = physicsEngine.checkAABBRaw(hitX - 22, hitY - 22, 44, 44, enemy.x - 12, enemy.y - 12, 24, 24);
     if (isHit) {
-      if (isFrontalShieldBlock(enemy, playerFacing)) {
-        sfx.hit();
-        const kb = physicsEngine.calculateKnockbackVector(px, py, enemy.x, enemy.y, 4.5);
-        return { ...enemy, knockback: kb };
-      }
       screenEffects.triggerShake(7, 0.25);
       const newHp = Math.max(0, enemy.hp - 25);
       if (newHp === 0) {
@@ -600,7 +725,7 @@ function executeSwordSlash() {
         sfx.hit();
       }
       const kb = physicsEngine.calculateKnockbackVector(px, py, enemy.x, enemy.y, 10.5);
-      return { ...enemy, hp: newHp, hurtTime: 18, iframeTime: 24, knockback: kb };
+      return { ...enemy, hp: newHp, hurtTime: 18, knockback: kb };
     }
     return enemy;
   });
@@ -645,24 +770,56 @@ function executeWhirlingBlade() {
 function executeYItem() {
   isSheathed = false;
 
-  if (activeYItem === 'shadow_boomerang') {
-    if (projectilePhysics.boomerangs.length > 0) return;
-    sfx.boomerang();
-    projectilePhysics.spawnBoomerang(px, py, playerFacing, 0);
-  } else if (activeYItem === 'dark_bow') {
-    if (bowCooldown > 0) return; // Controlled reciprocation speed limit!
-    if (shadowEngine.arrows <= 0) return;
-    shadowEngine.arrows--;
-    bowCooldown = 26; // ~0.43s reloading cooldown between shots
-    sfx.slash();
+  // Enforce Miyamoto's Sword Mandate ($3C lockout): charging/holding/swinging sword locks out Y items
+  const isSwordBusy = bHeldTime > 0 || isCharging || (slashAnim && slashAnim.timer > 0) || swordCooldown > 0;
+  inventoryState.setSwordLockout(isSwordBusy);
 
-    let vx = 0, vy = 0;
-    const arrowSpeed = 5.2; // Controlled, realistic arrow velocity
-    if (playerFacing === 'UP') vy = -arrowSpeed;
-    if (playerFacing === 'DOWN') vy = arrowSpeed;
-    if (playerFacing === 'LEFT') vx = -arrowSpeed;
-    if (playerFacing === 'RIGHT') vx = arrowSpeed;
-    otherProjectiles.push({ x: px, y: py, vx, vy, type: 'arrow', timer: 55 });
+  const context = {
+    px,
+    py,
+    playerFacing,
+    getAmmo: (type) => (type === 'arrows' ? shadowEngine.arrows : 0),
+    consumeAmmo: (type, amount) => {
+      if (type === 'arrows') shadowEngine.arrows = Math.max(0, shadowEngine.arrows - amount);
+    },
+    onBoomerangStep: (bSlot) => {
+      props = props.map(prop => {
+        if (!prop.destroyed && physicsEngine.checkAABBRaw(bSlot.x - 8, bSlot.y - 8, 16, 16, prop.x - 10, prop.y - 10, 20, 20)) {
+          if (prop.type === 'pot') sfx.potBreak();
+          else sfx.bushCut();
+          spawnDropItem(prop.x, prop.y);
+          return { ...prop, destroyed: true };
+        }
+        return prop;
+      });
+      droppedItems.forEach(item => {
+        if (Math.hypot(item.x - bSlot.x, item.y - bSlot.y) < 24) {
+          if (item.type === 'rupee') { sfx.rupee(); shadowEngine.rupees += 5; }
+          else if (item.type === 'heart') { sfx.heart(); playerHp = Math.min(playerMaxHp, playerHp + 20); }
+          item.timer = 0;
+        }
+      });
+    },
+    onArrowStep: (aSlot) => {
+      let hit = false;
+      enemies = enemies.map(e => {
+        if (e.hp > 0 && physicsEngine.checkAABBRaw(aSlot.x - 4, aSlot.y - 4, 8, 8, e.x - 10, e.y - 10, 20, 20)) {
+          hit = true;
+          sfx.hit();
+          const newHp = Math.max(0, e.hp - 20);
+          if (newHp === 0) spawnDropItem(e.x, e.y);
+          const kb = physicsEngine.calculateKnockbackVector(aSlot.x, aSlot.y, e.x, e.y, 8.0);
+          return { ...e, hp: newHp, hurtTime: 10, knockback: kb };
+        }
+        return e;
+      });
+      return hit;
+    }
+  };
+
+  const res = inventoryState.executeEquippedYItem(context, ancillaEngine);
+  if (!res.success) {
+    return;
   }
 }
 
@@ -673,8 +830,9 @@ function executeInteract() {
     if (!prop.destroyed && physicsEngine.checkAABBRaw(px - 18, py - 18, 36, 36, prop.x - 12, prop.y - 12, 24, 24)) {
       if (prop.type === 'pedestal') {
         if (prop.itemId) {
-          activeYItem = prop.itemId;
-          shadowEngine.setSelectedYItem(prop.itemId);
+          inventoryState.setEquippedYItem(prop.itemId);
+          activeYItem = inventoryState.equippedYItemId || prop.itemId;
+          shadowEngine.setSelectedYItem(activeYItem);
         }
         return prop;
       }
@@ -706,11 +864,7 @@ async function bootVanillaEngine() {
     { key: 'items', url: new URL('items/items.105.bejson', rawBase).href },
     { key: 'sprites', url: new URL('sprites/sprites_manifest.105a.bejson', rawBase).href },
     { key: 'tiles', url: new URL('tiles/tiles_manifest.105a.bejson', rawBase).href },
-    { key: 'chunk', url: new URL('chunks/cave_chunk_0_0.105.bejson', rawBase).href },
-    { key: 'combat_animations', url: new URL('combat/shadow_link_combat_animations.105a.bejson', rawBase).href },
-    { key: 'weapons_combat', url: new URL('combat/weapons_combat_registry.105a.bejson', rawBase).href },
-    { key: 'projectile_combat', url: new URL('combat/projectile_combat_registry.105a.bejson', rawBase).href },
-    { key: 'projectile_impact', url: new URL('combat/projectile_impact_dynamics.105a.bejson', rawBase).href }
+    { key: 'chunk', url: new URL('chunks/cave_chunk_0_0.105.bejson', rawBase).href }
   ];
 
   for (const f of filesToLoad) {
@@ -724,16 +878,14 @@ async function bootVanillaEngine() {
       console.warn(`[Vanilla Mirror] Failed loading ${f.url}:`, err);
     }
   }
-  await canvasSpriteManager.preloadAll();
   setDebugRoom('debug_chamber');
   requestAnimationFrame(gameLoop);
 }
 
 function updatePhysics() {
   tickCount++;
-  // Balanced movement speed: 2.2 normal walk, 3.2 sprint, 0.833x (~16.7% penalty) while sword-held
-  const baseSpeed = keys['shift'] ? 3.2 : 2.2;
-  const speed = isCharging ? baseSpeed * 0.833 : baseSpeed;
+  // Balanced movement speed: 2.2 normal walk, 3.2 shift sprint (Zelda ALttP calibrated)
+  const speed = keys['shift'] ? 3.2 : 2.2;
   let dx = 0;
   let dy = 0;
 
@@ -752,54 +904,22 @@ function updatePhysics() {
     dy = joystickVector.y * speed;
   }
 
-  // Cardinal facing lock during sword-hold stance (allows strafing & backpedaling)
-  if (!isCharging) {
-    const isH = Math.abs(dx) > 0.05;
-    const isV = Math.abs(dy) > 0.05;
-    if (isH && isV) {
-      const matchesH = (dx > 0 && playerFacing === 'RIGHT') || (dx < 0 && playerFacing === 'LEFT');
-      const matchesV = (dy > 0 && playerFacing === 'DOWN') || (dy < 0 && playerFacing === 'UP');
-      if (!matchesH && !matchesV) {
-        playerFacing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'RIGHT' : 'LEFT') : (dy > 0 ? 'DOWN' : 'UP');
-      }
-    } else if (isH) {
-      playerFacing = dx > 0 ? 'RIGHT' : 'LEFT';
-    } else if (isV) {
-      playerFacing = dy > 0 ? 'DOWN' : 'UP';
+  // 8-directional movement with 4-directional cardinal facing & first-input priority latch
+  const isH = Math.abs(dx) > 0.05;
+  const isV = Math.abs(dy) > 0.05;
+  if (isH && isV) {
+    const matchesH = (dx > 0 && playerFacing === 'RIGHT') || (dx < 0 && playerFacing === 'LEFT');
+    const matchesV = (dy > 0 && playerFacing === 'DOWN') || (dy < 0 && playerFacing === 'UP');
+    if (!matchesH && !matchesV) {
+      playerFacing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'RIGHT' : 'LEFT') : (dy > 0 ? 'DOWN' : 'UP');
     }
+  } else if (isH) {
+    playerFacing = dx > 0 ? 'RIGHT' : 'LEFT';
+  } else if (isV) {
+    playerFacing = dy > 0 ? 'DOWN' : 'UP';
   }
 
-  // Active Poke Hitbox during sword-hold stance
-  if (isCharging && !(slashAnim && slashAnim.timer > 0)) {
-    let pokeX = px, pokeY = py;
-    if (playerFacing === 'UP') pokeY -= 26;
-    else if (playerFacing === 'DOWN') pokeY += 26;
-    else if (playerFacing === 'LEFT') pokeX -= 26;
-    else if (playerFacing === 'RIGHT') pokeX += 26;
-
-    enemies = enemies.map(enemy => {
-      if (enemy.hp <= 0 || (enemy.iframeTime || 0) > 0 || enemy.hurtTime > 0) return enemy;
-      if (physicsEngine.checkAABBRaw(pokeX - 10, pokeY - 10, 20, 20, enemy.x - 12, enemy.y - 12, 24, 24)) {
-        if (isFrontalShieldBlock(enemy, playerFacing)) {
-          sfx.hit();
-          return { ...enemy, knockback: physicsEngine.calculateKnockbackVector(px, py, enemy.x, enemy.y, 4.0) };
-        }
-        const newHp = Math.max(0, enemy.hp - 12);
-        if (newHp === 0) { sfx.enemyDeath(); spawnDropItem(enemy.x, enemy.y); }
-        else sfx.hit();
-        return {
-          ...enemy,
-          hp: newHp,
-          hurtTime: 15,
-          iframeTime: 24,
-          knockback: physicsEngine.calculateKnockbackVector(px, py, enemy.x, enemy.y, 7.5)
-        };
-      }
-      return enemy;
-    });
-  }
-
-  // Hit animation movement lock: 13-frame slash or player damage stun
+  // Hit animation stun delay: attack swing commits player (~0.3s) or player damage stun
   if ((slashAnim && slashAnim.timer > 0) || playerHurtTime > 0) {
     dx = 0;
     dy = 0;
@@ -888,7 +1008,51 @@ function updatePhysics() {
 
   if (swordCooldown > 0) swordCooldown--;
 
-  // Update Boomerangs
+  // Step inventory lockout timers ($3C sword lockout & $0301 action commit)
+  const isSwordBusy = bHeldTime > 0 || isCharging || (slashAnim && slashAnim.timer > 0);
+  inventoryState.setSwordLockout(isSwordBusy);
+  inventoryState.tickLockouts();
+
+  // Step 10-Slot Ancilla Engine (ALttP $0C4A Parallel Slot Architecture)
+  ancillaEngine.updateAll({
+    px,
+    py,
+    onBoomerangStep: (bSlot) => {
+      props = props.map(prop => {
+        if (!prop.destroyed && physicsEngine.checkAABBRaw(bSlot.x - 8, bSlot.y - 8, 16, 16, prop.x - 10, prop.y - 10, 20, 20)) {
+          if (prop.type === 'pot') sfx.potBreak();
+          else sfx.bushCut();
+          spawnDropItem(prop.x, prop.y);
+          return { ...prop, destroyed: true };
+        }
+        return prop;
+      });
+      droppedItems.forEach(item => {
+        if (Math.hypot(item.x - bSlot.x, item.y - bSlot.y) < 24) {
+          if (item.type === 'rupee') { sfx.rupee(); shadowEngine.rupees += 5; }
+          else if (item.type === 'heart') { sfx.heart(); playerHp = Math.min(playerMaxHp, playerHp + 20); }
+          item.timer = 0;
+        }
+      });
+    },
+    onArrowStep: (aSlot) => {
+      let hit = false;
+      enemies = enemies.map(e => {
+        if (e.hp > 0 && physicsEngine.checkAABBRaw(aSlot.x - 4, aSlot.y - 4, 8, 8, e.x - 10, e.y - 10, 20, 20)) {
+          hit = true;
+          sfx.hit();
+          const newHp = Math.max(0, e.hp - 20);
+          if (newHp === 0) spawnDropItem(e.x, e.y);
+          const kb = physicsEngine.calculateKnockbackVector(aSlot.x, aSlot.y, e.x, e.y, 8.0);
+          return { ...e, hp: newHp, hurtTime: 10, knockback: kb };
+        }
+        return e;
+      });
+      return hit;
+    }
+  });
+
+  // Update Boomerangs (legacy fallback)
   projectilePhysics.updateBoomerangs(px, py, (item) => {
     if (item.type === 'rupee') { sfx.rupee(); shadowEngine.rupees += 5; }
     else if (item.type === 'heart') { sfx.heart(); playerHp = Math.min(playerMaxHp, playerHp + 20); }
@@ -933,70 +1097,150 @@ function updatePhysics() {
         });
       }
 
-      if (p.type === 'arrow' || p.type === 'sword_beam') {
-        let beamHit = false;
-        const dmg = p.type === 'sword_beam' ? (p.damage || 12) : 20;
+      if (p.type === 'arrow') {
         enemies = enemies.map(e => {
-          if (e.hp > 0 && !beamHit && physicsEngine.checkAABBRaw(nx - 4, ny - 4, 8, 8, e.x - 10, e.y - 10, 20, 20)) {
-            beamHit = true;
+          if (e.hp > 0 && physicsEngine.checkAABBRaw(nx - 4, ny - 4, 8, 8, e.x - 10, e.y - 10, 20, 20)) {
             sfx.hit();
-            const newHp = Math.max(0, e.hp - dmg);
+            const newHp = Math.max(0, e.hp - 20);
             if (newHp === 0) spawnDropItem(e.x, e.y);
             const kb = physicsEngine.calculateKnockbackVector(p.x, p.y, e.x, e.y, 8.0);
-            return { ...e, hp: newHp, hurtTime: 10, iframeTime: 24, knockback: kb };
+            return { ...e, hp: newHp, hurtTime: 10, knockback: kb };
           }
           return e;
         });
-        if (beamHit && p.type === 'sword_beam') nt = 0;
       }
 
       return { ...p, x: nx, y: ny, timer: nt };
     })
     .filter(p => p.timer > 0);
 
-  // Update Enemy AI & Chasing Physics (Top-Down Standard NPC Combat AI)
-  enemies = enemies.map((e, idx) =>
-    updateStandardNpcCombatAI({
-      enemy: e,
-      slotIndex: idx,
-      tickCount,
-      px,
-      py,
-      mapWorldWidth,
-      mapWorldHeight,
-      isSolidAt: (wx, wy) =>
-        wx < 24 ||
-        wx > mapWorldWidth - 24 ||
-        wy < 24 ||
-        wy > mapWorldHeight - 24 ||
-        props.some(pr => !pr.destroyed && Math.abs(wx - pr.x) < 16 && Math.abs(wy - pr.y) < 16),
-      onSpawnProjectile: (proj) => otherProjectiles.push(proj),
-      onHitPlayer: (attacker) => {
-        if (playerHurtTime <= 0) {
-          playerHp = Math.max(0, playerHp - (attacker.attack || 15));
-          sfx.playerHurt();
-          screenEffects.triggerShake(10, 0.35);
-          screenEffects.triggerFlash('#DE2626', 0.55, 0.25);
-          playerHurtTime = 18;
-          playerKnockback = physicsEngine.calculateKnockbackVector(attacker.x, attacker.y, px, py, 9.5);
+  // Update Enemy AI & Chasing Physics (State-Driven AI Parity: PATROL -> ALERT -> LOCK_ON -> CHARGE -> COOLDOWN)
+  enemies = enemies.map(e => {
+    if (e.hp <= 0) return e;
+
+    let ex = e.x + e.knockback.vx;
+    let ey = e.y + e.knockback.vy;
+    physicsEngine.applyFriction(e.knockback, 0.85);
+
+    let state = e.aiState || 'PATROL';
+    let timer = e.aiTimer || 0;
+    let tx = e.targetX || ex;
+    let ty = e.targetY || ey;
+    let cvx = e.chargeVx || 0;
+    let cvy = e.chargeVy || 0;
+    let pvx = e.patrolVx || 0;
+    let pvy = e.patrolVy || 0;
+
+    const distToPlayer = Math.hypot(px - ex, py - ey);
+
+    // Taking damage interrupts any active state into HURT knockback stun
+    if (e.hurtTime > 0) {
+      state = 'HURT';
+      timer = e.hurtTime;
+    } else if (state === 'HURT') {
+      state = 'COOLDOWN';
+      timer = 30; // 0.5s recovery post-hurt
+    }
+
+    if (state === 'PATROL') {
+      // Slow wander pace
+      timer--;
+      if (timer <= 0) {
+        timer = 50 + Math.floor(Math.random() * 40);
+        const angle = Math.random() * Math.PI * 2;
+        const wanderSpeed = e.type === 'guard' ? 0.6 : 0.4;
+        pvx = Math.cos(angle) * wanderSpeed;
+        pvy = Math.sin(angle) * wanderSpeed;
+      }
+      ex += pvx;
+      ey += pvy;
+
+      // Stage 1: Awareness detection within 160px
+      if (distToPlayer < 160) {
+        state = 'ALERT';
+        timer = 20; // 20 frames (~0.33s) startled pause with '!'
+        pvx = 0; pvy = 0;
+      }
+    } else if (state === 'ALERT') {
+      // Stage 2: Brief stunned awareness pause
+      timer--;
+      if (timer <= 0) {
+        state = 'LOCK_ON';
+        timer = 26; // 26 frames (~0.43s) telegraph delay
+        // Lock Link's position at start of lock-on
+        tx = px;
+        ty = py;
+      }
+    } else if (state === 'LOCK_ON') {
+      // Stage 3: Telegraph delay - enemy freezes & aims at locked target position
+      // Giving the player ample time to dodge/move!
+      timer--;
+      if (timer <= 0) {
+        state = 'CHARGE';
+        timer = 35; // Max blind charge duration (~0.6s)
+        const chargeDist = Math.hypot(tx - ex, ty - ey);
+        const chargeSpeed = e.type === 'guard' ? 2.6 : 1.8;
+        if (chargeDist > 4) {
+          cvx = ((tx - ex) / chargeDist) * chargeSpeed;
+          cvy = ((ty - ey) / chargeDist) * chargeSpeed;
+        } else {
+          cvx = 0; cvy = 0;
         }
       }
-    })
-  );
+    } else if (state === 'CHARGE') {
+      // Stage 4: Blind straight-line charge (does NOT track player mid-lunge)
+      ex += cvx;
+      ey += cvy;
+      timer--;
 
-  // Enemy ranged projectiles colliding with Shadow Link
-  otherProjectiles = otherProjectiles.filter(p => {
-    if (p.type !== 'enemy_arrow' && p.type !== 'enemy_bolt') return true;
-    if (Math.abs(p.x - px) < 14 && Math.abs(p.y - py) < 14 && playerHurtTime <= 0) {
-      playerHp = Math.max(0, playerHp - (p.damage || 12));
-      sfx.playerHurt();
-      screenEffects.triggerShake(7, 0.25);
-      screenEffects.triggerFlash('#DE2626', 0.45, 0.2);
-      playerHurtTime = 16;
-      playerKnockback = physicsEngine.calculateKnockbackVector(p.x - p.vx, p.y - p.vy, px, py, 6.5);
-      return false;
+      const distToTarget = Math.hypot(tx - ex, ty - ey);
+      if (distToTarget < 12 || timer <= 0 || ex < 24 || ex > mapWorldWidth - 24 || ey < 24 || ey > mapWorldHeight - 24) {
+        state = 'COOLDOWN';
+        timer = 40; // 40 frames (~0.67s) punish opening
+        cvx = 0; cvy = 0;
+      }
+
+      // Collision with Link during blind charge
+      const hitPlayer = physicsEngine.checkAABBRaw(ex - 8, ey - 8, 16, 16, px - 8, py - 8, 16, 16);
+      if (hitPlayer && playerHurtTime <= 0 && e.hurtTime <= 0) {
+        playerHp = Math.max(0, playerHp - (e.attack || (e.type === 'guard' ? 15 : 10)));
+        sfx.playerHurt();
+        screenEffects.triggerShake(10, 0.35);
+        screenEffects.triggerFlash('#DE2626', 0.55, 0.25);
+        playerHurtTime = 18; // 0.3s player incapacitation stun
+        playerKnockback = physicsEngine.calculateKnockbackVector(ex, ey, px, py, 9.5);
+        state = 'COOLDOWN';
+        timer = 40;
+        cvx = 0; cvy = 0;
+      }
+    } else if (state === 'COOLDOWN') {
+      // Stage 5: Cooldown / exhaustion recovery window (completely vulnerable)
+      timer--;
+      if (timer <= 0) {
+        if (distToPlayer < 140) {
+          state = 'ALERT';
+          timer = 20;
+        } else {
+          state = 'PATROL';
+          timer = 45;
+        }
+      }
     }
-    return true;
+
+    return {
+      ...e,
+      x: Math.max(20, Math.min(mapWorldWidth - 20, ex)),
+      y: Math.max(20, Math.min(mapWorldHeight - 20, ey)),
+      aiState: state,
+      aiTimer: timer,
+      targetX: tx,
+      targetY: ty,
+      chargeVx: cvx,
+      chargeVy: cvy,
+      patrolVx: pvx,
+      patrolVy: pvy,
+      hurtTime: Math.max(0, e.hurtTime - 1)
+    };
   });
 
   screenEffects.update(1 / 60);
@@ -1032,16 +1276,14 @@ function render() {
       const isBoundary = r === 0 || r === tilesH - 1 || c === 0 || c === tilesW - 1;
 
       if (isBoundary) {
-        if (!canvasSpriteManager.drawTile(ctx, 'dungeon_wall', tx, ty, tileUnitPx)) {
-          ctx.fillStyle = '#1c281e';
-          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-          ctx.fillStyle = '#2d4232';
-          ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, 12);
-          ctx.fillRect(tx + 2, ty + 18, tileUnitPx - 4, 12);
-          ctx.strokeStyle = '#0f1710';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
-        }
+        ctx.fillStyle = '#1c281e';
+        ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+        ctx.fillStyle = '#2d4232';
+        ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, 12);
+        ctx.fillRect(tx + 2, ty + 18, tileUnitPx - 4, 12);
+        ctx.strokeStyle = '#0f1710';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
       } else if (currentLevelSlug === 'debug_chamber') {
         const isHallway = (c >= 30 && c <= 33) || (r >= 30 && r <= 33);
         if (isHallway) {
@@ -1049,23 +1291,17 @@ function render() {
           ctx.fillStyle = altWay ? '#52525b' : '#3f3f46';
           ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
         } else if (c < 30 && r < 30) {
-          if (!canvasSpriteManager.drawTile(ctx, 'dark_grass', tx, ty, tileUnitPx)) {
-            const alt = (r + c) % 2 === 0;
-            ctx.fillStyle = alt ? '#2e7d32' : '#256628';
-            ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-          }
+          const alt = (r + c) % 2 === 0;
+          ctx.fillStyle = alt ? '#2e7d32' : '#256628';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
         } else if (c > 33 && r < 30) {
-          if (!canvasSpriteManager.drawTile(ctx, 'sanctuary_floor', tx, ty, tileUnitPx)) {
-            const alt = (r + c) % 2 === 0;
-            ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
-            ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-          }
+          const alt = (r + c) % 2 === 0;
+          ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
         } else if (c < 30 && r > 33) {
-          if (!canvasSpriteManager.drawTile(ctx, 'dungeon_wall', tx, ty, tileUnitPx)) {
-            const alt = (r + c) % 2 === 0;
-            ctx.fillStyle = alt ? '#3f3f46' : '#27272a';
-            ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-          }
+          const alt = (r + c) % 2 === 0;
+          ctx.fillStyle = alt ? '#3f3f46' : '#27272a';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
         } else {
           const alt = (r + c) % 2 === 0;
           ctx.fillStyle = alt ? '#b45309' : '#92400e';
@@ -1074,24 +1310,20 @@ function render() {
       } else if (currentLevelSlug === 'ganon_sanctuary') {
         const isCenterCarpet = (c >= 14 && c <= 17) || (c >= 30 && c <= 33);
         if (isCenterCarpet) {
-          if (!canvasSpriteManager.drawTile(ctx, 'sanctuary_carpet', tx, ty, tileUnitPx)) {
-            ctx.fillStyle = '#991b1b';
-            ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-            ctx.fillStyle = '#7f1d1d';
-            ctx.fillRect(tx + 4, ty + 4, tileUnitPx - 8, tileUnitPx - 8);
-            ctx.strokeStyle = '#f59e0b';
-            ctx.lineWidth = 0.5;
-            ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
-          }
+          ctx.fillStyle = '#991b1b';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+          ctx.fillStyle = '#7f1d1d';
+          ctx.fillRect(tx + 4, ty + 4, tileUnitPx - 8, tileUnitPx - 8);
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
         } else {
-          if (!canvasSpriteManager.drawTile(ctx, 'sanctuary_floor', tx, ty, tileUnitPx)) {
-            const alt = (r + c) % 2 === 0;
-            ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
-            ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-            ctx.strokeStyle = '#333338';
-            ctx.lineWidth = 0.5;
-            ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
-          }
+          const alt = (r + c) % 2 === 0;
+          ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+          ctx.strokeStyle = '#333338';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
         }
       } else if (currentLevelSlug === 'forgotten_cavern') {
         // Forgotten Dark Cavern Biome: Subterranean Slate Floor & Blue Water Streams
@@ -1188,6 +1420,11 @@ function render() {
     renderQueue.push({ sortY: p.y, type: 'projectile', data: p });
   });
 
+  // 10-Slot Parallel Ancilla Engine Entities & Particles (ALttP $0C4A Parity)
+  ancillaEngine.getActiveAncillae().forEach(anc => {
+    renderQueue.push({ sortY: anc.y, type: 'ancilla', data: anc });
+  });
+
   projectilePhysics.boomerangs.forEach(b => {
     renderQueue.push({ sortY: b.y, type: 'boomerang', data: b });
   });
@@ -1229,27 +1466,17 @@ function render() {
       }
     } else if (item.type === 'item') {
       const drop = item.data;
-      let itemSlug = '';
-      if (drop.type === 'rupee') itemSlug = 'dark_elixir';
-      else if (drop.type === 'heart') itemSlug = 'heart_container';
-      else if (drop.type === 'bomb') itemSlug = 'bomb';
-      else if (drop.type === 'arrow') itemSlug = 'shadow_blade';
-
-      if (itemSlug && canvasSpriteManager.drawItem(ctx, itemSlug, drop.x - 8, drop.y - 8, 16)) {
-        // Sprite atlas drawn
+      if (drop.type === 'rupee') {
+        ctx.fillStyle = '#10b981'; ctx.beginPath();
+        ctx.moveTo(drop.x, drop.y - 7); ctx.lineTo(drop.x + 5, drop.y); ctx.lineTo(drop.x, drop.y + 7); ctx.lineTo(drop.x - 5, drop.y);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#a7f3d0'; ctx.fillRect(drop.x - 1, drop.y - 4, 2, 4);
+      } else if (drop.type === 'heart') {
+        ctx.fillStyle = '#DE2626'; ctx.beginPath();
+        ctx.arc(drop.x - 3, drop.y - 2, 3, 0, Math.PI * 2); ctx.arc(drop.x + 3, drop.y - 2, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(drop.x - 6, drop.y - 1); ctx.lineTo(drop.x, drop.y + 6); ctx.lineTo(drop.x + 6, drop.y - 1); ctx.fill();
       } else {
-        if (drop.type === 'rupee') {
-          ctx.fillStyle = '#10b981'; ctx.beginPath();
-          ctx.moveTo(drop.x, drop.y - 7); ctx.lineTo(drop.x + 5, drop.y); ctx.lineTo(drop.x, drop.y + 7); ctx.lineTo(drop.x - 5, drop.y);
-          ctx.closePath(); ctx.fill();
-          ctx.fillStyle = '#a7f3d0'; ctx.fillRect(drop.x - 1, drop.y - 4, 2, 4);
-        } else if (drop.type === 'heart') {
-          ctx.fillStyle = '#DE2626'; ctx.beginPath();
-          ctx.arc(drop.x - 3, drop.y - 2, 3, 0, Math.PI * 2); ctx.arc(drop.x + 3, drop.y - 2, 3, 0, Math.PI * 2); ctx.fill();
-          ctx.beginPath(); ctx.moveTo(drop.x - 6, drop.y - 1); ctx.lineTo(drop.x, drop.y + 6); ctx.lineTo(drop.x + 6, drop.y - 1); ctx.fill();
-        } else {
-          ctx.fillStyle = '#f59e0b'; ctx.fillRect(drop.x - 2, drop.y - 5, 4, 10);
-        }
+        ctx.fillStyle = '#f59e0b'; ctx.fillRect(drop.x - 2, drop.y - 5, 4, 10);
       }
     } else if (item.type === 'ganon') {
       ctx.fillStyle = '#7f1d1d'; ctx.fillRect(470, 110, 84, 50);
@@ -1262,42 +1489,24 @@ function render() {
       });
 
       const gx = 512, gy = 135;
-      const gFrame = Math.floor(tickCount / 15) % 4;
-      if (!canvasSpriteManager.drawGanon(ctx, gFrame, gx, gy)) {
-        ctx.fillStyle = '#991b1b'; ctx.fillRect(gx - 20, gy - 10, 40, 30);
-        ctx.fillStyle = '#312e81'; ctx.fillRect(gx - 14, gy - 8, 28, 24);
-        ctx.fillStyle = '#1e1b4b'; ctx.beginPath(); ctx.arc(gx, gy - 16, 12, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ef4444'; ctx.fillRect(gx - 7, gy - 19, 4, 3); ctx.fillRect(gx + 3, gy - 19, 4, 3);
-      }
+      ctx.fillStyle = '#991b1b'; ctx.fillRect(gx - 20, gy - 10, 40, 30);
+      ctx.fillStyle = '#312e81'; ctx.fillRect(gx - 14, gy - 8, 28, 24);
+      ctx.fillStyle = '#1e1b4b'; ctx.beginPath(); ctx.arc(gx, gy - 16, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ef4444'; ctx.fillRect(gx - 7, gy - 19, 4, 3); ctx.fillRect(gx + 3, gy - 19, 4, 3);
     } else if (item.type === 'enemy') {
       const e = item.data;
-      const eFrame = Math.floor(tickCount / 12) % 4;
-      let drewEnemy = false;
       if (e.type === 'slime') {
-        drewEnemy = canvasSpriteManager.drawSlime(ctx, eFrame, e.x, e.y, e.hurtTime > 0);
-      } else if (e.type === 'guard') {
-        drewEnemy = canvasSpriteManager.drawGuard(ctx, eFrame, e.x, e.y, e.hurtTime > 0);
-      } else if (e.type === 'hyrule_knight' || e.type === 'hyrule_archer' || e.type === 'hyrule_mage') {
-        ctx.save();
-        if (e.hurtTime > 0) ctx.filter = 'brightness(2.0)';
-        drewEnemy = canvasSpriteManager.drawCell(ctx, e.type, eFrame, 0, Math.round(e.x - 16), Math.round(e.y - 20), 32, 32);
-        ctx.restore();
-      }
-
-      if (!drewEnemy) {
-        if (e.type === 'slime') {
-          const squish = Math.sin(tickCount * 0.2) * 2;
-          ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : '#16a34a';
-          ctx.beginPath(); ctx.ellipse(e.x, e.y, 11 + squish, 9 - squish, 0, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = '#86efac'; ctx.fillRect(e.x - 4, e.y - 5, 3, 3);
-          ctx.fillStyle = '#000000'; ctx.fillRect(e.x - 5, e.y - 1, 3, 3); ctx.fillRect(e.x + 2, e.y - 1, 3, 3);
-        } else {
-          ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : '#2563eb';
-          ctx.fillRect(e.x - 10, e.y - 10, 20, 20);
-          ctx.fillStyle = '#94a3b8'; ctx.fillRect(e.x - 8, e.y - 14, 16, 8);
-          ctx.fillStyle = '#0f172a'; ctx.fillRect(e.x - 6, e.y - 11, 12, 2);
-          ctx.fillStyle = '#cbd5e1'; ctx.fillRect(e.x + 10, e.y - 16, 2, 28);
-        }
+        const squish = Math.sin(tickCount * 0.2) * 2;
+        ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : '#16a34a';
+        ctx.beginPath(); ctx.ellipse(e.x, e.y, 11 + squish, 9 - squish, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#86efac'; ctx.fillRect(e.x - 4, e.y - 5, 3, 3);
+        ctx.fillStyle = '#000000'; ctx.fillRect(e.x - 5, e.y - 1, 3, 3); ctx.fillRect(e.x + 2, e.y - 1, 3, 3);
+      } else {
+        ctx.fillStyle = e.hurtTime > 0 ? '#ffffff' : '#2563eb';
+        ctx.fillRect(e.x - 10, e.y - 10, 20, 20);
+        ctx.fillStyle = '#94a3b8'; ctx.fillRect(e.x - 8, e.y - 14, 16, 8);
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(e.x - 6, e.y - 11, 12, 2);
+        ctx.fillStyle = '#cbd5e1'; ctx.fillRect(e.x + 10, e.y - 16, 2, 28);
       }
       ctx.fillStyle = '#18181b'; ctx.fillRect(e.x - 12, e.y - 20, 24, 3);
       ctx.fillStyle = '#DE2626'; ctx.fillRect(e.x - 12, e.y - 20, (e.hp / e.maxHp) * 24, 3);
@@ -1330,39 +1539,22 @@ function render() {
         ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 8px monospace';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('•••', e.x, e.y - 24);
-      } else if (e.aiState === 'STUNNED') {
-        ctx.fillStyle = '#FDE047'; ctx.font = 'bold 9px monospace';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('★', e.x, e.y - 24);
       }
     } else if (item.type === 'projectile') {
       const p = item.data;
       if (p.type === 'arrow') {
-        let arrowCol = 0;
-        if (p.vy < 0) arrowCol = 1;
-        else if (p.vx < 0) arrowCol = 2;
-        else if (p.vx > 0) arrowCol = 3;
-        if (!canvasSpriteManager.drawCell(ctx, 'shadow_arrow_flight', arrowCol, 0, Math.round(p.x - 16), Math.round(p.y - 16), 32, 32)) {
-          ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x - 2, p.y - 2, 5, 5);
-        }
-      } else if (p.type === 'enemy_arrow') {
-        ctx.fillStyle = '#F59E0B';
-        ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
-      } else if (p.type === 'enemy_bolt') {
-        ctx.fillStyle = tickCount % 6 < 3 ? '#FDE047' : '#2563EB';
-        ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
-      } else if (p.type === 'sword_beam') {
-        ctx.fillStyle = tickCount % 4 < 2 ? '#FFFFFF' : '#DE2626';
-        ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x - 2, p.y - 2, 5, 5);
       } else if (p.type === 'bomb') {
         ctx.fillStyle = tickCount % 10 < 5 ? '#DE2626' : '#18181b'; ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.fill();
       }
     } else if (item.type === 'boomerang') {
       const b = item.data;
       ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, Math.PI * 2); ctx.fill();
+    } else if (item.type === 'ancilla') {
+      const anc = item.data;
+      if (typeof anc.onRender === 'function') {
+        anc.onRender(anc, ctx);
+      }
     } else if (item.type === 'player') {
       const facing = playerFacing;
       const isSwordOverBody = facing === 'RIGHT' || facing === 'DOWN';
@@ -1384,39 +1576,20 @@ function render() {
           if (varIdx === 1) { sweepSpan = Math.PI * 0.9; extensionBonus = 5; }
           else if (varIdx === 2) { sweepSpan = Math.PI * 1.3; extensionBonus = 2; }
 
-          const frameIdx = Math.min(3, Math.floor(progress * 4));
-          const phaseAngles = [-0.48, -0.08, 0.32, 0.50];
-          const phaseLengths = [0.68, 1.0, 1.12, 0.82];
-          const phaseAlpha = [0.25, 0.55, 0.45, 0.18];
+          const startAngle = baseAngle - sweepSpan * 0.5;
+          const currentSweep = (progress - 0.5) * sweepSpan;
+          const currentBladeAngle = baseAngle + currentSweep;
 
-          const sweepDir = facing === 'RIGHT' ? -1 : 1;
-          const currentBladeAngle = baseAngle + phaseAngles[frameIdx] * sweepSpan * sweepDir;
-          const bladeLength = (40 + extensionBonus) * phaseLengths[frameIdx];
+          const bladeLength = 40 + extensionBonus;
           const bladeX = px + Math.cos(currentBladeAngle) * bladeLength;
           const bladeY = py + Math.sin(currentBladeAngle) * bladeLength;
 
-          if (frameIdx >= 1) {
-            const prevAngle = baseAngle + phaseAngles[frameIdx - 1] * sweepSpan * sweepDir;
-            ctx.fillStyle = varIdx === 1 ? `rgba(255, 255, 255, ${phaseAlpha[frameIdx]})` : `rgba(222, 38, 38, ${phaseAlpha[frameIdx]})`;
-            ctx.beginPath();
-            ctx.arc(px, py, bladeLength + 2, prevAngle, currentBladeAngle, sweepDir < 0);
-            ctx.arc(px, py, Math.max(10, bladeLength * 0.45), currentBladeAngle, prevAngle, sweepDir > 0);
-            ctx.closePath();
-            ctx.fill();
+          const trailStartAngle = Math.max(startAngle, currentBladeAngle - Math.PI * 0.55);
+          ctx.fillStyle = varIdx === 1 ? 'rgba(255, 255, 255, 0.45)' : 'rgba(222, 38, 38, 0.4)';
+          ctx.beginPath(); ctx.arc(px, py, bladeLength + 2, trailStartAngle, currentBladeAngle); ctx.lineTo(px, py); ctx.closePath(); ctx.fill();
 
-            const prevLen = (40 + extensionBonus) * phaseLengths[frameIdx - 1];
-            ctx.strokeStyle = 'rgba(222, 38, 38, 0.45)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(px + Math.cos(prevAngle) * 6, py + Math.sin(prevAngle) * 6);
-            ctx.lineTo(px + Math.cos(prevAngle) * prevLen, py + Math.sin(prevAngle) * prevLen);
-            ctx.stroke();
-          }
-
-          ctx.strokeStyle = '#DE2626'; ctx.lineWidth = frameIdx === 0 ? 3 : 5;
-          ctx.beginPath(); ctx.moveTo(px + Math.cos(currentBladeAngle) * 5, py + Math.sin(currentBladeAngle) * 5); ctx.lineTo(bladeX, bladeY); ctx.stroke();
-          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5;
-          ctx.beginPath(); ctx.moveTo(px + Math.cos(currentBladeAngle) * 4, py + Math.sin(currentBladeAngle) * 4); ctx.lineTo(bladeX, bladeY); ctx.stroke();
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(bladeX, bladeY); ctx.stroke();
+          ctx.strokeStyle = '#DE2626'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(px + Math.cos(currentBladeAngle) * 5, py + Math.sin(currentBladeAngle) * 5); ctx.lineTo(bladeX, bladeY); ctx.stroke();
           ctx.fillStyle = '#ffffff'; ctx.fillRect(bladeX - 1.5, bladeY - 1.5, 3, 3);
         }
       };
@@ -1458,26 +1631,21 @@ function render() {
       if (facing === 'UP') renderObsidianShield();
       if (!isSwordOverBody) renderSwordSlash();
 
-      // Shadow Link Body (Sprite Sheet with Procedural Fallback)
-      const walkFrame = isMoving ? Math.floor(tickCount / 8) % 4 : 0;
-      const drewSprite = canvasSpriteManager.drawShadowLink(ctx, facing, walkFrame, px, py, isHurt);
+      // Shadow Link Body
+      ctx.fillStyle = isHurt ? '#ffffff' : '#ffffff';
+      ctx.fillRect(px - 7, py + 10, 5, 5); ctx.fillRect(px + 2, py + 10, 5, 5);
 
-      if (!drewSprite) {
-        ctx.fillStyle = isHurt ? '#ffffff' : '#ffffff';
-        ctx.fillRect(px - 7, py + 10, 5, 5); ctx.fillRect(px + 2, py + 10, 5, 5);
+      ctx.fillStyle = isHurt ? '#ffffff' : '#1e1e2d';
+      ctx.fillRect(px - 9, py - 10, 18, 20);
+      ctx.strokeStyle = '#3f3f5a'; ctx.lineWidth = 1; ctx.strokeRect(px - 9, py - 10, 18, 20);
 
-        ctx.fillStyle = isHurt ? '#ffffff' : '#1e1e2d';
-        ctx.fillRect(px - 9, py - 10, 18, 20);
-        ctx.strokeStyle = '#3f3f5a'; ctx.lineWidth = 1; ctx.strokeRect(px - 9, py - 10, 18, 20);
+      ctx.fillStyle = '#DE2626'; ctx.fillRect(px - 9, py + 1, 18, 3);
+      ctx.fillStyle = '#12121a'; ctx.fillRect(px - 7, py - 14, 14, 8);
 
-        ctx.fillStyle = '#DE2626'; ctx.fillRect(px - 9, py + 1, 18, 3);
-        ctx.fillStyle = '#12121a'; ctx.fillRect(px - 7, py - 14, 14, 8);
-
-        ctx.fillStyle = '#f87171';
-        if (facing === 'DOWN') { ctx.fillRect(px - 5, py - 7, 3, 3); ctx.fillRect(px + 2, py - 7, 3, 3); }
-        else if (facing === 'LEFT') ctx.fillRect(px - 6, py - 7, 3, 3);
-        else if (facing === 'RIGHT') ctx.fillRect(px + 3, py - 7, 3, 3);
-      }
+      ctx.fillStyle = '#f87171';
+      if (facing === 'DOWN') { ctx.fillRect(px - 5, py - 7, 3, 3); ctx.fillRect(px + 2, py - 7, 3, 3); }
+      else if (facing === 'LEFT') ctx.fillRect(px - 6, py - 7, 3, 3);
+      else if (facing === 'RIGHT') ctx.fillRect(px + 3, py - 7, 3, 3);
 
       if (facing !== 'UP') renderObsidianShield();
       if (isSwordOverBody) renderSwordSlash();
@@ -1497,7 +1665,8 @@ function render() {
   ctx.fillStyle = '#DE2626';
   ctx.font = 'bold 11px monospace';
 
-  const yItemLabel = activeYItem === 'shadow_boomerang' ? '🪃 BOOMERANG' : '🏹 DARK BOW';
+  const curItem = inventoryState.getEquippedYItem();
+  const yItemLabel = curItem ? `${curItem.icon} ${curItem.name.toUpperCase()}` : (activeYItem === 'shadow_boomerang' ? '🪃 BOOMERANG' : '🏹 DARK BOW');
   const roomName = currentLevelSlug.replace('_', ' ').toUpperCase();
   ctx.fillText(`SHADOW LINK | HP: ${playerHp}/${playerMaxHp} | Y: ${yItemLabel}`, 12, 20);
 

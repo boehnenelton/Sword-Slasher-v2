@@ -29,7 +29,6 @@
     ["d7efa941-b0b8-4f8f-bd00-72d0277a1b0d", "ItemDefinition", "WEAPON", "BROADSWORD", "SLOT_SWORD", "LEGENDARY", "shadow_blade", "Shadow Blade", 25, 0, 0, "#DE2626", "A dark sword forged in Ganon's flame with crimson slash energy.", "2026-10-25T21:04:00Z"],
     ["6ff5b8c1-466e-44fb-8592-41f44cbbf8c5", "ItemDefinition", "CONSUMABLE", "HEAL_POTION", "NONE", "COMMON", "dark_elixir", "Dark Elixir", 0, 0, 50, "#8b5cf6", "Restores 50 health points for Shadow Link.", "2026-10-25T21:04:00Z"],
     ["6ff5b8c1-466e-44fb-8592-41f44cbbf8c6", "ItemDefinition", "KEY_ITEM", "PORTAL_KEY", "NONE", "RARE", "sanctuary_seal", "Sanctuary Seal", 0, 0, 0, "#f59e0b", "Unlocks the portal exit from Ganon's Dark Sanctuary.", "2026-10-25T21:04:00Z"],
-    ["6ff5b8c1-466e-44fb-8592-41f44cbbf8c7", "ItemDefinition", "KEY_ITEM", "PORTAL_KEY", "NONE", "LEGENDARY", "princess_zelda", "Princess Zelda", 0, 0, 0, "#ec4899", "The royal captive required by Ganon to fulfill the dark prophecy.", "2026-10-25T21:04:00Z"],
-    ["d2000001-0002-4000-8000-000000000002", "ItemDefinition", "WEAPON", "BOW", "SLOT_TOOL", "RARE", "dark_bow", "Dark Bow", 25, 0, 0, "#DE2626", "Fires shadow piercing arrows across distances.", "2026-11-16T07:32:00Z"]
+    ["6ff5b8c1-466e-44fb-8592-41f44cbbf8c7", "ItemDefinition", "KEY_ITEM", "PORTAL_KEY", "NONE", "LEGENDARY", "princess_zelda", "Princess Zelda", 0, 0, 0, "#ec4899", "The royal captive required by Ganon to fulfill the dark prophecy.", "2026-10-25T21:04:00Z"]
   ]
 }

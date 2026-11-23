@@ -3,16 +3,19 @@
 Name:           data_chunker.py
 Family:         Simple_Chunker
 Description:    Dedicated CLI tool for BEJSON data chunking and serialization into flat containers (.104a.bejson.txt).
-Version:        1.0.1
+Version:        1.0.2
 Date:           2026-11-12
 Author:         Elton Boehnen · boehnenelton2024@gmail.com
-RELATIONAL_ID:  7558ee23-9f0c-40f0-969b-eb42bee1f75d
+RELATIONAL_ID:  d4bc2f79-4ee6-42ff-99a8-518caff4325d
 """
 
 import os
 import json
 import sys
 import hashlib
+import logging
+
+log = logging.getLogger("ss2.chunker")
 
 def compute_sha1(payload_bytes: bytes) -> str:
     return hashlib.sha1(payload_bytes).hexdigest()
@@ -27,7 +30,7 @@ def run_chunker():
     os.makedirs(output_dir, exist_ok=True)
 
     records = []
-    print(f"[*] Chunker scanning: {raw_dir}")
+    log.info(f"Chunker scanning: {raw_dir}")
 
     if os.path.exists(raw_dir):
         for root, _, files in os.walk(raw_dir):
@@ -49,9 +52,9 @@ def run_chunker():
                                 False,
                                 False
                             ])
-                            print(f"  + Chunked: {rel_p}")
+                            log.info(f"Chunked: {rel_p}")
                     except Exception as e:
-                        print(f"  ! Error chunking {rel_p}: {e}")
+                        log.error(f"Error chunking {rel_p}: {e}")
 
     chunk_doc = {
         "Format": "BEJSON",
@@ -78,7 +81,8 @@ def run_chunker():
     with open(out_file, "w", encoding="utf-8") as out_f:
         json.dump(chunk_doc, out_f, indent=2)
 
-    print(f"[SUCCESS] Chunker created container with {len(records)} files -> {out_file}")
+    log.info(f"[SUCCESS] Chunker created container with {len(records)} files -> {out_file}")
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     run_chunker()

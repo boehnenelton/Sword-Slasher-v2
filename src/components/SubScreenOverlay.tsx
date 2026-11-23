@@ -2,14 +2,14 @@
  * Library:         SubScreenOverlay.tsx
  * Module Purpose:  Compact Authentic Link to the Past Inventory & Status Sub-Screen Overlay
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com
- * Relational_ID:   105a0032-2026-1110-9999-000000000309
- * Version:         200300
+ * Relational_ID:   bb62575c-3aad-4d9b-8b31-82c56d97bc9e
+ * Version:         200301
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { shadowEngine } from '../lib/lib_bejson_Gaming_shadow_engine';
 import { soundEngine } from '../engine/soundEngine';
-import { X, Sword, Shield, Key, Heart, Gem, Sparkles, Layers, Compass } from 'lucide-react';
+import { X, Key, Heart, Gem, Compass } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;

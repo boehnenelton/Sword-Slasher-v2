@@ -2,13 +2,13 @@
  * Library:         IntroStartScreen.tsx
  * Module Purpose:  Clean Pixel Art Start Screen with Title, Start Game, AI Advisor, and System Controls
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com
- * Relational_ID:   105a0002-2026-1025-9999-000000000106
- * Version:         200103
+ * Relational_ID:   2a13446a-ff4f-47f9-9c6e-a094d5645c9e
+ * Version:         200104
  */
 
 import React, { useEffect, useRef, useState } from 'react';
 import { soundEngine } from '../engine/soundEngine';
-import { Volume2, VolumeX, Play, Info, Sparkles, Terminal, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Volume2, VolumeX, Play, Info, Terminal } from 'lucide-react';
 
 interface Props {
   onStartGame: () => void;
