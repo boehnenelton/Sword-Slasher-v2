@@ -176,11 +176,44 @@ def compile_bejson_datasets():
         <p style="font-size: 10px; color: #71717a; font-family: monospace; margin-top: 20px;">Author: Elton Boehnen · BEJSON 105 Pure Data Engine</p>
       </div>
       <canvas id="gameCanvas" width="448" height="448"></canvas>
+      <div id="debug-mode-badge" style="display: none; position: absolute; top: 12px; left: 12px; background: rgba(245, 158, 11, 0.25); border: 1px solid rgba(245, 158, 11, 0.7); color: #fcd34d; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; z-index: 20; pointer-events: none; font-family: monospace;">
+        ● DEBUG DOMAIN
+      </div>
     </div>
 
-    <div id="room-controls">
-      <button id="btn-room-debug" class="room-btn active" onclick="setDebugRoom('debug_chamber')">🔧 Debug Chamber [1]</button>
-      <button id="btn-room-sanctuary" class="room-btn" onclick="setDebugRoom('ganon_sanctuary')">🏛️ Ganon Sanctuary [2]</button>
+    <!-- SELECT: System & Debug Mode Overlay -->
+    <div id="select-menu-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(4px); z-index: 999; align-items: center; justify-content: center;">
+      <div style="background: #09090b; border: 2px solid #3f3f46; border-radius: 12px; width: 90%; max-width: 420px; padding: 20px; box-shadow: 0 0 35px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 14px; font-family: monospace; color: #fff;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a; padding-bottom: 10px;">
+          <span style="font-weight: bold; font-size: 13px; color: #f4f4f5; letter-spacing: 0.05em;">SYSTEM & DEBUG SETTINGS</span>
+          <button id="btn-close-select-menu" style="background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; border-radius: 6px; padding: 3px 8px; font-size: 12px; cursor: pointer;">✕</button>
+        </div>
+
+        <div style="background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 12px; font-weight: bold; color: #fbbf24;">DEBUG MODE SWITCH</div>
+              <div style="font-size: 10px; color: #71717a; font-family: sans-serif; margin-top: 2px;">Separate debug testing room from real game world</div>
+            </div>
+            <button id="btn-toggle-debug" style="background: #27272a; border: 1px solid #52525b; color: #e4e4e7; border-radius: 6px; padding: 6px 14px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: monospace; transition: all 0.2s;">
+              DEBUG: OFF
+            </button>
+          </div>
+          <div style="background: #09090b; border: 1px solid #27272a; border-radius: 6px; padding: 8px 12px; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #71717a;">ACTIVE REALM:</span>
+            <span id="label-active-realm" style="color: #34d399; font-weight: bold;">🗡️ [GAME WORLD 1]</span>
+          </div>
+        </div>
+
+        <button id="btn-resume-game" style="background: #DE2626; border: none; color: #fff; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer; font-family: monospace; letter-spacing: 0.05em; margin-top: 4px;">
+          RESUME GAME [SELECT / ESC]
+        </button>
+      </div>
+    </div>
+
+    <div id="room-controls" style="display: none;">
+      <button id="btn-room-debug" class="room-btn" onclick="if(isDebugMode) setDebugRoom('debug_chamber')">🔧 Debug Chamber [1]</button>
+      <button id="btn-room-sanctuary" class="room-btn active" onclick="setDebugRoom('ganon_sanctuary')">🏛️ Ganon Sanctuary [2]</button>
       <button id="btn-room-cavern" class="room-btn" onclick="setDebugRoom('forgotten_cavern')">🦇 Forgotten Cavern [3]</button>
       <button id="btn-room-courtyard" class="room-btn" onclick="setDebugRoom('castle_courtyard')">🏰 Castle Courtyard [4]</button>
     </div>
@@ -554,7 +587,9 @@ def compile_bejson_datasets():
     inventoryState.setSlot(1, {{ itemId: 'dark_bow', unlocked: true, tier: 1 }});
     inventoryState.setEquippedYItem('shadow_boomerang');
     let activeYItem = inventoryState.equippedYItemId || 'shadow_boomerang';
-    let currentLevelSlug = 'debug_chamber';
+    let isDebugMode = false;
+    let realWorldLevelSlug = 'ganon_sanctuary';
+    let currentLevelSlug = realWorldLevelSlug;
 
     let boomerangs = [];
     let droppedItems = [];
@@ -565,6 +600,9 @@ def compile_bejson_datasets():
     function setDebugRoom(slug) {{
       ancillaEngine.clearAll();
       currentLevelSlug = slug;
+      if (slug !== 'debug_chamber') {{
+        realWorldLevelSlug = slug;
+      }}
       if (slug === 'forgotten_cavern' || slug === 'castle_courtyard') {{
         tilesW = 96;
         tilesH = 96;
@@ -611,7 +649,7 @@ def compile_bejson_datasets():
       else if (slug === 'castle_courtyard') document.getElementById('btn-room-courtyard')?.classList.add('active');
     }}
 
-    setDebugRoom('debug_chamber');
+    setDebugRoom(isDebugMode ? 'debug_chamber' : realWorldLevelSlug);
 
     const keys = {{}};
     let joystickVector = {{ x: 0, y: 0 }};
@@ -619,10 +657,16 @@ def compile_bejson_datasets():
     window.addEventListener('keydown', e => {{
       const k = e.key.toLowerCase();
       keys[k] = true;
-      if (k === '1') setDebugRoom('debug_chamber');
+      if (k === '1') {{
+        if (isDebugMode) setDebugRoom('debug_chamber');
+      }}
       if (k === '2') setDebugRoom('ganon_sanctuary');
       if (k === '3') setDebugRoom('forgotten_cavern');
       if (k === '4') setDebugRoom('castle_courtyard');
+      if (k === 'escape') {{
+        const o = document.getElementById('select-menu-overlay');
+        if (o) o.style.display = 'none';
+      }}
       if (k === 'q' || k === 'tab') {{
         e.preventDefault();
         const nextItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
@@ -821,9 +865,11 @@ def compile_bejson_datasets():
       dismissIntro();
       document.getElementById('btn-select')?.classList.add('active');
       document.getElementById('row-select')?.classList.add('active');
-      const nextItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
-      inventoryState.setEquippedYItem(nextItem);
-      activeYItem = inventoryState.equippedYItemId || nextItem;
+      const overlay = document.getElementById('select-menu-overlay');
+      if (overlay) {{
+        const isVisible = overlay.style.display === 'flex';
+        overlay.style.display = isVisible ? 'none' : 'flex';
+      }}
       setTimeout(() => {{
         document.getElementById('btn-select')?.classList.remove('active');
         document.getElementById('row-select')?.classList.remove('active');
@@ -831,6 +877,54 @@ def compile_bejson_datasets():
     }};
     document.getElementById('btn-select')?.addEventListener('pointerdown', handleSelect);
     document.getElementById('row-select')?.addEventListener('pointerdown', handleSelect);
+
+    const handleToggleDebug = (e) => {{
+      if (e) {{ e.preventDefault(); e.stopPropagation(); }}
+      isDebugMode = !isDebugMode;
+      const btn = document.getElementById('btn-toggle-debug');
+      const realmLabel = document.getElementById('label-active-realm');
+      const roomControls = document.getElementById('room-controls');
+      const debugBadge = document.getElementById('debug-mode-badge');
+
+      if (isDebugMode) {{
+        setDebugRoom('debug_chamber');
+        if (btn) {{
+          btn.textContent = 'DEBUG: ON';
+          btn.style.background = '#d97706';
+          btn.style.borderColor = '#f59e0b';
+          btn.style.color = '#ffffff';
+        }}
+        if (realmLabel) {{
+          realmLabel.textContent = '🔧 [DEBUG DOMAIN] TEST CHAMBER';
+          realmLabel.style.color = '#fbbf24';
+        }}
+        if (roomControls) roomControls.style.display = 'flex';
+        if (debugBadge) debugBadge.style.display = 'block';
+      }} else {{
+        setDebugRoom(realWorldLevelSlug || 'ganon_sanctuary');
+        if (btn) {{
+          btn.textContent = 'DEBUG: OFF';
+          btn.style.background = '#27272a';
+          btn.style.borderColor = '#52525b';
+          btn.style.color = '#e4e4e7';
+        }}
+        if (realmLabel) {{
+          realmLabel.textContent = '🗡️ [GAME WORLD 1]';
+          realmLabel.style.color = '#34d399';
+        }}
+        if (roomControls) roomControls.style.display = 'none';
+        if (debugBadge) debugBadge.style.display = 'none';
+      }}
+    }};
+    document.getElementById('btn-toggle-debug')?.addEventListener('click', handleToggleDebug);
+    document.getElementById('btn-close-select-menu')?.addEventListener('click', () => {{
+      const o = document.getElementById('select-menu-overlay');
+      if (o) o.style.display = 'none';
+    }});
+    document.getElementById('btn-resume-game')?.addEventListener('click', () => {{
+      const o = document.getElementById('select-menu-overlay');
+      if (o) o.style.display = 'none';
+    }});
 
     const handleStart = (e) => {{
       if (e) {{ e.preventDefault(); e.stopPropagation(); }}

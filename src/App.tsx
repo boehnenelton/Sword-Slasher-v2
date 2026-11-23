@@ -37,6 +37,28 @@ export default function App() {
   const [isSubScreenOpen, setIsSubScreenOpen] = useState(false);
   const [isWorldMapOpen, setIsWorldMapOpen] = useState(false);
   const [activeDialogue, setActiveDialogue] = useState<GameEventData | null>(null);
+  const [isDebugMode, setIsDebugMode] = useState(false);
+  const [savedRealWorldSlug, setSavedRealWorldSlug] = useState('ganon_sanctuary');
+
+  const handleToggleDebugMode = (enable: boolean) => {
+    if (enable) {
+      if (!isDebugMode && bejsonEngine.currentLevelSlug !== 'debug_chamber') {
+        setSavedRealWorldSlug(bejsonEngine.currentLevelSlug);
+      }
+      setIsDebugMode(true);
+      bejsonEngine.currentLevelSlug = 'debug_chamber';
+      bejsonEngine.playerX = 320;
+      bejsonEngine.playerY = 320;
+      soundEngine.playChimeSFX();
+    } else {
+      setIsDebugMode(false);
+      const target = (savedRealWorldSlug && savedRealWorldSlug !== 'debug_chamber') ? savedRealWorldSlug : 'ganon_sanctuary';
+      bejsonEngine.currentLevelSlug = target;
+      bejsonEngine.playerX = 320;
+      bejsonEngine.playerY = 360;
+      soundEngine.playChimeSFX();
+    }
+  };
 
   // Boot BEJSON 105 Simulation Engine
   useEffect(() => {
@@ -131,6 +153,7 @@ export default function App() {
               onOpenInventory={() => setIsSubScreenOpen(true)}
               onOpenSettings={() => setIsSettingsOpen(true)}
               onOpenWorldMap={() => setIsWorldMapOpen(true)}
+              isDebugMode={isDebugMode}
             />
             {activeDialogue && (
               <DialogueOverlay
@@ -150,15 +173,14 @@ export default function App() {
       <SubScreenOverlay
         isOpen={isSubScreenOpen}
         onClose={() => setIsSubScreenOpen(false)}
+        isDebugMode={isDebugMode}
         onExitToTitle={() => {
           setIsSubScreenOpen(false);
           soundEngine.stopMusic();
           setInGame(false);
         }}
         onWarpToDebug={() => {
-          bejsonEngine.currentLevelSlug = 'debug_chamber';
-          bejsonEngine.playerX = 320;
-          bejsonEngine.playerY = 320;
+          handleToggleDebugMode(true);
           setIsSubScreenOpen(false);
         }}
       />
@@ -175,6 +197,8 @@ export default function App() {
         onClose={() => setIsSettingsOpen(false)}
         crtEnabled={crtEnabled}
         onToggleCrt={() => setCrtEnabled(!crtEnabled)}
+        isDebugMode={isDebugMode}
+        onToggleDebugMode={handleToggleDebugMode}
       />
 
       <MetaUIModal

@@ -23,6 +23,7 @@ interface Props {
   onOpenInventory: () => void;
   onOpenSettings: () => void;
   onOpenWorldMap: () => void;
+  isDebugMode?: boolean;
 }
 
 interface EnemyState {
@@ -71,7 +72,8 @@ export const GameViewport: React.FC<Props> = ({
   crtEnabled,
   onOpenInventory,
   onOpenSettings,
-  onOpenWorldMap
+  onOpenWorldMap,
+  isDebugMode = false
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const keysRef = useRef<{ [key: string]: boolean }>({});
@@ -1686,6 +1688,14 @@ export const GameViewport: React.FC<Props> = ({
         {/* CRT Scanline Overlay */}
         {crtEnabled && (
           <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,_rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px]" />
+        )}
+
+        {/* Debug Domain Indicator Badge */}
+        {isDebugMode && (
+          <div className="absolute top-2 left-2 pointer-events-none bg-amber-500/20 border border-amber-500/60 text-amber-300 text-[9px] font-mono font-bold px-2 py-0.5 rounded shadow-lg backdrop-blur-sm flex items-center gap-1.5 z-20">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            DEBUG DOMAIN
+          </div>
         )}
       </div>
 

@@ -325,11 +325,16 @@ let activeYItem = inventoryState.equippedYItemId || 'shadow_boomerang';
 let otherProjectiles = [];
 let droppedItems = [];
 
-let currentLevelSlug = 'debug_chamber';
+let isDebugMode = false;
+let realWorldLevelSlug = 'ganon_sanctuary';
+let currentLevelSlug = realWorldLevelSlug;
 
 function setDebugRoom(slug) {
   ancillaEngine.clearAll();
   currentLevelSlug = slug;
+  if (slug !== 'debug_chamber') {
+    realWorldLevelSlug = slug;
+  }
   if (slug === 'forgotten_cavern' || slug === 'castle_courtyard') {
     tilesW = 96;
     tilesH = 96;
@@ -539,23 +544,7 @@ function initGamepadDeck() {
     btnX.addEventListener('pointercancel', () => btnX.classList.remove('active'));
   }
 
-  // SELECT: Toggle active Y-item (supports tapping button or row)
-  const handleSelect = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    initAudio();
-    document.getElementById('btn-select')?.classList.add('active');
-    document.getElementById('row-select')?.classList.add('active');
-    const nextItem = activeYItem === 'shadow_boomerang' ? 'dark_bow' : 'shadow_boomerang';
-    inventoryState.setEquippedYItem(nextItem);
-    activeYItem = inventoryState.equippedYItemId || nextItem;
-    shadowEngine.setSelectedYItem(activeYItem);
-    sfx.chime();
-    setTimeout(() => {
-      document.getElementById('btn-select')?.classList.remove('active');
-      document.getElementById('row-select')?.classList.remove('active');
-    }, 150);
-  };
+  // SELECT: Open System & Debug Mode Overlay Menu
   document.getElementById('btn-select')?.addEventListener('pointerdown', handleSelect);
   document.getElementById('row-select')?.addEventListener('pointerdown', handleSelect);
 
@@ -579,15 +568,85 @@ function initGamepadDeck() {
   document.getElementById('row-start')?.addEventListener('pointerdown', handleStart);
 }
 
+function handleSelect(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  initAudio();
+  document.getElementById('btn-select')?.classList.add('active');
+  document.getElementById('row-select')?.classList.add('active');
+  const overlay = document.getElementById('select-menu-overlay');
+  if (overlay) {
+    const isVisible = overlay.style.display === 'flex';
+    overlay.style.display = isVisible ? 'none' : 'flex';
+    sfx.chime();
+  }
+  setTimeout(() => {
+    document.getElementById('btn-select')?.classList.remove('active');
+    document.getElementById('row-select')?.classList.remove('active');
+  }, 150);
+}
+
+function handleToggleDebug(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  initAudio();
+  isDebugMode = !isDebugMode;
+  const btn = document.getElementById('btn-toggle-debug');
+  const realmLabel = document.getElementById('label-active-realm');
+  const controlsBar = document.getElementById('controls-bar');
+  const debugBadge = document.getElementById('debug-mode-badge');
+
+  if (isDebugMode) {
+    setDebugRoom('debug_chamber');
+    if (btn) {
+      btn.textContent = 'DEBUG: ON';
+      btn.style.background = '#d97706';
+      btn.style.borderColor = '#f59e0b';
+      btn.style.color = '#ffffff';
+    }
+    if (realmLabel) {
+      realmLabel.textContent = '🔧 [DEBUG DOMAIN] TEST CHAMBER';
+      realmLabel.style.color = '#fbbf24';
+    }
+    if (controlsBar) controlsBar.style.display = 'flex';
+    if (debugBadge) debugBadge.style.display = 'block';
+  } else {
+    setDebugRoom(realWorldLevelSlug || 'ganon_sanctuary');
+    if (btn) {
+      btn.textContent = 'DEBUG: OFF';
+      btn.style.background = '#27272a';
+      btn.style.borderColor = '#52525b';
+      btn.style.color = '#e4e4e7';
+    }
+    if (realmLabel) {
+      realmLabel.textContent = '🗡️ [GAME WORLD 1]';
+      realmLabel.style.color = '#34d399';
+    }
+    if (controlsBar) controlsBar.style.display = 'none';
+    if (debugBadge) debugBadge.style.display = 'none';
+  }
+  sfx.chime();
+}
+
 window.addEventListener('keydown', (e) => {
   const k = e.key.toLowerCase();
   keys[k] = true;
   initAudio();
 
-  if (k === '1') setDebugRoom('debug_chamber');
+  if (k === '1') {
+    if (isDebugMode) setDebugRoom('debug_chamber');
+  }
   if (k === '2') setDebugRoom('ganon_sanctuary');
   if (k === '3') setDebugRoom('forgotten_cavern');
   if (k === '4') setDebugRoom('castle_courtyard');
+  if (k === 'escape') {
+    const o = document.getElementById('select-menu-overlay');
+    if (o) o.style.display = 'none';
+  }
 
   if (k === 'w' || k === 'a' || k === 's' || k === 'd' || k.startsWith('arrow')) {
     document.getElementById('joystick')?.classList.add('active');
@@ -636,10 +695,21 @@ window.addEventListener('keyup', (e) => {
 });
 
 function initControlsAndDeck() {
-  document.getElementById('btn-room-debug')?.addEventListener('click', () => setDebugRoom('debug_chamber'));
+  document.getElementById('btn-room-debug')?.addEventListener('click', () => {
+    if (isDebugMode) setDebugRoom('debug_chamber');
+  });
   document.getElementById('btn-room-sanctuary')?.addEventListener('click', () => setDebugRoom('ganon_sanctuary'));
   document.getElementById('btn-room-cavern')?.addEventListener('click', () => setDebugRoom('forgotten_cavern'));
   document.getElementById('btn-room-courtyard')?.addEventListener('click', () => setDebugRoom('castle_courtyard'));
+  document.getElementById('btn-toggle-debug')?.addEventListener('click', handleToggleDebug);
+  document.getElementById('btn-close-select-menu')?.addEventListener('click', () => {
+    const o = document.getElementById('select-menu-overlay');
+    if (o) o.style.display = 'none';
+  });
+  document.getElementById('btn-resume-game')?.addEventListener('click', () => {
+    const o = document.getElementById('select-menu-overlay');
+    if (o) o.style.display = 'none';
+  });
   initGamepadDeck();
 }
 
@@ -878,7 +948,7 @@ async function bootVanillaEngine() {
       console.warn(`[Vanilla Mirror] Failed loading ${f.url}:`, err);
     }
   }
-  setDebugRoom('debug_chamber');
+  setDebugRoom(isDebugMode ? 'debug_chamber' : realWorldLevelSlug);
   requestAnimationFrame(gameLoop);
 }
 

@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { X, Key, Tv, Volume2, ShieldCheck, Lock } from 'lucide-react';
+import { X, Key, Tv, Volume2, ShieldCheck, Lock, Wrench } from 'lucide-react';
 import { soundEngine } from '../engine/soundEngine';
 
 interface Props {
@@ -15,9 +15,18 @@ interface Props {
   onClose: () => void;
   crtEnabled: boolean;
   onToggleCrt: () => void;
+  isDebugMode?: boolean;
+  onToggleDebugMode?: (enabled: boolean) => void;
 }
 
-export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, crtEnabled, onToggleCrt }) => {
+export const SettingsModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  crtEnabled,
+  onToggleCrt,
+  isDebugMode = false,
+  onToggleDebugMode
+}) => {
   const [enableExternalKeys, setEnableExternalKeys] = useState(false);
   const [customApiKey, setCustomApiKey] = useState('');
   const [isMuted, setIsMuted] = useState(soundEngine.getIsMuted());
@@ -95,6 +104,37 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, crtEnabled, on
             >
               {!isMuted ? 'AUDIO ON' : 'MUTED'}
             </button>
+          </div>
+        </div>
+
+        {/* Debug World & Environment Isolation Switch */}
+        <div className="space-y-3 bg-zinc-900/60 p-5 border border-white/5 rounded-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                <Wrench className="w-4 h-4 text-amber-400" /> DEBUG MODE SWITCH
+              </div>
+              <p className="text-[11px] text-zinc-400 font-sans mt-0.5">
+                Isolate debug testing chamber from real game world campaign.
+              </p>
+            </div>
+            <button
+              onClick={() => onToggleDebugMode && onToggleDebugMode(!isDebugMode)}
+              className={`px-4 py-2 text-xs font-bold rounded-lg cursor-pointer transition-all border font-mono ${
+                isDebugMode
+                  ? 'bg-amber-600/90 text-white border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+                  : 'bg-zinc-900 text-zinc-300 border-white/10 hover:border-white/30'
+              }`}
+            >
+              {isDebugMode ? 'DEBUG: ON' : 'DEBUG: OFF'}
+            </button>
+          </div>
+
+          <div className="bg-zinc-950 p-3 rounded-lg border border-white/5 flex items-center justify-between text-xs">
+            <span className="text-zinc-400 font-mono">ACTIVE REALM:</span>
+            <span className={`font-bold font-mono ${isDebugMode ? 'text-amber-400' : 'text-emerald-400'}`}>
+              {isDebugMode ? '🔧 [DEBUG DOMAIN] TEST CHAMBER' : '🗡️ [GAME WORLD 1] CAMPAIGN REALM'}
+            </span>
           </div>
         </div>
 

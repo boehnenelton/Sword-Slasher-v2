@@ -16,9 +16,10 @@ interface Props {
   onClose: () => void;
   onExitToTitle?: () => void;
   onWarpToDebug?: () => void;
+  isDebugMode?: boolean;
 }
 
-export const SubScreenOverlay: React.FC<Props> = ({ isOpen, onClose, onExitToTitle, onWarpToDebug }) => {
+export const SubScreenOverlay: React.FC<Props> = ({ isOpen, onClose, onExitToTitle, onWarpToDebug, isDebugMode = false }) => {
   const [activeTab, setActiveTab] = useState<'yItems' | 'gear'>('yItems');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -276,7 +277,7 @@ export const SubScreenOverlay: React.FC<Props> = ({ isOpen, onClose, onExitToTit
         <div className="flex justify-between items-center pt-2 border-t border-zinc-800 text-[9px] text-zinc-400">
           <span>PRESS [Q] / [E] SWITCH TAB · [ENTER] RETURN</span>
           <div className="flex items-center gap-1.5">
-            {onWarpToDebug && (
+            {onWarpToDebug && isDebugMode && (
               <button
                 onClick={() => { soundEngine.playChimeSFX(); onWarpToDebug(); }}
                 className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-amber-400 border border-amber-600/50 font-['Press_Start_2P'] text-[8px] uppercase rounded cursor-pointer transition-colors flex items-center gap-1"
