@@ -557,7 +557,7 @@ function initGamepadDeck() {
     btnA.addEventListener('pointercancel', () => btnA.classList.remove('active'));
   }
 
-  // X Button: Sheath / Unsheath sword
+  // X Button: Open Context-Sensitive Spatial World Map Overlay (8x8 Overworld Mode 7 & Supertile 0x00 4-Quadrant Map)
   const btnX = document.getElementById('btn-x');
   if (btnX) {
     btnX.addEventListener('pointerdown', (e) => {
@@ -565,8 +565,7 @@ function initGamepadDeck() {
       e.stopPropagation();
       initAudio();
       btnX.classList.add('active');
-      isSheathed = !isSheathed;
-      sfx.chime();
+      toggleSpatialMapOverlay();
     });
     btnX.addEventListener('pointerup', () => btnX.classList.remove('active'));
     btnX.addEventListener('pointercancel', () => btnX.classList.remove('active'));
@@ -594,6 +593,122 @@ function initGamepadDeck() {
   };
   document.getElementById('btn-start')?.addEventListener('pointerdown', handleStart);
   document.getElementById('row-start')?.addEventListener('pointerdown', handleStart);
+}
+
+let spatialMapViewMode = 'UNDERWORLD';
+let spatialMapPerspectiveTilt = true;
+
+function renderSpatialMapOverlay() {
+  const isOverworldNow = currentLevelSlug === 'overworld_grid';
+  const curPx = Math.round(px);
+  const curPy = Math.round(py);
+  const activeSecId = isOverworldNow
+    ? SpatialCoordinateMath.toOverworldSectorId(curPx, curPy)
+    : SPATIAL_CONSTANTS.HOME_OVERWORLD_SECTOR_ID;
+  const activeQuadId = !isOverworldNow
+    ? SpatialCoordinateMath.toSupertileQuadrant(curPx, curPy)
+    : 0;
+  const mode7 = SpatialCoordinateMath.projectToMode7MapSpace(
+    isOverworldNow ? curPx : SPATIAL_CONSTANTS.HOME_THRESHOLD_WORLD_X,
+    isOverworldNow ? curPy : SPATIAL_CONSTANTS.HOME_THRESHOLD_WORLD_Y
+  );
+
+  const badgeEl = document.getElementById('spatial-map-badge');
+  const subEl = document.getElementById('spatial-map-subtitle');
+  const toggleDomainBtn = document.getElementById('btn-spatial-toggle-domain');
+  const toggleTiltBtn = document.getElementById('btn-spatial-toggle-tilt');
+  const statsEl = document.getElementById('spatial-map-stats');
+  const bodyEl = document.getElementById('spatial-map-body');
+  const footerCoordsEl = document.getElementById('spatial-map-footer-coords');
+
+  if (footerCoordsEl) {
+    footerCoordsEl.textContent = `WORLD POS: (${curPx}, ${curPy}) · METATILE: (${curPx >> 4}, ${curPy >> 4})`;
+  }
+
+  if (spatialMapViewMode === 'OVERWORLD') {
+    if (badgeEl) badgeEl.textContent = 'FIELD MAP (8x8)';
+    if (subEl) subEl.textContent = '4096x4096 PX · 64 SECTORS (0x00..0x3F)';
+    if (toggleDomainBtn) toggleDomainBtn.textContent = 'VIEW HOME CAVE (0x00)';
+    if (toggleTiltBtn) {
+      toggleTiltBtn.style.display = 'inline-block';
+      toggleTiltBtn.textContent = spatialMapPerspectiveTilt ? 'PERSPECTIVE: MODE 7 TILT' : 'PERSPECTIVE: 2D ORTHO';
+    }
+    const secHex = activeSecId.toString(16).toUpperCase().padStart(2, '0');
+    if (statsEl) {
+      statsEl.innerHTML = `<span>ACTIVE SECTOR: <strong style="color:#34d399;">0x${secHex} (${activeSecId & 7},${(activeSecId >> 3) & 7})</strong></span>` +
+        `<span>MODE 7 (1:4): <strong style="color:#fbbf24;">(${mode7.mapX}, ${mode7.mapY})</strong></span>`;
+    }
+    if (bodyEl) {
+      const tiltStyle = spatialMapPerspectiveTilt ? 'transform: perspective(620px) rotateX(22deg) scale(0.95);' : '';
+      let gridHtml = `<div style="display:grid; grid-template-columns:repeat(8,1fr); gap:4px; width:100%; max-width:440px; transition:transform 0.3s; ${tiltStyle}">`;
+      for (let i = 0; i < 64; i++) {
+        const sec = spatialWorldEngine.overworldSectors[i];
+        const isHere = isOverworldNow && sec.sectorId === activeSecId;
+        const isHome = sec.sectorId === SPATIAL_CONSTANTS.HOME_OVERWORLD_SECTOR_ID;
+        const isVis = spatialWorldEngine.isOverworldSectorVisited(sec.sectorId);
+        const hId = sec.sectorId.toString(16).toUpperCase().padStart(2, '0');
+        let cellStyle = 'background:rgba(9,9,11,0.7); border:1px solid #27272a; opacity:0.65;';
+        if (isHere) cellStyle = 'background:rgba(222,38,38,0.30); border:1px solid #DE2626; box-shadow:0 0 8px rgba(222,38,38,0.6); opacity:1;';
+        else if (isHome) cellStyle = 'background:rgba(120,53,15,0.40); border:1px solid rgba(245,158,11,0.8); opacity:1;';
+        else if (isVis) cellStyle = 'background:rgba(6,78,59,0.30); border:1px solid rgba(16,185,129,0.5); opacity:1;';
+        const marker = isHere ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #DE2626;"></span>'
+          : (isHome ? '<span style="color:#fbbf24;font-size:10px;">⌂</span>' : '');
+        gridHtml += `<div style="height:42px; border-radius:4px; padding:3px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; font-size:8px; ${cellStyle}">` +
+          `<div style="width:100%;display:flex;justify-content:space-between;font-size:7px;color:#a1a1aa;"><span>${hId}</span><span>${sec.col},${sec.row}</span></div>` +
+          `<div>${marker}</div>` +
+          `<div style="font-size:6px;color:#71717a;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${isHome ? 'SHADOW CAVE' : 'EMPTY'}</div>` +
+          `</div>`;
+      }
+      gridHtml += `</div>`;
+      bodyEl.innerHTML = gridHtml;
+    }
+  } else {
+    if (badgeEl) badgeEl.textContent = 'SUPERTILE MAP';
+    if (subEl) subEl.textContent = 'SUPERTILE 0x00 · SHADOW CAVE (HOME BASE)';
+    if (toggleDomainBtn) toggleDomainBtn.textContent = 'VIEW 8x8 OVERWORLD';
+    if (toggleTiltBtn) toggleTiltBtn.style.display = 'none';
+    const qLabels = ['NW (Q0)', 'NE (Q1)', 'SW (Q2)', 'SE (Q3)'];
+    if (statsEl) {
+      statsEl.innerHTML = `<span>SUPERTILE: <strong style="color:#fbbf24;">0x00 (SHADOW CAVE · HOME BASE)</strong></span>` +
+        `<span>FLOOR: <strong style="color:#34d399;">1F (FULL_4Q · 512x512 PX)</strong></span>` +
+        `<span>QUADRANT: <strong style="color:#fff;">${qLabels[activeQuadId]}</strong></span>`;
+    }
+    if (bodyEl) {
+      let quadHtml = `<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; width:240px; height:240px; padding:8px; background:#09090b; border:2px solid rgba(245,158,11,0.8); border-radius:8px;">`;
+      qLabels.forEach((ql, qIdx) => {
+        const isAct = !isOverworldNow && activeQuadId === qIdx;
+        const qStyle = isAct
+          ? 'background:rgba(222,38,38,0.25); border:1px dashed #DE2626;'
+          : 'background:rgba(24,24,27,0.6); border:1px dashed #3f3f46;';
+        const mid = isAct
+          ? '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span style="color:#DE2626;font-size:14px;">▼</span><span style="font-size:8px;color:#fff;font-weight:bold;">SHADOW LINK</span></div>'
+          : '<span style="font-size:8px;color:#71717a;">256x256 PX</span>';
+        quadHtml += `<div style="border-radius:4px; padding:8px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; ${qStyle}">` +
+          `<span style="font-size:9px;font-weight:bold;color:#d4d4d8;">${ql}</span>` +
+          mid +
+          `<span style="font-size:7px;color:#71717a;">16x16 METATILES</span>` +
+          `</div>`;
+      });
+      quadHtml += `</div>` +
+        `<div style="margin-top:10px;font-size:10px;color:#fbbf24;font-weight:bold;">SOUTH EXIT DOORWAY (TILE 16,30) ➔ OVERWORLD SECTOR 0x1B (1792, 1808)</div>`;
+      bodyEl.innerHTML = quadHtml;
+    }
+  }
+}
+
+function toggleSpatialMapOverlay(forceClose = false) {
+  const overlay = document.getElementById('spatial-map-overlay');
+  if (!overlay) return;
+  const isVisible = overlay.style.display === 'flex';
+  if (forceClose || isVisible) {
+    overlay.style.display = 'none';
+    sfx.chime();
+    return;
+  }
+  spatialMapViewMode = currentLevelSlug === 'overworld_grid' ? 'OVERWORLD' : 'UNDERWORLD';
+  renderSpatialMapOverlay();
+  overlay.style.display = 'flex';
+  sfx.chime();
 }
 
 function handleSelect(e) {
@@ -674,6 +789,7 @@ window.addEventListener('keydown', (e) => {
   if (k === 'escape') {
     const o = document.getElementById('select-menu-overlay');
     if (o) o.style.display = 'none';
+    toggleSpatialMapOverlay(true);
   }
 
   if (k === 'w' || k === 'a' || k === 's' || k === 'd' || k.startsWith('arrow')) {
@@ -704,6 +820,7 @@ window.addEventListener('keydown', (e) => {
   }
   if (k === 'x' || k === 'k') {
     document.getElementById('btn-x')?.classList.add('active');
+    toggleSpatialMapOverlay();
   }
 });
 
@@ -737,6 +854,22 @@ function initControlsAndDeck() {
   document.getElementById('btn-resume-game')?.addEventListener('click', () => {
     const o = document.getElementById('select-menu-overlay');
     if (o) o.style.display = 'none';
+  });
+  document.getElementById('btn-spatial-close-top')?.addEventListener('click', () => toggleSpatialMapOverlay(true));
+  document.getElementById('btn-spatial-close-bottom')?.addEventListener('click', () => toggleSpatialMapOverlay(true));
+  document.getElementById('btn-spatial-toggle-domain')?.addEventListener('click', () => {
+    spatialMapViewMode = spatialMapViewMode === 'OVERWORLD' ? 'UNDERWORLD' : 'OVERWORLD';
+    sfx.chime();
+    renderSpatialMapOverlay();
+  });
+  document.getElementById('btn-spatial-toggle-tilt')?.addEventListener('click', () => {
+    spatialMapPerspectiveTilt = !spatialMapPerspectiveTilt;
+    sfx.chime();
+    renderSpatialMapOverlay();
+  });
+  document.getElementById('btn-spatial-warp-home')?.addEventListener('click', () => {
+    setDebugRoom('shadow_cave', 256, 256);
+    toggleSpatialMapOverlay(true);
   });
   initGamepadDeck();
 }

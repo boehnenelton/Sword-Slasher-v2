@@ -24,7 +24,7 @@ from termux_playwright import sync_playwright_termux, launch_sync
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("ss2.playwright")
 
-REPO_ROOT = "/storage/emulated/0/Admin/Dev/Repos/Shadow_Link_Awakening"
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXP_IMG_DIR = os.path.join(REPO_ROOT, "Images", "Experimental_Engine")
 JS_IMG_DIR = os.path.join(REPO_ROOT, "Images", "JS_Engine")
 PORT = 8765
@@ -110,6 +110,14 @@ def run_tests():
         page.screenshot(path=os.path.join(EXP_IMG_DIR, "02_real_game_world_init.png"))
         log.info("Captured Experimental 02_real_game_world_init.png (Shadow Cave Home Base)")
 
+        # 02a Open X-Button Spatial Map Indoors (Supertile 0x00)
+        page.click("#btn-x")
+        time.sleep(0.5)
+        page.screenshot(path=os.path.join(EXP_IMG_DIR, "02a_spatial_map_supertile_0x00.png"))
+        log.info("Captured Experimental 02a_spatial_map_supertile_0x00.png")
+        page.click("#btn-spatial-close-bottom")
+        time.sleep(0.3)
+
         # 02b Walk South out of Shadow Cave into Empty 8x8 Overworld Grid (Sector 0x1B)
         page.keyboard.down("s")
         time.sleep(1.8)
@@ -117,6 +125,14 @@ def run_tests():
         time.sleep(0.4)
         page.screenshot(path=os.path.join(EXP_IMG_DIR, "02b_overworld_sector_0x1B_threshold.png"))
         log.info("Captured Experimental 02b_overworld_sector_0x1B_threshold.png (Overworld Sector 0x1B)")
+
+        # 02c Open X-Button Spatial Map Outdoors (8x8 Overworld Mode 7 Field Map)
+        page.click("#btn-x")
+        time.sleep(0.5)
+        page.screenshot(path=os.path.join(EXP_IMG_DIR, "02c_spatial_map_overworld_8x8.png"))
+        log.info("Captured Experimental 02c_spatial_map_overworld_8x8.png")
+        page.click("#btn-spatial-close-bottom")
+        time.sleep(0.3)
 
         # 03 Open System Menu via SELECT button
         page.click("#btn-select")
@@ -242,6 +258,14 @@ def run_tests():
         page.screenshot(path=os.path.join(JS_IMG_DIR, "01_real_game_world_init.png"))
         log.info("Captured JS Engine 01_real_game_world_init.png (Shadow Cave Home Base)")
 
+        # 01a Open X-Button Spatial Map Indoors (Supertile 0x00)
+        page.click("#btn-x")
+        time.sleep(0.5)
+        page.screenshot(path=os.path.join(JS_IMG_DIR, "01a_spatial_map_supertile_0x00.png"))
+        log.info("Captured JS Engine 01a_spatial_map_supertile_0x00.png")
+        page.click("#btn-spatial-close-bottom")
+        time.sleep(0.3)
+
         # 01b Walk South out of Shadow Cave into Empty 8x8 Overworld Grid (Sector 0x1B)
         page.keyboard.down("s")
         time.sleep(1.8)
@@ -249,6 +273,14 @@ def run_tests():
         time.sleep(0.4)
         page.screenshot(path=os.path.join(JS_IMG_DIR, "01b_overworld_sector_0x1B_threshold.png"))
         log.info("Captured JS Engine 01b_overworld_sector_0x1B_threshold.png (Overworld Sector 0x1B)")
+
+        # 01c Open X-Button Spatial Map Outdoors (8x8 Overworld Mode 7 Field Map)
+        page.click("#btn-x")
+        time.sleep(0.5)
+        page.screenshot(path=os.path.join(JS_IMG_DIR, "01c_spatial_map_overworld_8x8.png"))
+        log.info("Captured JS Engine 01c_spatial_map_overworld_8x8.png")
+        page.click("#btn-spatial-close-bottom")
+        time.sleep(0.3)
 
         # 02 Open System Menu via SELECT button
         page.click("#btn-select")

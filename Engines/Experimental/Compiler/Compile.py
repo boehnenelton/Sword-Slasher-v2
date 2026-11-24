@@ -211,6 +211,45 @@ def compile_bejson_datasets():
       </div>
     </div>
 
+    <!-- X-BUTTON: Context-Sensitive Spatial World Map Overlay (8x8 Overworld Mode 7 & Supertile 0x00 4-Quadrant Map) -->
+    <div id="spatial-map-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.90); backdrop-filter: blur(6px); z-index: 1000; align-items: center; justify-content: center; padding: 12px;">
+      <div style="background: #09090b; border: 4px solid #DE2626; border-radius: 12px; width: 100%; max-width: 640px; padding: 16px; box-shadow: 0 0 35px rgba(222,38,38,0.7); display: flex; flex-direction: column; gap: 12px; font-family: monospace; color: #fff;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #27272a; padding-bottom: 10px; gap: 8px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="spatial-map-badge" style="background: #DE2626; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; letter-spacing: 0.05em;">SUPERTILE MAP</span>
+            <span id="spatial-map-subtitle" style="font-size: 11px; color: #a1a1aa; font-weight: bold;">SUPERTILE 0x00 · SHADOW CAVE (HOME BASE)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button id="btn-spatial-toggle-domain" style="background: #18181b; border: 1px solid rgba(245,158,11,0.6); color: #fbbf24; border-radius: 6px; padding: 4px 10px; font-size: 10px; font-weight: bold; cursor: pointer; font-family: monospace;">
+              VIEW 8x8 OVERWORLD
+            </button>
+            <button id="btn-spatial-close-top" style="background: #27272a; border: 1px solid #3f3f46; color: #d4d4d8; border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer;">✕</button>
+          </div>
+        </div>
+
+        <div id="spatial-map-toolbar" style="background: rgba(24,24,27,0.9); border: 1px solid #27272a; border-radius: 6px; padding: 6px 10px; font-size: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+          <div id="spatial-map-stats" style="display: flex; gap: 12px; flex-wrap: wrap; color: #a1a1aa;"></div>
+          <button id="btn-spatial-toggle-tilt" style="display: none; background: #09090b; border: 1px solid #3f3f46; color: #e4e4e7; border-radius: 4px; padding: 2px 8px; font-size: 9px; font-weight: bold; cursor: pointer; font-family: monospace;">
+            PERSPECTIVE: MODE 7 TILT
+          </button>
+        </div>
+
+        <div id="spatial-map-body" style="background: #18181b; border: 2px solid #27272a; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;"></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #27272a; padding-top: 10px; font-size: 10px; color: #a1a1aa; flex-wrap: wrap; gap: 8px;">
+          <span id="spatial-map-footer-coords">WORLD POS: (256, 256) · METATILE: (16, 16)</span>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-spatial-warp-home" style="background: #18181b; border: 1px solid rgba(245,158,11,0.7); color: #fbbf24; border-radius: 6px; padding: 5px 10px; font-size: 9px; font-weight: bold; cursor: pointer; font-family: monospace;">
+              WARP: SHADOW CAVE (HOME)
+            </button>
+            <button id="btn-spatial-close-bottom" style="background: #DE2626; border: none; color: #fff; border-radius: 6px; padding: 5px 12px; font-size: 9px; font-weight: bold; cursor: pointer; font-family: monospace;">
+              CLOSE [X]
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="room-controls" style="display: none;">
       <button id="btn-room-debug" class="room-btn" onclick="if(isDebugMode) setDebugRoom('debug_chamber')">🔧 Debug Chamber [1]</button>
       <button id="btn-room-sanctuary" class="room-btn active" onclick="setDebugRoom('ganon_sanctuary')">🏛️ Ganon Sanctuary [2]</button>
@@ -686,6 +725,7 @@ def compile_bejson_datasets():
       if (k === 'escape') {{
         const o = document.getElementById('select-menu-overlay');
         if (o) o.style.display = 'none';
+        toggleSpatialMapOverlay(true);
       }}
       if (k === 'q' || k === 'tab') {{
         e.preventDefault();
@@ -711,6 +751,7 @@ def compile_bejson_datasets():
       }}
       if (k === 'x' || k === 'k') {{
         document.getElementById('btn-x')?.classList.add('active');
+        toggleSpatialMapOverlay();
       }}
       if (k === 'enter' || k === ' ') dismissIntro();
     }});
@@ -867,6 +908,121 @@ def compile_bejson_datasets():
       btnA.addEventListener('pointercancel', () => btnA.classList.remove('active'));
     }}
 
+    let spatialMapViewMode = 'UNDERWORLD';
+    let spatialMapPerspectiveTilt = true;
+    const visitedOverworldSectors = new Set([0x1B]);
+
+    function renderSpatialMapOverlay() {{
+      const isOverworldNow = currentLevelSlug === 'overworld_grid';
+      const curPx = Math.round(px);
+      const curPy = Math.round(py);
+      const secCol = Math.max(0, Math.min(7, (curPx >> 9) & 0x07));
+      const secRow = Math.max(0, Math.min(7, (curPy >> 9) & 0x07));
+      const activeSecId = isOverworldNow ? ((secRow << 3) | secCol) : 0x1B;
+      if (isOverworldNow) visitedOverworldSectors.add(activeSecId);
+      const qx = (Math.max(0, Math.min(511, curPx)) >> 8) & 1;
+      const qy = (Math.max(0, Math.min(511, curPy)) >> 8) & 1;
+      const activeQuadId = !isOverworldNow ? ((qy << 1) | qx) : 0;
+      const m7X = Math.max(0, Math.min(1023, (isOverworldNow ? curPx : 1792) >> 2));
+      const m7Y = Math.max(0, Math.min(1023, (isOverworldNow ? curPy : 1808) >> 2));
+
+      const badgeEl = document.getElementById('spatial-map-badge');
+      const subEl = document.getElementById('spatial-map-subtitle');
+      const toggleDomainBtn = document.getElementById('btn-spatial-toggle-domain');
+      const toggleTiltBtn = document.getElementById('btn-spatial-toggle-tilt');
+      const statsEl = document.getElementById('spatial-map-stats');
+      const bodyEl = document.getElementById('spatial-map-body');
+      const footerCoordsEl = document.getElementById('spatial-map-footer-coords');
+
+      if (footerCoordsEl) {{
+        footerCoordsEl.textContent = `WORLD POS: (${{curPx}}, ${{curPy}}) · METATILE: (${{curPx >> 4}}, ${{curPy >> 4}})`;
+      }}
+
+      if (spatialMapViewMode === 'OVERWORLD') {{
+        if (badgeEl) badgeEl.textContent = 'FIELD MAP (8x8)';
+        if (subEl) subEl.textContent = '4096x4096 PX · 64 SECTORS (0x00..0x3F)';
+        if (toggleDomainBtn) toggleDomainBtn.textContent = 'VIEW HOME CAVE (0x00)';
+        if (toggleTiltBtn) {{
+          toggleTiltBtn.style.display = 'inline-block';
+          toggleTiltBtn.textContent = spatialMapPerspectiveTilt ? 'PERSPECTIVE: MODE 7 TILT' : 'PERSPECTIVE: 2D ORTHO';
+        }}
+        const secHex = activeSecId.toString(16).toUpperCase().padStart(2, '0');
+        if (statsEl) {{
+          statsEl.innerHTML = `<span>ACTIVE SECTOR: <strong style="color:#34d399;">0x${{secHex}} (${{activeSecId & 7}},${{(activeSecId >> 3) & 7}})</strong></span>` +
+            `<span>MODE 7 (1:4): <strong style="color:#fbbf24;">(${{m7X}}, ${{m7Y}})</strong></span>`;
+        }}
+        if (bodyEl) {{
+          const tiltStyle = spatialMapPerspectiveTilt ? 'transform: perspective(620px) rotateX(22deg) scale(0.95);' : '';
+          let gridHtml = `<div style="display:grid; grid-template-columns:repeat(8,1fr); gap:4px; width:100%; max-width:440px; transition:transform 0.3s; ${{tiltStyle}}">`;
+          for (let i = 0; i < 64; i++) {{
+            const c = i & 7;
+            const r = (i >> 3) & 7;
+            const isHere = isOverworldNow && i === activeSecId;
+            const isHome = i === 0x1B;
+            const isVis = visitedOverworldSectors.has(i);
+            const hId = i.toString(16).toUpperCase().padStart(2, '0');
+            let cellStyle = 'background:rgba(9,9,11,0.7); border:1px solid #27272a; opacity:0.65;';
+            if (isHere) cellStyle = 'background:rgba(222,38,38,0.30); border:1px solid #DE2626; box-shadow:0 0 8px rgba(222,38,38,0.6); opacity:1;';
+            else if (isHome) cellStyle = 'background:rgba(120,53,15,0.40); border:1px solid rgba(245,158,11,0.8); opacity:1;';
+            else if (isVis) cellStyle = 'background:rgba(6,78,59,0.30); border:1px solid rgba(16,185,129,0.5); opacity:1;';
+            const marker = isHere ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #DE2626;"></span>'
+              : (isHome ? '<span style="color:#fbbf24;font-size:10px;">⌂</span>' : '');
+            gridHtml += `<div style="height:42px; border-radius:4px; padding:3px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; font-size:8px; ${{cellStyle}}">` +
+              `<div style="width:100%;display:flex;justify-content:space-between;font-size:7px;color:#a1a1aa;"><span>${{hId}}</span><span>${{c}},${{r}}</span></div>` +
+              `<div>${{marker}}</div>` +
+              `<div style="font-size:6px;color:#71717a;text-align:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${{isHome ? 'SHADOW CAVE' : 'EMPTY'}}</div>` +
+              `</div>`;
+          }}
+          gridHtml += `</div>`;
+          bodyEl.innerHTML = gridHtml;
+        }}
+      }} else {{
+        if (badgeEl) badgeEl.textContent = 'SUPERTILE MAP';
+        if (subEl) subEl.textContent = 'SUPERTILE 0x00 · SHADOW CAVE (HOME BASE)';
+        if (toggleDomainBtn) toggleDomainBtn.textContent = 'VIEW 8x8 OVERWORLD';
+        if (toggleTiltBtn) toggleTiltBtn.style.display = 'none';
+        const qLabels = ['NW (Q0)', 'NE (Q1)', 'SW (Q2)', 'SE (Q3)'];
+        if (statsEl) {{
+          statsEl.innerHTML = `<span>SUPERTILE: <strong style="color:#fbbf24;">0x00 (SHADOW CAVE · HOME BASE)</strong></span>` +
+            `<span>FLOOR: <strong style="color:#34d399;">1F (FULL_4Q · 512x512 PX)</strong></span>` +
+            `<span>QUADRANT: <strong style="color:#fff;">${{qLabels[activeQuadId]}}</strong></span>`;
+        }}
+        if (bodyEl) {{
+          let quadHtml = `<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; width:240px; height:240px; padding:8px; background:#09090b; border:2px solid rgba(245,158,11,0.8); border-radius:8px;">`;
+          qLabels.forEach((ql, qIdx) => {{
+            const isAct = !isOverworldNow && activeQuadId === qIdx;
+            const qStyle = isAct
+              ? 'background:rgba(222,38,38,0.25); border:1px dashed #DE2626;'
+              : 'background:rgba(24,24,27,0.6); border:1px dashed #3f3f46;';
+            const mid = isAct
+              ? '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span style="color:#DE2626;font-size:14px;">▼</span><span style="font-size:8px;color:#fff;font-weight:bold;">SHADOW LINK</span></div>'
+              : '<span style="font-size:8px;color:#71717a;">256x256 PX</span>';
+            quadHtml += `<div style="border-radius:4px; padding:8px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; ${{qStyle}}">` +
+              `<span style="font-size:9px;font-weight:bold;color:#d4d4d8;">${{ql}}</span>` +
+              mid +
+              `<span style="font-size:7px;color:#71717a;">16x16 METATILES</span>` +
+              `</div>`;
+          }});
+          quadHtml += `</div>` +
+            `<div style="margin-top:10px;font-size:10px;color:#fbbf24;font-weight:bold;">SOUTH EXIT DOORWAY (TILE 16,30) ➔ OVERWORLD SECTOR 0x1B (1792, 1808)</div>`;
+          bodyEl.innerHTML = quadHtml;
+        }}
+      }}
+    }}
+
+    function toggleSpatialMapOverlay(forceClose = false) {{
+      const overlay = document.getElementById('spatial-map-overlay');
+      if (!overlay) return;
+      const isVisible = overlay.style.display === 'flex';
+      if (forceClose || isVisible) {{
+        overlay.style.display = 'none';
+        return;
+      }}
+      spatialMapViewMode = currentLevelSlug === 'overworld_grid' ? 'OVERWORLD' : 'UNDERWORLD';
+      renderSpatialMapOverlay();
+      overlay.style.display = 'flex';
+    }}
+
     const btnX = document.getElementById('btn-x');
     if (btnX) {{
       btnX.addEventListener('pointerdown', e => {{
@@ -874,11 +1030,26 @@ def compile_bejson_datasets():
         e.stopPropagation();
         dismissIntro();
         btnX.classList.add('active');
-        isSheathed = !isSheathed;
+        toggleSpatialMapOverlay();
       }});
       btnX.addEventListener('pointerup', () => btnX.classList.remove('active'));
       btnX.addEventListener('pointercancel', () => btnX.classList.remove('active'));
     }}
+
+    document.getElementById('btn-spatial-close-top')?.addEventListener('click', () => toggleSpatialMapOverlay(true));
+    document.getElementById('btn-spatial-close-bottom')?.addEventListener('click', () => toggleSpatialMapOverlay(true));
+    document.getElementById('btn-spatial-toggle-domain')?.addEventListener('click', () => {{
+      spatialMapViewMode = spatialMapViewMode === 'OVERWORLD' ? 'UNDERWORLD' : 'OVERWORLD';
+      renderSpatialMapOverlay();
+    }});
+    document.getElementById('btn-spatial-toggle-tilt')?.addEventListener('click', () => {{
+      spatialMapPerspectiveTilt = !spatialMapPerspectiveTilt;
+      renderSpatialMapOverlay();
+    }});
+    document.getElementById('btn-spatial-warp-home')?.addEventListener('click', () => {{
+      setDebugRoom('shadow_cave', 256, 256);
+      toggleSpatialMapOverlay(true);
+    }});
 
     const handleSelect = (e) => {{
       if (e) {{ e.preventDefault(); e.stopPropagation(); }}
