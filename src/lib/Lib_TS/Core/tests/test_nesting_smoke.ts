@@ -12,7 +12,7 @@
  * Date:            2026-10-16
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
  * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   e8210873-eb0c-49b2-9fb7-d8269205d0f0
+ * RELATIONAL_ID:   fbb31187-7f51-4d63-85fe-320b9c179a56
  * Changelog:
  *   1.1.0 (2026-10-16) - Added tests: Core validator rules apply to nested cells; same-schema documents do not share cache entries.
  *   1.0.2 (2026-10-16) - Query API now imported from core_nesting (nesting_query merged).

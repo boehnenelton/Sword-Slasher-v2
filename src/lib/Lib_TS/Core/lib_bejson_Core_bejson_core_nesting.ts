@@ -12,7 +12,7 @@
  * Date:            2026-10-16
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
  * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   b983a234-6bea-47ca-84a1-889b94d4695c
+ * RELATIONAL_ID:   fbb31187-7f51-4d63-85fe-320b9c179a56
  * Changelog:
  *   0.6.0 (2026-10-16) - Merged lib_bejson_Core_bejson_nesting_query into this module (bejsonNestingQuery, bejsonNestingGetPath, bejsonNestingQuerySummary, QueryMatch, NESTING_QUERY_ERRORS); query module removed, no alias.
  *           Nested-cell validation now delegates to Core validate104; field maps use Core bejson_core_get_field_map (key _bejson_field_map replaces _nestingFieldMap). Local _buildFieldMap removed.

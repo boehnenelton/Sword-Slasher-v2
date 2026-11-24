@@ -8,7 +8,7 @@
  * Date:            2026-11-02
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
  * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c
+ * RELATIONAL_ID:   fbb31187-7f51-4d63-85fe-320b9c179a56
  */
 
 export type SS2EventType = 'LEVEL_ENTER' | 'ENEMY_DEFEATED' | 'ZELDA_KIDNAPPED' | 'PROP_DESTROYED';

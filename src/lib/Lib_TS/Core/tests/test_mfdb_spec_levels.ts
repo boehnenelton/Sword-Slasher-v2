@@ -9,7 +9,7 @@
  * Date:            2026-10-28
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
  * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   7e809c11-a092-4d96-962d-e787a29640e3
+ * RELATIONAL_ID:   fbb31187-7f51-4d63-85fe-320b9c179a56
  * Usage: tsc --target es2020 --module commonjs --skipLibCheck --outDir out *.ts tests/*.ts && node out/tests/test_mfdb_spec_levels.js
  */
 import { createManifest, registerEntity } from "../lib_bejson_Core_mfdb_core";

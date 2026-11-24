@@ -6,7 +6,7 @@ Description:    Dedicated CLI tool for BEJSON data chunking and serialization in
 Version:        1.0.2
 Date:           2026-11-12
 Author:         Elton Boehnen · boehnenelton2024@gmail.com
-RELATIONAL_ID:  d4bc2f79-4ee6-42ff-99a8-518caff4325d
+RELATIONAL_ID:  fbb31187-7f51-4d63-85fe-320b9c179a56
 """
 
 import os

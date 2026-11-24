@@ -9,7 +9,7 @@
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
  * License:         PolyForm-Noncommercial-1.0.0
  * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   a84d19f2-2026-1123-9999-000000000159
+ * RELATIONAL_ID:   fbb31187-7f51-4d63-85fe-320b9c179a56
  */
 
 export const SPATIAL_CONSTANTS = Object.freeze({

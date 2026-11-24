@@ -14,7 +14,7 @@
  *   2.2.0 - 2026-10-30: Added mfdb_validator_check_referential_integrity (standalone FK audit, PY/TS/SH parity, verified on a shared corpus); Network_Role validation; strict-FK errors carry the numeric FK code.  Absolute file_path / Parent_Hierarchy treated as escaping the root.
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
  * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   9d25d7ac-28ea-4395-bac9-dd054b06dfbc
+ * RELATIONAL_ID:   fbb31187-7f51-4d63-85fe-320b9c179a56
  */
 
 'use strict';
