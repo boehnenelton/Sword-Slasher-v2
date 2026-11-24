@@ -27,44 +27,16 @@
     [
       "994b1b9c-42b1-415f-8d21-6233d9672390",
       "GameEvent",
-      "CUTSCENE_AUTO",
+      "INTERACTION",
       "OBJECT_OPCODE_V2",
-      "ganon_opening_command",
+      "shadow_cave_home_inscription",
       "fa8b5962-afc8-439c-966a-470241c6d3f0",
-      192.0,
-      140.0,
-      "[{\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Ganon (Dark Lord)\", \"text\": \"Shadow Link... arise! The Light World clings to false hope.\"}, {\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Ganon (Dark Lord)\", \"text\": \"Go forth into Hyrule, breach the Royal Sanctuary, and TAKE PRINCESS ZELDA for our dark ascension!\"}, {\"op\": \"PLAY_SFX\", \"sound\": \"dark_aura\"}, {\"op\": \"GIVE_ITEM\", \"item_uuid\": \"d7efa941-b0b8-4f8f-bd00-72d0277a1b0d\"}, {\"op\": \"OBJECTIVE_SET\", \"objective\": \"Breach Hyrule Castle & Kidnap Princess Zelda\"}]",
-      null,
-      false,
-      "2026-10-25T21:04:00Z"
-    ],
-    [
-      "994b1b9c-42b1-415f-8d21-6233d9672392",
-      "GameEvent",
-      "INTERACTION",
-      "OBJECT_OPCODE_V2",
-      "zelda_kidnap_event",
-      "fa8b5962-afc8-439c-966a-470241c6d3f9",
-      192.0,
-      120.0,
-      "[{\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Princess Zelda\", \"text\": \"Shadow Link?! No... the crimson eyes of dark prophecy! Unhand me!\"}, {\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Shadow Link\", \"text\": \"Master Ganon awaits his royal captive. Your light belongs to the shadows now!\"}, {\"op\": \"PLAY_SFX\", \"sound\": \"kidnap_chime\"}, {\"op\": \"GIVE_ITEM\", \"item_uuid\": \"6ff5b8c1-466e-44fb-8592-41f44cbbf8c7\"}, {\"op\": \"VICTORY_WIN\", \"message\": \"VICTORY! PRINCESS ZELDA HAS BEEN TAKEN! GANON'S DARK RULE BEGINS!\"}]",
-      null,
-      false,
-      "2026-10-25T21:04:00Z"
-    ],
-    [
-      "994b1b9c-42b1-415f-8d21-6233d967239e",
-      "GameEvent",
-      "INTERACTION",
-      "OBJECT_OPCODE_V2",
-      "hermit_greeting",
-      "fa8b5962-afc8-439c-966a-470241c6d3f7",
       256.0,
-      224.0,
-      "[{\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Dark Hermit\", \"text\": \"The royal guards above are heavily armed. Use your Dark Spin Attack [K / X] to pierce their shields!\"}, {\"op\": \"PLAY_SFX\", \"sound\": \"chime_bell\"}, {\"op\": \"GIVE_ITEM\", \"item_uuid\": \"6ff5b8c1-466e-44fb-8592-41f44cbbf8c5\"}]",
+      160.0,
+      "[{\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Shadow Cave Inscription\", \"text\": \"Shadow Cave — Home Base. Step through the south threshold to enter the open 8x8 Overworld Grid.\"}]",
       null,
-      false,
-      "2026-10-25T21:04:00Z"
+      true,
+      "2026-11-23T23:55:00Z"
     ]
   ]
 }

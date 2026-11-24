@@ -8,7 +8,7 @@
  * Contact:        eltonboehnen@gmail.com | boehnenelton2024.pages.dev | github.com/boehnenelton
  * Format_Creator: Elton Boehnen
  * RELATIONAL_ID:  5b9b9119-137e-44c6-bce9-9dbb7af2dab5
- * Release_Version: 300
+ * Release_Version: 301
  *
  * Changelog:
  *   2.4.0 - ONE self-maintaining cache for every lookup (mirrors Python core

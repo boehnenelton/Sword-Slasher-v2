@@ -2,13 +2,15 @@
  * Library:        lib_bejson_Core_mfdb_core.ts
  * Family:         Core
  * Description:    Multi-file database orchestrator managing manifests and entity synchronization.
- * Version:        2.3.4
- * Date:           2026-10-09
+ * Version:        2.3.5
+ * Date:           2026-10-30
+ * Changelog:
+ *   2.3.5 - 2026-10-30: explicit fk_on_delete:null is invalid; only an absent key defaults to restrict (parity with PY/JS).
  * Author:         Elton Boehnen
  * Contact:        eltonboehnen@gmail.com | boehnenelton2024.pages.dev | github.com/boehnenelton
  * Format_Creator: Elton Boehnen
- * RELATIONAL_ID:  6cd5c38e-bfaa-4ada-b540-60354d74cabf
- * Release_Version: 300
+ * RELATIONAL_ID:  a7516546-97f3-4c4c-abd4-397db28159c0
+ * Release_Version: 301
  *
  * FIX (2026-10-03): registerEntity() now defaults record_count to 0 instead
  * of null, closing the previously documented parseInt(null) -> NaN ->
@@ -251,7 +253,7 @@ export function createConnectedSlaveEntity(manifest: BEJSONDocument): BEJSONDocu
   const role = (manifest as any)["Network_Role"] ?? "";
   if (role !== "Master") {
     throw new MFDBCoreError(
-      E.INVALID_OPERATION ?? "INVALID_OPERATION",
+      E.INVALID_OPERATION ?? 21,
       `ConnectedSlave may only be created on a Master node. Got: '${role}'`
     );
   }
@@ -486,7 +488,8 @@ function _debugGetEntityPath(manifestPath: string, entityName: string): string {
 
 function _debugAtomicWrite(filePath: string, doc: unknown): void {
   const temp = `${filePath}.tmp.${Date.now()}`;
-  fs.writeFileSync(temp, JSON.stringify(doc, null, 2), "utf8");
+  const fd = fs.openSync(temp, "w");
+  try { fs.writeFileSync(fd, JSON.stringify(doc, null, 2), "utf8"); fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
   fs.renameSync(temp, filePath);
 }
 
@@ -740,7 +743,7 @@ export function checkFKWrite(
 ): void {
   if (value === null || value === undefined) return;
 
-  const onDelete = fieldDef.fk_on_delete ?? "restrict";
+  const onDelete = fieldDef.fk_on_delete === undefined ? "restrict" : fieldDef.fk_on_delete;
   if (!["restrict", "cascade", "null"].includes(onDelete)) {
     throw new MFDBCoreError(
       EV.FK_INVALID_ON_DELETE,
@@ -821,7 +824,7 @@ export function resolveDeleteDependents(
     const isMultiRef = refDoc.Format_Version === "105db";
 
     for (const fkField of fkFields) {
-      const onDelete = fkField.fk_on_delete ?? "restrict";
+      const onDelete = fkField.fk_on_delete === undefined ? "restrict" : fkField.fk_on_delete;
       const col = _fmIndex(refDoc, fkField.name);
       // 105db: Fields[0] is Record_Type_Parent at row col 0; Fields[i>=1] at i+1.
       const absCol = isMultiRef ? (col === 0 ? 0 : col + 1) : col + 1;

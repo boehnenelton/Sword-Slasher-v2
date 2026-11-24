@@ -8,7 +8,7 @@
  * Contact:        eltonboehnen@gmail.com | boehnenelton2024.pages.dev | github.com/boehnenelton
  * Format_Creator: Elton Boehnen
  * RELATIONAL_ID:  455ff0ca-ed56-4381-a7bd-f794a4cf2ea2
- * Release_Version: 300
+ * Release_Version: 301
  *
  * Changelog:
  *   2.0.4 - Audit fix (2026-08-15 second-pass audit, HIGH-4): parse_json()

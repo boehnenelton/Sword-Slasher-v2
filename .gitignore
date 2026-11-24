@@ -6,3 +6,5 @@ __pycache__/
 *.lock
 data/temp/
 .DS_Store
+
+.wrangler/

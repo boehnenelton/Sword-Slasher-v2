@@ -22,16 +22,16 @@ export interface GameEventData {
 export class Bejson105Engine {
   private loaded: boolean = false;
 
-  // Active Runtime State
-  public currentLevelSlug: string = 'ganon_sanctuary';
-  public currentObjective: string = 'Walk up to Lord Ganon to receive your dark command';
+  // Active Runtime State (Starts in Shadow Cave Home Base — Supertile 0x00)
+  public currentLevelSlug: string = 'shadow_cave';
+  public currentObjective: string = 'Shadow Cave (Home Base) — Step south to enter the 8x8 Overworld Grid';
   public playerHp: number = 120;
   public playerMaxHp: number = 120;
   public magicPoints: number = 100;
   public maxMagicPoints: number = 100;
-  public playerX: number = 320;
-  public playerY: number = 500;
-  public playerFacing: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' = 'UP';
+  public playerX: number = 256;
+  public playerY: number = 256;
+  public playerFacing: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT' = 'DOWN';
   public isOpeningWalkCompleted: boolean = false;
   public activeDialogue: { speaker: string; text: string }[] | null = null;
   public activeDialogueIdx: number = 0;

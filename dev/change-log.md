@@ -1,5 +1,35 @@
 # dev/change-log.md - Revision History
 
+## [2.0.0-105 / Package 156] - 2026-11-21
+- Cleanup only, no behavior change. Removed `public/assets/aistudio/` (10 unreferenced files, about 6.9 MB), orphan components `GameHUD.tsx` and `HorizToolbar.tsx`, 20 unused imports across 6 components, dead state `bundleSize`/`chunkDocSize` in `FlaskSystemModal.tsx`, and unused private fields `boxPoolA`/`boxPoolB` in `physicsEngine.ts`.
+- Header Version/Relational_ID bumped on the 7 touched source files. No library, data, config or Python file was modified.
+- Verified: `tsc --noEmit` clean before and after; `vite build` OK before and after; every copied `dist/data/**` and `dist/config/**` file hash-identical to baseline; JS bundle 516,233 -> 515,999 B.
+- Flagged for decision (see dev/dead_code.md): 12 unreferenced `lib_bejson_gamingss2_engine_*.ts` libraries, 12 duplicate `lib_js` Core copies, 5 unused props/params.
+
+## [2.0.0-105 / Package 155] - 2026-11-15
+- Extracted `BejsonCoreEngine` and the `bejsonCore` singleton out of the top-level `src/lib/lib_js/lib_bejson_Core_bejson_core.js` (where they had been appended to a frozen Core file) into the new non-frozen module `src/lib/lib_js/lib_bejson_Gaming_core_adapter.js`. Class body moved verbatim; the adapter also republishes `window.BEJSON.bejsonCore` / `.BejsonCoreEngine`, which the Core copy used to publish.
+- Re-pointed the two import sites to the adapter: `Engines/JS/main.js` and `src/lib/lib_js/lib_bejson_Gaming_engine.js`. Both resolve to the same file, so they share one singleton and one field-map cache.
+- The top-level Core copy no longer exports `BejsonCoreEngine` / `bejsonCore`; it is now the canonical `Core/` code plus its pre-existing ESM export footer and one comment line.
+- `AGENTS.md`: added "JS Library Layout & Core Immutability" section (frozen Core mirror, adapter pattern, single shared singleton, no duplicate library trees, open items) and a status line. `GEMINI.md`: added the adapter bullet.
+- Verified: `node --check` on the adapter, Core copy, Gaming engine, `main.js` and every file in `lib_js/` and `lib_js/Core/` (0 failures); 23 behavior-equivalence cases old class vs adapter (all equal); Gaming engine imports under Node; `Compile.py --batch` output unchanged; Python modules compile. Not verified: in-browser rendering (no browser in this environment).
+- Open, awaiting decision: delete the 12 duplicate top-level `lib_bejson_Core_*.js` files; TS-side `BejsonCoreEngine` inside `src/lib/lib_bejson_Core_bejson_core.ts`; Termux shebangs in `server_manager.py` / `run.sh` (changed to `/usr/bin/env` in V154).
+
+## [2.0.0-105 / Package 154] - 2026-11-13
+- Policy remediation (§2): every `print()` in `app.py`, `server_manager.py`, `Compile.py` and `data_chunker.py` replaced with the standard `logging` module. Interactive menu/banner rendering uses a `_ui()` stdout writer, not logging. `app.py` now logs with timestamps/levels into `server.log`.
+- `Compile.py`: menu option 2 used `os.system` with an unquoted interpolated path and a hardcoded `python3`; now `subprocess.run([sys.executable, path])`.
+- Shebangs in `server_manager.py` and `run.sh` changed from the hardcoded Termux path to `/usr/bin/env` (portable, still works in Termux).
+- `AGENTS.md`: "MFDB 132" corrected to "MFDB 105a" (matches `game_data/raw/manifest/105a.mfdb.bejson`).
+- Removed `public/js/`: stale, unreferenced pre-restructure copy of the JS engine (superseded by `Engines/JS/`).
+- Added `dev/security-notes.md`. Bumped file headers/RELATIONAL_IDs on all modified Python files.
+- Verified: py_compile; `Compile.py --batch` output byte-identical to V153; chunker; compiler and launcher menus; launcher start/status/log/stop/failed-start; Flask smoke (200 on `/`, `/api/data/config`, `/api/data/bundle`).
+
+## [2.0.0-105 / Package 153] - 2026-11-13
+- Recorded post-V152 engine work: Flask launcher (`Engines/PY/server_manager.py`, `run.sh`, `app.py` --host/--port/--no-browser, debug off), mobile viewport/room-control UI in `Engines/JS/index.html` and the standalone template in `Compile.py`, updates to `GameViewport.tsx`, `GamepadDeck.tsx`, the `gamingss2` map libs (TS + new JS port), `lib_bejson_Gaming_engine.js`, `lib_bejson_Gaming_projectile_physics.js`, and Playwright screenshots under `Images/`.
+- `server_manager.py` fixes: start now waits for the app's own `/api/data/config` to answer (previously printed "started" and opened the browser even if `app.py` crashed, e.g. port in use); on failure it stops the child, clears the PID file and prints the log tail. `is_running` no longer treats PermissionError as "not running" and checks `/proc/<pid>/cmdline` against `app.py` to survive PID reuse. Log file handle is closed in the parent.
+- `AGENTS.md`: fixed broken headings (`##URGENT`, split `Part 1`), fenced the directory tree, added missing section markers, corrected typos (INSTRUCTONS, JS_Emgine -> JS_Engine), stamped Part 1 as completed in V152.
+- Removed duplicate `Images/JS_Emgine/` (byte-identical to `Images/JS_Engine/`). Added `.gitignore` (node_modules, __pycache__, server pid/log).
+- Verified: py_compile, `tsc --noEmit` clean, node syntax check on engine + libs, `Compile.py --batch` output identical to shipped bundle/html, Flask smoke (200 on `/`, `/api/data/config`, `/api/data/bundle`), launcher start / duplicate-start refusal / stop / failed-start paths.
+
 ## [2.0.0-105 / Package 152] - 2026-11-12
 - Restructured engine locations to the AGENTS.md Part 1 layout: `js/` -> `Engines/JS/`; `Gaming/PY/engine/` -> `Engines/PY/`; `Gaming/PY/compiler/` -> `Engines/Experimental/Compiler/` (`compiler.py` renamed `Compile.py`); compiled artifacts -> `Engines/Experimental/Compiled/` (`standalone_game.html` renamed `standalone-game.html`). `Gaming/` removed.
 - Added root `game_data/raw/` (20 BEJSON datasets, identical to `public/data/`, which is retained for the React client). Each engine now has its own `config.json` routing relatively to it (`Engines/JS`, `Engines/PY`, `Engines/Experimental/Compiler`).

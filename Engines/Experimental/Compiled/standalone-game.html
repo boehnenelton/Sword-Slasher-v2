@@ -151,7 +151,7 @@
   "Release_Version": 300,
   "Author": "Elton Boehnen \u00b7 boehnenelton2024@gmail.com",
   "Total_Datasets": 20,
-  "Total_Records": 104,
+  "Total_Records": 93,
   "Datasets": {
     "manifest/105a.mfdb.bejson": {
       "Format": "BEJSON",
@@ -543,20 +543,38 @@
         [
           "fa8b5962-afc8-439c-966a-470241c6d3f0",
           "GameLevel",
-          "BOSS_ARENA",
-          "MEDIUM_64X64",
+          "CAVERN_DUNGEON",
+          "SMALL_32X32",
           "NONE",
-          "ganon_sanctuary",
-          "[GAME WORLD 1] Ganon's Dark Sanctuary",
-          64,
-          64,
+          "shadow_cave",
+          "[GAME WORLD 1] Shadow Cave (Home Base)",
+          32,
+          32,
+          16,
+          "0f94d339-50d0-4daf-aa01-88eeea870b2b",
+          "a0011223-3445-4556-8667-778899aabbcc",
+          "ambient_drip",
+          "{\"type\": \"NONE\", \"supertile_id\": 0, \"partition_mode\": \"FULL_4Q\", \"is_home_base\": true}",
+          "2026-11-23T23:55:00Z",
+          "2026-11-23T23:55:00Z"
+        ],
+        [
+          "fa8b5962-afc8-439c-966a-470241c6d3f2",
+          "GameLevel",
+          "OVERWORLD_FIELD",
+          "HUGE_128X128",
+          "NONE",
+          "overworld_grid",
+          "[GAME WORLD 1] Overworld 8x8 Sector Grid",
+          256,
+          256,
           16,
           "0f94d339-50d0-4daf-aa01-88eeea870b2a",
           "a0011223-3445-4556-8667-778899aabbcc",
           "ganon_theme",
-          "{\"type\": \"NONE\"}",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
+          "{\"type\": \"NONE\", \"sector_cols\": 8, \"sector_rows\": 8, \"sector_px\": 512, \"home_sector_id\": 27}",
+          "2026-11-23T23:55:00Z",
+          "2026-11-23T23:55:00Z"
         ],
         [
           "fa8b5962-afc8-439c-966a-470241c6d3f1",
@@ -572,99 +590,9 @@
           "0f94d339-50d0-4daf-aa01-88eeea870b2a",
           "a0011223-3445-4556-8667-778899aabbcc",
           "ganon_theme",
-          "{\"type\": \"NONE\"}",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "fa8b5962-afc8-439c-966a-470241c6d3f7",
-          "GameLevel",
-          "CAVERN_DUNGEON",
-          "LARGE_96X96",
-          "DEFEAT_ALL_ENEMIES",
-          "forgotten_cavern",
-          "[GAME WORLD 1] Forgotten Dark Cavern - Level 1",
-          96,
-          96,
-          16,
-          "0f94d339-50d0-4daf-aa01-88eeea870b2b",
-          "a0011223-3445-4556-8667-778899aabbcc",
-          "ambient_drip",
-          "{\"type\": \"DEFEAT_ALL_ENEMIES\", \"target_faction\": \"HOSTILE\"}",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "fa8b5962-afc8-439c-966a-470241c6d3f8",
-          "GameLevel",
-          "OVERWORLD_FIELD",
-          "LARGE_96X96",
-          "REACH_PORTAL",
-          "castle_courtyard",
-          "[GAME WORLD 1] Hyrule Castle Courtyard - Level 2",
-          96,
-          96,
-          16,
-          "0f94d339-50d0-4daf-aa01-88eeea870b2c",
-          "a0011223-3445-4556-8667-778899aabbcc",
-          "castle_march",
-          "{\"type\": \"REACH_PORTAL\"}",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "fa8b5962-afc8-439c-966a-470241c6d3f9",
-          "GameLevel",
-          "BOSS_ARENA",
-          "SMALL_32X32",
-          "COLLECT_ITEM",
-          "princess_tower",
-          "[GAME WORLD 1] Princess Zelda's Tower Chamber",
-          32,
-          32,
-          16,
-          "0f94d339-50d0-4daf-aa01-88eeea870b2c",
-          "a0011223-3445-4556-8667-778899aabbcc",
-          "dark_prophecy",
-          "{\"type\": \"COLLECT_ITEM\", \"item_slug\": \"princess_zelda\"}",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "fa8b5962-afc8-439c-966a-470241c6d3f2",
-          "GameLevel",
-          "OVERWORLD_FIELD",
-          "HUGE_128X128",
-          "REACH_PORTAL",
-          "dark_world_overworld",
-          "[GAME WORLD 1] Dark World Hyrule Overworld",
-          128,
-          128,
-          16,
-          "0f94d339-50d0-4daf-aa01-88eeea870b2a",
-          "a0011223-3445-4556-8667-778899aabbcc",
-          "ganon_theme",
-          "{\"type\": \"REACH_PORTAL\"}",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "fa8b5962-afc8-439c-966a-470241c6d3f3",
-          "GameLevel",
-          "OVERWORLD_FIELD",
-          "HUGE_128X128",
-          "REACH_PORTAL",
-          "game_world_1",
-          "[GAME WORLD 1] Hyrule Campaign World - Zone 1",
-          128,
-          128,
-          16,
-          "0f94d339-50d0-4daf-aa01-88eeea870b2a",
-          "a0011223-3445-4556-8667-778899aabbcc",
-          "ganon_theme",
-          "{\"type\": \"REACH_PORTAL\"}",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
+          "{\"type\": \"NONE\", \"domain\": \"DEBUG_ISOLATED\"}",
+          "2026-11-23T23:55:00Z",
+          "2026-11-23T23:55:00Z"
         ]
       ]
     },
@@ -848,11 +776,11 @@
           "967bec9e-e89b-40bf-9194-f07227e4f7a1",
           "player",
           "Shadow Link",
-          192.0,
-          300.0,
-          192.0,
-          300.0,
-          "UP",
+          256.0,
+          256.0,
+          256.0,
+          256.0,
+          "DOWN",
           120,
           20,
           8,
@@ -860,70 +788,22 @@
           null,
           null,
           "[\"6ff5b8c1-466e-44fb-8592-41f44cbbf8c5\"]",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "3464096b-6f5b-4a48-87b4-f68e70edd6f0",
-          "ActorInstance",
-          "ENEMY_BOSS",
-          "IDLE",
-          "fa8b5962-afc8-439c-966a-470241c6d3f0",
-          "f34bebc3-90c5-4fcc-b40b-300dbdd4cb30",
-          "ganon",
-          "Ganon Dark Lord",
-          192.0,
-          100.0,
-          192.0,
-          100.0,
-          "DOWN",
-          999,
-          50,
-          20,
-          null,
-          null,
-          "994b1b9c-42b1-415f-8d21-6233d9672390",
-          "[]",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "3464096b-6f5b-4a48-87b4-f68e70edd6f2",
-          "ActorInstance",
-          "NPC_DIALOGUE",
-          "IDLE",
-          "fa8b5962-afc8-439c-966a-470241c6d3f9",
-          "f34bebc3-90c5-4fcc-b40b-300dbdd4cb32",
-          "zelda",
-          "Princess Zelda",
-          192.0,
-          120.0,
-          192.0,
-          120.0,
-          "DOWN",
-          100,
-          0,
-          1,
-          null,
-          null,
-          "994b1b9c-42b1-415f-8d21-6233d9672392",
-          "[]",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z",
+          "2026-11-23T23:55:00Z"
         ],
         [
           "3464096b-6f5b-4a48-87b4-f68e70edd6f3",
           "ActorInstance",
           "ENEMY_MOB",
           "IDLE",
-          "fa8b5962-afc8-439c-966a-470241c6d3f7",
+          "fa8b5962-afc8-439c-966a-470241c6d3f1",
           "6f08ff8c-ae51-4a46-895c-651ad32a07ea",
           "slime",
-          "Shadow Slime 1",
-          200.0,
-          200.0,
-          200.0,
-          200.0,
+          "Debug Test Slime",
+          400.0,
+          400.0,
+          400.0,
+          400.0,
           "LEFT",
           35,
           10,
@@ -932,22 +812,22 @@
           null,
           null,
           "[]",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z",
+          "2026-11-23T23:55:00Z"
         ],
         [
           "3464096b-6f5b-4a48-87b4-f68e70edd6f4",
           "ActorInstance",
           "ENEMY_MOB",
           "IDLE",
-          "fa8b5962-afc8-439c-966a-470241c6d3f8",
+          "fa8b5962-afc8-439c-966a-470241c6d3f1",
           "6f08ff8c-ae51-4a46-895c-651ad32a07eb",
           "guard",
-          "Royal Guard Captain",
-          220.0,
-          180.0,
-          220.0,
-          180.0,
+          "Debug Test Guard",
+          600.0,
+          400.0,
+          600.0,
+          400.0,
           "DOWN",
           60,
           15,
@@ -956,8 +836,8 @@
           null,
           null,
           "[]",
-          "2026-10-25T21:04:00Z",
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z",
+          "2026-11-23T23:55:00Z"
         ]
       ]
     },
@@ -1641,26 +1521,26 @@
           "fa8b5962-afc8-439c-966a-470241c6d3f0",
           "f8812345-6789-4abc-8def-012345678902",
           "wall_torch",
-          "Sanctuary Dark Torch",
-          4,
-          4,
+          "Shadow Cave Brazier",
+          12,
+          10,
           false,
           null,
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z"
         ],
         [
           "813cb168-2718-4099-ab29-b986aebc1cce",
           "WorldObject",
           "CONTAINER_CHEST",
-          "fa8b5962-afc8-439c-966a-470241c6d3f7",
+          "fa8b5962-afc8-439c-966a-470241c6d3f0",
           "f8812345-6789-4abc-8def-012345678903",
-          "chest_potions",
-          "Dark Cache Chest",
-          8,
-          8,
+          "chest_home_cache",
+          "Shadow Cave Supply Chest",
+          16,
+          10,
           true,
-          "994b1b9c-42b1-415f-8d21-6233d9672393",
-          "2026-10-25T21:04:00Z"
+          null,
+          "2026-11-23T23:55:00Z"
         ],
         [
           "813cb168-2718-4099-ab29-b986aebc1ccf",
@@ -1674,7 +1554,7 @@
           6,
           true,
           null,
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z"
         ],
         [
           "813cb168-2718-4099-ab29-b986aebc1cd0",
@@ -1688,7 +1568,7 @@
           6,
           true,
           null,
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z"
         ],
         [
           "813cb168-2718-4099-ab29-b986aebc1cd1",
@@ -1702,7 +1582,7 @@
           6,
           true,
           null,
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z"
         ],
         [
           "813cb168-2718-4099-ab29-b986aebc1cd2",
@@ -1716,7 +1596,7 @@
           6,
           true,
           null,
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z"
         ]
       ]
     },
@@ -2742,17 +2622,17 @@
           "cbe3d495-b527-4268-8b26-9df51dfeba6f",
           "TileChunkMatrix",
           "DENSE_MATRIX_16X16",
-          "fa8b5962-afc8-439c-966a-470241c6d3f7",
-          "forgotten_cavern",
+          "fa8b5962-afc8-439c-966a-470241c6d3f0",
+          "shadow_cave",
           0,
           0,
-          16,
-          16,
+          32,
+          32,
           "[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]",
           "[]",
           "[]",
-          "[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]",
-          "2026-10-25T21:04:00Z"
+          "[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1]]",
+          "2026-11-23T23:55:00Z"
         ]
       ]
     },
@@ -2854,44 +2734,16 @@
         [
           "994b1b9c-42b1-415f-8d21-6233d9672390",
           "GameEvent",
-          "CUTSCENE_AUTO",
+          "INTERACTION",
           "OBJECT_OPCODE_V2",
-          "ganon_opening_command",
+          "shadow_cave_home_inscription",
           "fa8b5962-afc8-439c-966a-470241c6d3f0",
-          192.0,
-          140.0,
-          "[{\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Ganon (Dark Lord)\", \"text\": \"Shadow Link... arise! The Light World clings to false hope.\"}, {\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Ganon (Dark Lord)\", \"text\": \"Go forth into Hyrule, breach the Royal Sanctuary, and TAKE PRINCESS ZELDA for our dark ascension!\"}, {\"op\": \"PLAY_SFX\", \"sound\": \"dark_aura\"}, {\"op\": \"GIVE_ITEM\", \"item_uuid\": \"d7efa941-b0b8-4f8f-bd00-72d0277a1b0d\"}, {\"op\": \"OBJECTIVE_SET\", \"objective\": \"Breach Hyrule Castle & Kidnap Princess Zelda\"}]",
-          null,
-          false,
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "994b1b9c-42b1-415f-8d21-6233d9672392",
-          "GameEvent",
-          "INTERACTION",
-          "OBJECT_OPCODE_V2",
-          "zelda_kidnap_event",
-          "fa8b5962-afc8-439c-966a-470241c6d3f9",
-          192.0,
-          120.0,
-          "[{\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Princess Zelda\", \"text\": \"Shadow Link?! No... the crimson eyes of dark prophecy! Unhand me!\"}, {\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Shadow Link\", \"text\": \"Master Ganon awaits his royal captive. Your light belongs to the shadows now!\"}, {\"op\": \"PLAY_SFX\", \"sound\": \"kidnap_chime\"}, {\"op\": \"GIVE_ITEM\", \"item_uuid\": \"6ff5b8c1-466e-44fb-8592-41f44cbbf8c7\"}, {\"op\": \"VICTORY_WIN\", \"message\": \"VICTORY! PRINCESS ZELDA HAS BEEN TAKEN! GANON'S DARK RULE BEGINS!\"}]",
-          null,
-          false,
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "994b1b9c-42b1-415f-8d21-6233d967239e",
-          "GameEvent",
-          "INTERACTION",
-          "OBJECT_OPCODE_V2",
-          "hermit_greeting",
-          "fa8b5962-afc8-439c-966a-470241c6d3f7",
           256.0,
-          224.0,
-          "[{\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Dark Hermit\", \"text\": \"The royal guards above are heavily armed. Use your Dark Spin Attack [K / X] to pierce their shields!\"}, {\"op\": \"PLAY_SFX\", \"sound\": \"chime_bell\"}, {\"op\": \"GIVE_ITEM\", \"item_uuid\": \"6ff5b8c1-466e-44fb-8592-41f44cbbf8c5\"}]",
+          160.0,
+          "[{\"op\": \"SHOW_DIALOGUE\", \"speaker\": \"Shadow Cave Inscription\", \"text\": \"Shadow Cave \u2014 Home Base. Step through the south threshold to enter the open 8x8 Overworld Grid.\"}]",
           null,
-          false,
-          "2026-10-25T21:04:00Z"
+          true,
+          "2026-11-23T23:55:00Z"
         ]
       ]
     },
@@ -3745,74 +3597,32 @@
       ],
       "Values": [
         [
-          "3cf77a77-c513-4b62-9b6c-4c161785d10d",
-          "WorldPortal",
-          "STEP_ON_TILE",
-          "sanctuary_to_debug_room",
-          "fa8b5962-afc8-439c-966a-470241c6d3f0",
-          8,
-          18,
-          "fa8b5962-afc8-439c-966a-470241c6d3f1",
-          12,
-          18,
-          null,
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "3cf77a77-c513-4b62-9b6c-4c161785d10e",
-          "WorldPortal",
-          "STEP_ON_TILE",
-          "debug_room_to_sanctuary",
-          "fa8b5962-afc8-439c-966a-470241c6d3f1",
-          12,
-          22,
-          "fa8b5962-afc8-439c-966a-470241c6d3f0",
-          12,
-          18,
-          null,
-          "2026-10-25T21:04:00Z"
-        ],
-        [
           "3cf77a77-c513-4b62-9b6c-4c161785d10a",
           "WorldPortal",
           "STEP_ON_TILE",
-          "sanctuary_to_cavern",
+          "shadow_cave_exit_to_overworld",
           "fa8b5962-afc8-439c-966a-470241c6d3f0",
-          12,
-          22,
-          "fa8b5962-afc8-439c-966a-470241c6d3f7",
           16,
-          2,
+          30,
+          "fa8b5962-afc8-439c-966a-470241c6d3f2",
+          112,
+          114,
           null,
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z"
         ],
         [
           "3cf77a77-c513-4b62-9b6c-4c161785d10b",
           "WorldPortal",
           "STEP_ON_TILE",
-          "cavern_to_castle",
-          "fa8b5962-afc8-439c-966a-470241c6d3f7",
+          "overworld_entry_to_shadow_cave",
+          "fa8b5962-afc8-439c-966a-470241c6d3f2",
+          112,
+          112,
+          "fa8b5962-afc8-439c-966a-470241c6d3f0",
           16,
-          30,
-          "fa8b5962-afc8-439c-966a-470241c6d3f8",
-          16,
-          2,
+          28,
           null,
-          "2026-10-25T21:04:00Z"
-        ],
-        [
-          "3cf77a77-c513-4b62-9b6c-4c161785d10c",
-          "WorldPortal",
-          "INTERACT_DOOR",
-          "castle_to_princess_tower",
-          "fa8b5962-afc8-439c-966a-470241c6d3f8",
-          16,
-          30,
-          "fa8b5962-afc8-439c-966a-470241c6d3f9",
-          12,
-          20,
-          null,
-          "2026-10-25T21:04:00Z"
+          "2026-11-23T23:55:00Z"
         ]
       ]
     },
@@ -4327,7 +4137,7 @@
     inventoryState.setEquippedYItem('shadow_boomerang');
     let activeYItem = inventoryState.equippedYItemId || 'shadow_boomerang';
     let isDebugMode = false;
-    let realWorldLevelSlug = 'ganon_sanctuary';
+    let realWorldLevelSlug = 'shadow_cave';
     let currentLevelSlug = realWorldLevelSlug;
 
     let boomerangs = [];
@@ -4336,24 +4146,42 @@
     let props = [];
     let enemies = [];
 
-    function setDebugRoom(slug) {
+    function setDebugRoom(rawSlug, customSpawnX = null, customSpawnY = null) {
       ancillaEngine.clearAll();
+      let slug = rawSlug;
+      if (rawSlug === 'ganon_sanctuary') slug = 'shadow_cave';
+      else if (rawSlug === 'forgotten_cavern' || rawSlug === 'castle_courtyard') slug = 'overworld_grid';
+
       currentLevelSlug = slug;
       if (slug !== 'debug_chamber') {
         realWorldLevelSlug = slug;
       }
-      if (slug === 'forgotten_cavern' || slug === 'castle_courtyard') {
-        tilesW = 96;
-        tilesH = 96;
+      if (slug === 'overworld_grid') {
+        tilesW = 256; // 8x8 sectors of 32x32 metatiles = 4096px
+        tilesH = 256;
+      } else if (slug === 'shadow_cave') {
+        tilesW = 32;  // Underworld Supertile 0x00 (512x512px)
+        tilesH = 32;
       } else {
-        tilesW = 64;
+        tilesW = 64;  // Debug Chamber (1024x1024px)
         tilesH = 64;
       }
       mapWorldWidth = tilesW * tileUnitPx;
       mapWorldHeight = tilesH * tileUnitPx;
 
-      px = mapWorldWidth / 2;
-      py = mapWorldHeight / 2 + 40;
+      if (customSpawnX !== null && customSpawnY !== null) {
+        px = customSpawnX;
+        py = customSpawnY;
+      } else if (slug === 'overworld_grid') {
+        px = 1792; // Sector 0x1B (Col 3, Row 3) outside Shadow Cave
+        py = 1808;
+      } else if (slug === 'shadow_cave') {
+        px = 256; // Center of Shadow Cave Supertile 0x00
+        py = 256;
+      } else {
+        px = mapWorldWidth / 2;
+        py = mapWorldHeight / 2 + 40;
+      }
 
       if (slug === 'debug_chamber') {
         props = [
@@ -4364,28 +4192,30 @@
           { id: 'p3', x: px + 160, y: py - 60, type: 'pot', destroyed: false },
           { id: 'p4', x: px + 200, y: py - 60, type: 'bush', destroyed: false }
         ];
-      } else {
-        props = [
-          { id: 'p1', x: px - 60, y: py - 50, type: 'pot', destroyed: false },
-          { id: 'p2', x: px + 60, y: py - 50, type: 'bush', destroyed: false },
-          { id: 'p3', x: px - 100, y: py + 50, type: 'pot', destroyed: false },
-          { id: 'p4', x: px + 100, y: py + 50, type: 'bush', destroyed: false }
+        enemies = [
+          { id: 'e1', type: 'guard', x: px - 120, y: py - 120, hp: 60, maxHp: 60, attack: 15, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 60, targetX: px - 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
+          { id: 'e2', type: 'slime', x: px + 120, y: py - 120, hp: 35, maxHp: 35, attack: 10, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 40, targetX: px + 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 }
         ];
+      } else if (slug === 'shadow_cave') {
+        props = [
+          { id: 'sc_pot_nw', x: 144, y: 160, type: 'pot', destroyed: false },
+          { id: 'sc_pot_ne', x: 368, y: 160, type: 'pot', destroyed: false },
+          { id: 'sc_pot_sw', x: 144, y: 352, type: 'pot', destroyed: false },
+          { id: 'sc_pot_se', x: 368, y: 352, type: 'pot', destroyed: false }
+        ];
+        enemies = [];
+      } else {
+        props = [];
+        enemies = [];
       }
-
-      enemies = [
-        { id: 'e1', type: 'guard', x: px - 120, y: py - 120, hp: 60, maxHp: 60, attack: 15, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 60, targetX: px - 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
-        { id: 'e2', type: 'slime', x: px + 120, y: py - 120, hp: 35, maxHp: 35, attack: 10, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 40, targetX: px + 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 }
-      ];
 
       ['debug', 'sanctuary', 'cavern', 'courtyard'].forEach(name => {
         const btn = document.getElementById('btn-room-' + name);
         if (btn) btn.classList.remove('active');
       });
       if (slug === 'debug_chamber') document.getElementById('btn-room-debug')?.classList.add('active');
-      else if (slug === 'ganon_sanctuary') document.getElementById('btn-room-sanctuary')?.classList.add('active');
-      else if (slug === 'forgotten_cavern') document.getElementById('btn-room-cavern')?.classList.add('active');
-      else if (slug === 'castle_courtyard') document.getElementById('btn-room-courtyard')?.classList.add('active');
+      else if (slug === 'shadow_cave') document.getElementById('btn-room-sanctuary')?.classList.add('active');
+      else document.getElementById('btn-room-cavern')?.classList.add('active');
     }
 
     setDebugRoom(isDebugMode ? 'debug_chamber' : realWorldLevelSlug);
@@ -4858,6 +4688,13 @@
       px = Math.max(24, Math.min(mapWorldWidth - 24, px));
       py = Math.max(24, Math.min(mapWorldHeight - 24, py));
 
+      // Threshold Doorway Transitions: Shadow Cave (Supertile 0x00) <-> Empty 8x8 Overworld Grid (Sector 0x1B)
+      if (currentLevelSlug === 'shadow_cave' && py >= 468 && Math.abs(px - 256) < 28) {
+        setDebugRoom('overworld_grid', 1792, 1808);
+      } else if (currentLevelSlug === 'overworld_grid' && Math.abs(px - 1792) < 24 && Math.abs(py - 1784) < 16) {
+        setDebugRoom('shadow_cave', 256, 420);
+      }
+
       if (keys['b'] || keys['j'] || keys['z']) {
         bHeldTime++;
         if (bHeldTime > 25) isCharging = true;
@@ -5102,11 +4939,27 @@
       const viewportWorldW = canvas.width / zoomScale; // 358.4px
       const viewportWorldH = canvas.height / zoomScale; // 358.4px
 
+      // $0600 Equivalent Sector / Supertile Camera Scroll Clamps
+      let clampMinX = 0, clampMinY = 0, clampMaxX = mapWorldWidth, clampMaxY = mapWorldHeight;
+      if (currentLevelSlug === 'overworld_grid') {
+        const secCol = Math.max(0, Math.min(7, (Math.floor(px) >> 9) & 7));
+        const secRow = Math.max(0, Math.min(7, (Math.floor(py) >> 9) & 7));
+        clampMinX = secCol * 512;
+        clampMinY = secRow * 512;
+        clampMaxX = (secCol + 1) * 512;
+        clampMaxY = (secRow + 1) * 512;
+      } else if (currentLevelSlug === 'shadow_cave') {
+        clampMinX = 0;
+        clampMinY = 0;
+        clampMaxX = 512;
+        clampMaxY = 512;
+      }
+
       let camX = px - viewportWorldW / 2;
       let camY = py - viewportWorldH / 2;
 
-      camX = Math.max(0, Math.min(mapWorldWidth - viewportWorldW, camX));
-      camY = Math.max(0, Math.min(mapWorldHeight - viewportWorldH, camY));
+      camX = Math.max(clampMinX, Math.min(Math.max(clampMinX, clampMaxX - viewportWorldW), camX));
+      camY = Math.max(clampMinY, Math.min(Math.max(clampMinY, clampMaxY - viewportWorldH), camY));
 
       ctx.save();
       ctx.scale(zoomScale, zoomScale);
@@ -5118,20 +4971,22 @@
       const minRow = Math.max(0, Math.floor(camY / tileUnitPx) - 1);
       const maxRow = Math.min(tilesH - 1, Math.ceil((camY + viewportWorldH) / tileUnitPx) + 1);
 
-      // 1. Terrain tile grid rendering (1:1 React parity)
+      const isShadowCave = currentLevelSlug === 'shadow_cave';
+
+      // 1. PASS 1 (BG1): Terrain metatile grid rendering
       for (let r = minRow; r <= maxRow; r++) {
         for (let c = minCol; c <= maxCol; c++) {
           const tx = c * tileUnitPx;
           const ty = r * tileUnitPx;
           const isBoundary = r === 0 || r === tilesH - 1 || c === 0 || c === tilesW - 1;
+          const isSouthExitGap = isShadowCave && r === tilesH - 1 && c >= 15 && c <= 17;
 
-          if (isBoundary) {
-            ctx.fillStyle = currentLevelSlug === 'ganon_sanctuary' ? '#1f1924' : '#1c281e';
+          if (isBoundary && !isSouthExitGap) {
+            ctx.fillStyle = isShadowCave ? '#1f1924' : '#1c281e';
             ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-            ctx.fillStyle = currentLevelSlug === 'ganon_sanctuary' ? '#2d2436' : '#2d4232';
+            ctx.fillStyle = isShadowCave ? '#2d2436' : '#2d4232';
             ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, 12);
-            ctx.fillRect(tx + 2, ty + 18, tileUnitPx - 4, 12);
-            ctx.strokeStyle = currentLevelSlug === 'ganon_sanctuary' ? '#110c17' : '#0f1710';
+            ctx.strokeStyle = isShadowCave ? '#110c17' : '#0f1710';
             ctx.lineWidth = 1;
             ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
           } else if (currentLevelSlug === 'debug_chamber') {
@@ -5144,18 +4999,10 @@
               ctx.lineWidth = 0.5;
               ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
             } else if (c < 30 && r < 30) {
-              // Zone A: Dark Grassland Biome
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#2e7d32' : '#256628';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-              const seed = (r * 31 + c * 17) % 5;
-              if (seed === 0) {
-                ctx.fillStyle = '#4caf50';
-                ctx.fillRect(tx + 6, ty + 8, 2, 4);
-                ctx.fillRect(tx + 10, ty + 6, 2, 6);
-              }
             } else if (c > 33 && r < 30) {
-              // Zone B: Obsidian Sanctuary Biome
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
@@ -5163,26 +5010,22 @@
               ctx.lineWidth = 0.5;
               ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
             } else if (c < 30 && r > 33) {
-              // Zone C: Subterranean Cavern Biome
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#3f3f46' : '#27272a';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
             } else {
-              // Zone D: Gerudo Dark Sands Biome
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#b45309' : '#92400e';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
             }
-          } else if (currentLevelSlug === 'ganon_sanctuary') {
-            const isCenterCarpet = (c >= 14 && c <= 17) || (c >= 30 && c <= 33);
-            if (isCenterCarpet) {
-              ctx.fillStyle = '#991b1b';
-              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+          } else if (isShadowCave) {
+            // Supertile 0x00: Shadow Cave (Home Base) — 32x32 metatiles (512x512px) with 4 Quadrants
+            const isCenterPath = c >= 15 && c <= 17 && r >= 14;
+            if (isCenterPath) {
               ctx.fillStyle = '#7f1d1d';
-              ctx.fillRect(tx + 4, ty + 4, tileUnitPx - 8, tileUnitPx - 8);
-              ctx.strokeStyle = '#f59e0b';
-              ctx.lineWidth = 0.5;
-              ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+              ctx.fillStyle = '#991b1b';
+              ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, tileUnitPx - 4);
             } else {
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
@@ -5191,74 +5034,51 @@
               ctx.lineWidth = 0.5;
               ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
             }
-          } else if (currentLevelSlug === 'forgotten_cavern') {
-            // Forgotten Dark Cavern Biome: Subterranean Slate Floor & Blue Water Streams
-            const isWaterStream = (c >= 44 && c <= 52) || (r >= 44 && r <= 52);
-            if (isWaterStream) {
-              const altWater = (r + c) % 2 === 0;
-              ctx.fillStyle = altWater ? '#1e3a8a' : '#172554';
-              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-              if ((r * 13 + c * 7) % 4 === 0) {
-                ctx.fillStyle = '#38bdf8';
-                ctx.fillRect(tx + 4, ty + 7, 6, 2);
-              }
-            } else {
-              const altCavern = (r + c) % 2 === 0;
-              ctx.fillStyle = altCavern ? '#27272a' : '#1e1e24';
-              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-              ctx.strokeStyle = '#18181b';
-              ctx.lineWidth = 0.5;
-              ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
-            }
-          } else if (currentLevelSlug === 'castle_courtyard') {
-            // Castle Courtyard Biome: Cobblestone Path Crossroads & Royal Green Gardens
-            const isPath = (c >= 44 && c <= 50) || (r >= 44 && r <= 50);
-            if (isPath) {
-              const altCobble = (r + c) % 2 === 0;
-              ctx.fillStyle = altCobble ? '#71717a' : '#52525b';
-              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-              ctx.strokeStyle = '#3f3f46';
-              ctx.lineWidth = 0.5;
+            if (c === 16 || r === 16) {
+              ctx.strokeStyle = 'rgba(245, 158, 11, 0.16)';
+              ctx.lineWidth = 1;
               ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
-            } else {
-              const altLawn = (r + c) % 2 === 0;
-              ctx.fillStyle = altLawn ? '#15803d' : '#166534';
-              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-              const flowerSeed = (r * 29 + c * 11) % 7;
-              if (flowerSeed === 0) {
-                ctx.fillStyle = '#DE2626'; // Crimson flower accent
-                ctx.fillRect(tx + 6, ty + 6, 3, 3);
-              } else if (flowerSeed === 1) {
-                ctx.fillStyle = '#4ade80'; // Bright grass tuft
-                ctx.fillRect(tx + 8, ty + 7, 2, 5);
-              }
             }
           } else {
+            // Empty 8x8 Overworld Grid (4096x4096px, 64 Sectors of 512x512px)
             const altGrass = (r + c) % 2 === 0;
-            ctx.fillStyle = altGrass ? '#2e7d32' : '#256628';
+            ctx.fillStyle = altGrass ? '#1e3a24' : '#19311e';
             ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-            const seed = (r * 31 + c * 17) % 5;
-            if (seed === 0) {
-              ctx.fillStyle = '#4caf50';
-              ctx.fillRect(tx + 6, ty + 8, 2, 4);
-              ctx.fillRect(tx + 10, ty + 6, 2, 6);
+
+            if (c % 32 === 0 || r % 32 === 0) {
+              ctx.strokeStyle = 'rgba(52, 211, 153, 0.22)';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
             }
           }
         }
       }
 
-      // Stone Pillars
-      const pillars = [
-        { x: 128, y: 128 }, { x: 896, y: 128 },
-        { x: 128, y: 640 }, { x: 896, y: 640 },
-        { x: 384, y: 384 }, { x: 640, y: 384 }
-      ];
-      pillars.forEach(p => {
+      if (isShadowCave) {
+        ctx.fillStyle = '#18181b';
+        ctx.fillRect(256 - 32, 112, 64, 32);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(256 - 32, 112, 64, 32);
+        ctx.fillStyle = '#DE2626';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText('SHADOW CAVE', 256 - 26, 126);
+        ctx.fillStyle = '#a1a1aa';
+        ctx.font = '7px monospace';
+        ctx.fillText('HOME BASE · 0x00', 256 - 30, 138);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(256 - 16, 480, 32, 12);
+      } else if (currentLevelSlug === 'overworld_grid') {
+        const caveX = 112 * tileUnitPx;
+        const caveY = 112 * tileUnitPx;
+        ctx.fillStyle = '#27272a';
+        ctx.fillRect(caveX - 32, caveY - 28, 64, 40);
+        ctx.strokeStyle = '#52525b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(caveX - 32, caveY - 28, 64, 40);
         ctx.fillStyle = '#09090b';
-        ctx.fillRect(p.x - 16, p.y - 16, 32, 32);
-        ctx.strokeStyle = '#DE2626'; ctx.lineWidth = 1.5; ctx.strokeRect(p.x - 16, p.y - 16, 32, 32);
-        ctx.fillStyle = '#ef4444'; ctx.fillRect(p.x - 6, p.y - 6, 12, 12);
-      });
+        ctx.fillRect(caveX - 14, caveY - 8, 28, 22);
+      }
 
       // 2. Y-Sorted Draw Queue for 2.5D Depth Sorting
       const renderQueue = [];
@@ -5445,6 +5265,23 @@
         }
       });
 
+      // PASS 3 (BG2): PRIORITY OCCLUSION LAYER (Overhead Arches & Lintels)
+      if (isShadowCave) {
+        ctx.fillStyle = '#3f3f46';
+        ctx.fillRect(256 - 28, 464, 56, 12);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(256 - 28, 464, 56, 12);
+      } else if (currentLevelSlug === 'overworld_grid') {
+        const caveX = 112 * tileUnitPx;
+        const caveY = 112 * tileUnitPx;
+        ctx.fillStyle = '#3f3f46';
+        ctx.fillRect(caveX - 24, caveY - 18, 48, 12);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(caveX - 24, caveY - 18, 48, 12);
+      }
+
       ctx.restore();
 
       // Top In-Canvas HUD
@@ -5452,13 +5289,25 @@
       ctx.fillStyle = '#DE2626'; ctx.font = 'bold 11px monospace';
       const curItem = inventoryState.getEquippedYItem();
       const yItemLabel = curItem ? `${curItem.icon} ${curItem.name.toUpperCase()}` : (activeYItem === 'shadow_boomerang' ? '🪃 BOOMERANG' : '🏹 DARK BOW');
-      const roomName = currentLevelSlug.replace('_', ' ').toUpperCase();
       ctx.fillText(`SHADOW LINK | HP: ${playerHp}/${playerMaxHp} | Y: ${yItemLabel}`, 12, 20);
 
-      // Bottom In-Canvas HUD with Real-Time Coordinates
+      // Bottom In-Canvas HUD with O(1) Spatial Sector / Supertile Telemetry
       ctx.fillStyle = '#09090b'; ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
       ctx.fillStyle = '#10b981'; ctx.font = '10px monospace';
-      ctx.fillText(`ROOM: ${roomName} (${tilesW}x${tilesH}) | CAM FOLLOW: (${Math.round(px)}, ${Math.round(py)}) | ZOOM: 1.25x`, 12, canvas.height - 8);
+      if (currentLevelSlug === 'overworld_grid') {
+        const secCol = (Math.floor(px) >> 9) & 7;
+        const secRow = (Math.floor(py) >> 9) & 7;
+        const secId = (secRow << 3) | secCol;
+        const secHex = '0x' + secId.toString(16).toUpperCase().padStart(2, '0');
+        ctx.fillText(`OVERWORLD SEC ${secHex} (${secCol},${secRow}) | XY:(${Math.round(px)},${Math.round(py)})`, 12, canvas.height - 8);
+      } else if (currentLevelSlug === 'shadow_cave') {
+        const qx = (Math.floor(px) >> 8) & 1;
+        const qy = (Math.floor(py) >> 8) & 1;
+        const qLabel = ['NW', 'NE', 'SW', 'SE'][(qy << 1) | qx] || 'NW';
+        ctx.fillText(`SHADOW CAVE [ST 0x00 · Q:${qLabel}] | XY:(${Math.round(px)},${Math.round(py)})`, 12, canvas.height - 8);
+      } else {
+        ctx.fillText(`DEBUG DOMAIN (${tilesW}x${tilesH}) | XY:(${Math.round(px)},${Math.round(py)})`, 12, canvas.height - 8);
+      }
     }
 
     function gameLoop() {

@@ -15,6 +15,7 @@ import { soundEngine } from '../engine/soundEngine';
 import { physicsEngine, KnockbackState } from '../engine/physicsEngine';
 import { screenEffects } from '../lib/lib_bejson_Gaming_screen_effects';
 import { spritePerspectiveEngine } from '../lib/lib_bejson_Viewport_sprites';
+import { spatialWorldEngine, SpatialCoordinateMath } from '../lib/lib_bejson_Gaming_spatial_world_engine';
 import { GamepadDeck } from './GamepadDeck';
 
 interface Props {
@@ -90,15 +91,10 @@ export const GameViewport: React.FC<Props> = ({
   // Active Non-Boomerang Projectiles & Props
   const otherProjectilesRef = useRef<OtherProjectile[]>([]);
   const propsRef = useRef<DestructibleProp[]>([
-    { id: 'p1', x: 300, y: 400, type: 'pot', destroyed: false },
-    { id: 'p2', x: 340, y: 400, type: 'bush', destroyed: false },
-    { id: 'p3', x: 600, y: 450, type: 'pot', destroyed: false },
-    { id: 'p4', x: 640, y: 450, type: 'bush', destroyed: false },
-    { id: 'p5', x: 512, y: 600, type: 'pot', destroyed: false },
-    { id: 'p6', x: 200, y: 700, type: 'bush', destroyed: false },
-    { id: 'p7', x: 800, y: 700, type: 'pot', destroyed: false },
-    { id: 'p8', x: 450, y: 300, type: 'bush', destroyed: false },
-    { id: 'p9', x: 550, y: 300, type: 'pot', destroyed: false }
+    { id: 'sc_pot_nw', x: 144, y: 160, type: 'pot', destroyed: false },
+    { id: 'sc_pot_ne', x: 368, y: 160, type: 'pot', destroyed: false },
+    { id: 'sc_pot_sw', x: 144, y: 352, type: 'pot', destroyed: false },
+    { id: 'sc_pot_se', x: 368, y: 352, type: 'pot', destroyed: false }
   ]);
 
   // Dynamic Level Enemy States
@@ -166,18 +162,17 @@ export const GameViewport: React.FC<Props> = ({
         { id: 'p3', x: cx + 160, y: cy - 80, type: 'pot', destroyed: false },
         { id: 'p4', x: cx + 200, y: cy - 80, type: 'bush', destroyed: false }
       ];
-    } else {
+    } else if (levelSlug === 'shadow_cave') {
+      // Shadow Cave (Home Base) 4-Quadrant Supply Pots
       propsRef.current = [
-        { id: 'p1', x: 300, y: 400, type: 'pot', destroyed: false },
-        { id: 'p2', x: 340, y: 400, type: 'bush', destroyed: false },
-        { id: 'p3', x: 600, y: 450, type: 'pot', destroyed: false },
-        { id: 'p4', x: 640, y: 450, type: 'bush', destroyed: false },
-        { id: 'p5', x: 512, y: 600, type: 'pot', destroyed: false },
-        { id: 'p6', x: 200, y: 700, type: 'bush', destroyed: false },
-        { id: 'p7', x: 800, y: 700, type: 'pot', destroyed: false },
-        { id: 'p8', x: 450, y: 300, type: 'bush', destroyed: false },
-        { id: 'p9', x: 550, y: 300, type: 'pot', destroyed: false }
+        { id: 'sc_pot_nw', x: 144, y: 160, type: 'pot', destroyed: false },
+        { id: 'sc_pot_ne', x: 368, y: 160, type: 'pot', destroyed: false },
+        { id: 'sc_pot_sw', x: 144, y: 352, type: 'pot', destroyed: false },
+        { id: 'sc_pot_se', x: 368, y: 352, type: 'pot', destroyed: false }
       ];
+    } else {
+      // Empty 8x8 Overworld Grid has 0 pre-populated location props
+      propsRef.current = [];
     }
   }, []);
 
@@ -594,16 +589,37 @@ export const GameViewport: React.FC<Props> = ({
 
       screenEffects.update(1 / 60);
 
-      // Dynamic Camera Viewport Follow System
+      // Dynamic Camera Viewport Follow System with $0600 Sector / Supertile Clamping
       const zoomScale = 1.25;
       const viewportWorldW = canvas.width / zoomScale;
       const viewportWorldH = canvas.height / zoomScale;
 
+      if (bejsonEngine.currentLevelSlug === 'overworld_grid') {
+        spatialWorldEngine.activeDomain = 'OVERWORLD';
+        spatialWorldEngine.updateOverworldCameraClamps(px, py);
+      } else if (bejsonEngine.currentLevelSlug === 'shadow_cave') {
+        spatialWorldEngine.activeDomain = 'UNDERWORLD';
+        spatialWorldEngine.updateUnderworldCameraClamps(px, py);
+      } else {
+        spatialWorldEngine.activeDomain = 'DEBUG';
+        spatialWorldEngine.cameraClamps = {
+          minX: 0,
+          minY: 0,
+          maxX: mapWorldWidth,
+          maxY: mapWorldHeight
+        };
+      }
+
+      const clampMinX = spatialWorldEngine.cameraClamps.minX;
+      const clampMinY = spatialWorldEngine.cameraClamps.minY;
+      const clampMaxX = Math.max(clampMinX, spatialWorldEngine.cameraClamps.maxX - viewportWorldW);
+      const clampMaxY = Math.max(clampMinY, spatialWorldEngine.cameraClamps.maxY - viewportWorldH);
+
       let camX = px - viewportWorldW / 2 + screenEffects.shake.offsetX;
       let camY = py - viewportWorldH / 2 + screenEffects.shake.offsetY;
 
-      camX = Math.max(0, Math.min(mapWorldWidth - viewportWorldW, camX));
-      camY = Math.max(0, Math.min(mapWorldHeight - viewportWorldH, camY));
+      camX = Math.max(clampMinX, Math.min(clampMaxX, camX));
+      camY = Math.max(clampMinY, Math.min(clampMaxY, camY));
 
       // Frustum Culling bounds
       const minCol = Math.max(0, Math.floor(camX / tileUnitPx) - 1);
@@ -724,14 +740,20 @@ export const GameViewport: React.FC<Props> = ({
         }
       }
 
-      // Check level transition portals
+      // Check level transition portals (Shadow Cave <-> Empty 8x8 Overworld Grid)
       const portals = bejsonEngine.getPortalsForLevel(bejsonEngine.currentLevelSlug);
       portals.forEach(port => {
         const portPxX = port.sourceX * tileUnitPx;
         const portPxY = port.sourceY * tileUnitPx;
-        if (physicsEngine.checkAABBRaw(px - 10, py - 10, 20, 20, portPxX - 12, portPxY - 12, 24, 24)) {
+        if (physicsEngine.checkAABBRaw(px - 10, py - 10, 20, 20, portPxX - 14, portPxY - 14, 28, 28)) {
+          if (bejsonEngine.currentLevelSlug === 'overworld_grid') {
+            spatialWorldEngine.enterShadowCaveFromOverworld(px, py);
+          } else if (bejsonEngine.currentLevelSlug === 'shadow_cave') {
+            spatialWorldEngine.exitShadowCaveToOverworld();
+          }
           bejsonEngine.switchLevelByUuid(port.targetLvlUuid, port.targetX, port.targetY);
           syncEnemiesForLevel(bejsonEngine.currentLevelSlug);
+          syncPropsForLevel(bejsonEngine.currentLevelSlug);
           soundEngine.playChimeSFX();
         }
       });
@@ -832,30 +854,29 @@ export const GameViewport: React.FC<Props> = ({
       ctx.scale(zoomScale, zoomScale);
       ctx.translate(-camX, -camY);
 
-      const isSanctuary = bejsonEngine.currentLevelSlug === 'ganon_sanctuary';
+      const isShadowCave = bejsonEngine.currentLevelSlug === 'shadow_cave';
 
-      // 1. TERRAIN BACKGROUND TILE GRID RENDERING
+      // 1. PASS 1 (BG1): TERRAIN BACKGROUND METATILE GRID RENDERING
       for (let r = minRow; r <= maxRow; r++) {
         for (let c = minCol; c <= maxCol; c++) {
           const tx = c * tileUnitPx;
           const ty = r * tileUnitPx;
           const isBoundary = r === 0 || r === tilesH - 1 || c === 0 || c === tilesW - 1;
+          const isSouthExitGap = isShadowCave && r === tilesH - 1 && c >= 15 && c <= 17;
 
-          if (isBoundary) {
-            ctx.fillStyle = isSanctuary ? '#1f1924' : '#1c281e';
+          if (isBoundary && !isSouthExitGap) {
+            ctx.fillStyle = isShadowCave ? '#1f1924' : '#1c281e';
             ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
 
-            ctx.fillStyle = isSanctuary ? '#2d2436' : '#2d4232';
+            ctx.fillStyle = isShadowCave ? '#2d2436' : '#2d4232';
             ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, 12);
-            ctx.fillRect(tx + 2, ty + 18, tileUnitPx - 4, 12);
 
-            ctx.strokeStyle = isSanctuary ? '#110c17' : '#0f1710';
+            ctx.strokeStyle = isShadowCave ? '#110c17' : '#0f1710';
             ctx.lineWidth = 1;
             ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
           } else if (bejsonEngine.currentLevelSlug === 'debug_chamber') {
             const isHallway = (c >= 30 && c <= 33) || (r >= 30 && r <= 33);
             if (isHallway) {
-              // Cobblestone Hallway Walkway
               const altWay = (r + c) % 2 === 0;
               ctx.fillStyle = altWay ? '#52525b' : '#3f3f46';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
@@ -863,12 +884,10 @@ export const GameViewport: React.FC<Props> = ({
               ctx.lineWidth = 0.5;
               ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
             } else if (c < 30 && r < 30) {
-              // Zone A: Dark Grassland Biome
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#2e7d32' : '#256628';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
             } else if (c > 33 && r < 30) {
-              // Zone B: Obsidian Sanctuary Biome
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
@@ -876,60 +895,77 @@ export const GameViewport: React.FC<Props> = ({
               ctx.lineWidth = 0.5;
               ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
             } else if (c < 30 && r > 33) {
-              // Zone C: Subterranean Cavern Biome
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#3f3f46' : '#27272a';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
             } else {
-              // Zone D: Gerudo Dark Sands Biome
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#b45309' : '#92400e';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
             }
-          } else if (isSanctuary) {
-            const isCenterCarpet = c >= 14 && c <= 17;
-            if (isCenterCarpet) {
-              ctx.fillStyle = '#991b1b';
-              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-
+          } else if (isShadowCave) {
+            // Supertile 0x00: Shadow Cave (Home Base) — 32x32 metatiles (512x512 px) with 4 Quadrants
+            const isCenterPath = c >= 15 && c <= 17 && r >= 14;
+            if (isCenterPath) {
               ctx.fillStyle = '#7f1d1d';
-              ctx.fillRect(tx + 4, ty + 4, tileUnitPx - 8, tileUnitPx - 8);
-
-              if (c === 14) {
-                ctx.fillStyle = '#f59e0b';
-                ctx.fillRect(tx, ty, 3, tileUnitPx);
-              }
-              if (c === 17) {
-                ctx.fillStyle = '#f59e0b';
-                ctx.fillRect(tx + tileUnitPx - 3, ty, 3, tileUnitPx);
-              }
+              ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+              ctx.fillStyle = '#991b1b';
+              ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, tileUnitPx - 4);
             } else {
               const alt = (r + c) % 2 === 0;
               ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
               ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-
               ctx.strokeStyle = '#333338';
-              ctx.lineWidth = 1;
+              ctx.lineWidth = 0.5;
               ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
             }
+            // Subtle 256px Quadrant dividing lines (c === 16 or r === 16)
+            if (c === 16 || r === 16) {
+              ctx.strokeStyle = 'rgba(245, 158, 11, 0.16)';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
+            }
           } else {
+            // Empty 8x8 Overworld Grid (4096x4096 px, 64 Sectors of 32x32 metatiles = 512x512 px)
             const altGrass = (r + c) % 2 === 0;
-            ctx.fillStyle = altGrass ? '#2e7d32' : '#256628';
+            ctx.fillStyle = altGrass ? '#1e3a24' : '#19311e';
             ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
 
-            const seed = (r * 31 + c * 17) % 5;
-            ctx.fillStyle = '#4caf50';
-            if (seed === 0) {
-              ctx.fillRect(tx + 6, ty + 8, 2, 6);
-              ctx.fillRect(tx + 10, ty + 6, 2, 8);
-            } else if (seed === 1) {
-              ctx.fillRect(tx + 18, ty + 10, 2, 7);
-            } else if (seed === 2) {
-              ctx.fillStyle = '#DE2626';
-              ctx.fillRect(tx + 14, ty + 14, 2, 2);
+            // 512px Sector Boundary Grid Marker (every 32 metatiles)
+            if (c % 32 === 0 || r % 32 === 0) {
+              ctx.strokeStyle = 'rgba(52, 211, 153, 0.22)';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
             }
           }
         }
+      }
+
+      // Render Shadow Cave Home Base Altar / Inscription Pedestal in North-Center of Shadow Cave
+      if (isShadowCave) {
+        ctx.fillStyle = '#18181b';
+        ctx.fillRect(256 - 32, 112, 64, 32);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(256 - 32, 112, 64, 32);
+        ctx.fillStyle = '#DE2626';
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText('SHADOW CAVE', 256 - 26, 126);
+        ctx.fillStyle = '#a1a1aa';
+        ctx.font = '7px monospace';
+        ctx.fillText('HOME BASE · 0x00', 256 - 30, 138);
+      } else if (bejsonEngine.currentLevelSlug === 'overworld_grid') {
+        // Render Shadow Cave Exterior Entrance Structure in Sector 0x1B (tile 112, 112 -> 1792, 1792)
+        const caveX = 112 * tileUnitPx;
+        const caveY = 112 * tileUnitPx;
+        ctx.fillStyle = '#27272a';
+        ctx.fillRect(caveX - 32, caveY - 28, 64, 40);
+        ctx.strokeStyle = '#52525b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(caveX - 32, caveY - 28, 64, 40);
+        // Dark cave mouth opening
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(caveX - 14, caveY - 8, 28, 22);
       }
 
       // 2. CONSTRUCT Y-SORTED DRAW QUEUE (2.5D DEPTH SORTING FROM TOP TO BOTTOM)
@@ -952,11 +988,6 @@ export const GameViewport: React.FC<Props> = ({
       levelPortals.forEach(port => {
         renderQueue.push({ sortY: port.sourceY * tileUnitPx, type: 'portal', data: port });
       });
-
-      // Add Ganon Sanctuary Boss Throne
-      if (isSanctuary) {
-        renderQueue.push({ sortY: 150, type: 'ganon', data: null });
-      }
 
       // Add Enemies
       enemiesRef.current.forEach(e => {
@@ -1567,12 +1598,56 @@ export const GameViewport: React.FC<Props> = ({
         ctx.restore();
       });
 
+      // PASS 3 (BG2): PRIORITY OCCLUSION LAYER (Overhead Arches & Lintels render above elevationLayer == 0 actors)
+      if (isShadowCave) {
+        // Overhead Stone Lintel Arch above South Exit Doorway (tile 16, 30 -> 256, 480)
+        ctx.fillStyle = '#3f3f46';
+        ctx.fillRect(256 - 28, 464, 56, 12);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(256 - 28, 464, 56, 12);
+      } else if (bejsonEngine.currentLevelSlug === 'overworld_grid') {
+        // Overhead Cave Mouth Arch in Sector 0x1B (tile 112, 112 -> 1792, 1792)
+        const caveX = 112 * tileUnitPx;
+        const caveY = 112 * tileUnitPx;
+        ctx.fillStyle = '#3f3f46';
+        ctx.fillRect(caveX - 24, caveY - 18, 48, 12);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(caveX - 24, caveY - 18, 48, 12);
+      }
+
       ctx.restore(); // END WORLD TRANSFORM
 
       // =========================================================================
-      // AUTHENTIC OVERLAID CANVAS HUD (HEALTH, ACTIVE Y-ITEM, NUMBERS & COUNTERS)
+      // PASS 5 (BG3): OVERLAID CANVAS HUD & SPATIAL COORDINATE TELEMETRY
       // =========================================================================
       const cW = canvas.width;
+      const cH = canvas.height;
+      const spatialSnap = spatialWorldEngine.getTelemetrySnapshot(Math.round(px), Math.round(py));
+
+      ctx.fillStyle = 'rgba(9, 9, 11, 0.85)';
+      ctx.fillRect(8, cH - 26, 290, 20);
+      ctx.strokeStyle = '#3f3f46';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(8, cH - 26, 290, 20);
+      ctx.fillStyle = '#34d399';
+      ctx.font = 'bold 9px monospace';
+      if (spatialSnap.domain === 'OVERWORLD') {
+        ctx.fillText(
+          `OVERWORLD SEC ${spatialSnap.sectorHex} (${spatialSnap.sectorCol},${spatialSnap.sectorRow}) · XY(${Math.round(px)},${Math.round(py)})`,
+          14,
+          cH - 13
+        );
+      } else if (spatialSnap.domain === 'UNDERWORLD') {
+        ctx.fillText(
+          `SHADOW CAVE [ST ${spatialSnap.supertileHex} · Q:${spatialSnap.quadrantLabel}] · XY(${Math.round(px)},${Math.round(py)})`,
+          14,
+          cH - 13
+        );
+      } else {
+        ctx.fillText(`DEBUG DOMAIN · XY(${Math.round(px)},${Math.round(py)})`, 14, cH - 13);
+      }
 
       ctx.fillStyle = 'rgba(9, 9, 11, 0.88)';
       ctx.fillRect(0, 0, cW, 38);

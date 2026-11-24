@@ -18,6 +18,7 @@ import { BEJSONGamingScreenEffects } from '../../src/lib/lib_js/lib_bejson_Gamin
 import { physicsEngine } from '../../src/lib/lib_js/lib_bejson_Gaming_physics_engine.js';
 import { projectilePhysics } from '../../src/lib/lib_js/lib_bejson_Gaming_projectile_physics.js';
 import { ancillaEngine, itemRegistry, inventoryState } from '../../src/lib/lib_js/lib_bejson_Gaming_ancilla_item_engine.js';
+import { spatialWorldEngine, SpatialCoordinateMath, SPATIAL_CONSTANTS } from '../../src/lib/lib_js/lib_bejson_Gaming_spatial_world_engine.js';
 
 console.log("initializing...");
 
@@ -326,27 +327,50 @@ let otherProjectiles = [];
 let droppedItems = [];
 
 let isDebugMode = false;
-let realWorldLevelSlug = 'ganon_sanctuary';
+let realWorldLevelSlug = 'shadow_cave';
 let currentLevelSlug = realWorldLevelSlug;
 
-function setDebugRoom(slug) {
+function setDebugRoom(rawSlug, customSpawnX = null, customSpawnY = null) {
   ancillaEngine.clearAll();
+  // Normalize legacy button aliases to canonical blank-canvas + Shadow Cave architecture
+  let slug = rawSlug;
+  if (rawSlug === 'ganon_sanctuary') slug = 'shadow_cave';
+  else if (rawSlug === 'forgotten_cavern' || rawSlug === 'castle_courtyard') slug = 'overworld_grid';
+
   currentLevelSlug = slug;
   if (slug !== 'debug_chamber') {
     realWorldLevelSlug = slug;
   }
-  if (slug === 'forgotten_cavern' || slug === 'castle_courtyard') {
-    tilesW = 96;
-    tilesH = 96;
+
+  if (slug === 'overworld_grid') {
+    tilesW = 256; // 8x8 sectors of 32x32 metatiles = 4096px
+    tilesH = 256;
+    spatialWorldEngine.activeDomain = 'OVERWORLD';
+  } else if (slug === 'shadow_cave') {
+    tilesW = 32;  // Underworld Supertile 0x00 (32x32 metatiles = 512px)
+    tilesH = 32;
+    spatialWorldEngine.activeDomain = 'UNDERWORLD';
   } else {
-    tilesW = 64;
+    tilesW = 64;  // Debug Chamber (64x64 metatiles = 1024px)
     tilesH = 64;
+    spatialWorldEngine.activeDomain = 'DEBUG';
   }
   mapWorldWidth = tilesW * tileUnitPx;
   mapWorldHeight = tilesH * tileUnitPx;
 
-  px = mapWorldWidth / 2;
-  py = mapWorldHeight / 2 + 40;
+  if (customSpawnX !== null && customSpawnY !== null) {
+    px = customSpawnX;
+    py = customSpawnY;
+  } else if (slug === 'overworld_grid') {
+    px = SPATIAL_CONSTANTS.HOME_THRESHOLD_WORLD_X; // 1792 (Sector 0x1B Col 3, Row 3)
+    py = SPATIAL_CONSTANTS.HOME_THRESHOLD_WORLD_Y; // 1808
+  } else if (slug === 'shadow_cave') {
+    px = 256; // Center of Supertile 0x00
+    py = 256;
+  } else {
+    px = mapWorldWidth / 2;
+    py = mapWorldHeight / 2 + 40;
+  }
 
   if (slug === 'debug_chamber') {
     props = [
@@ -357,19 +381,24 @@ function setDebugRoom(slug) {
       { id: 'p3', x: px + 160, y: py - 60, type: 'pot', destroyed: false },
       { id: 'p4', x: px + 200, y: py - 60, type: 'bush', destroyed: false }
     ];
-  } else {
-    props = [
-      { id: 'p1', x: px - 60, y: py - 50, type: 'pot', destroyed: false },
-      { id: 'p2', x: px + 60, y: py - 50, type: 'bush', destroyed: false },
-      { id: 'p3', x: px - 100, y: py + 50, type: 'pot', destroyed: false },
-      { id: 'p4', x: px + 100, y: py + 50, type: 'bush', destroyed: false }
+    enemies = [
+      { id: 'e1', name: 'Guard Knight', type: 'guard', x: px - 120, y: py - 120, hp: 60, maxHp: 60, attack: 15, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 60, targetX: px - 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
+      { id: 'e2', name: 'Green Slime', type: 'slime', x: px + 120, y: py - 120, hp: 35, maxHp: 35, attack: 10, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 40, targetX: px + 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 }
     ];
+  } else if (slug === 'shadow_cave') {
+    // Shadow Cave (Home Base) 4-Quadrant Supply Pots; 0 enemy spawns inside Home Base
+    props = [
+      { id: 'sc_pot_nw', x: 144, y: 160, type: 'pot', destroyed: false },
+      { id: 'sc_pot_ne', x: 368, y: 160, type: 'pot', destroyed: false },
+      { id: 'sc_pot_sw', x: 144, y: 352, type: 'pot', destroyed: false },
+      { id: 'sc_pot_se', x: 368, y: 352, type: 'pot', destroyed: false }
+    ];
+    enemies = [];
+  } else {
+    // Empty 8x8 Overworld Grid — Blank spatial canvas with 0 pre-populated locations or enemy clutter
+    props = [];
+    enemies = [];
   }
-
-  enemies = [
-    { id: 'e1', name: 'Guard Knight', type: 'guard', x: px - 120, y: py - 120, hp: 60, maxHp: 60, attack: 15, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 60, targetX: px - 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 },
-    { id: 'e2', name: 'Green Slime', type: 'slime', x: px + 120, y: py - 120, hp: 35, maxHp: 35, attack: 10, hurtTime: 0, knockback: { vx: 0, vy: 0 }, aiState: 'PATROL', aiTimer: 40, targetX: px + 120, targetY: py - 120, chargeVx: 0, chargeVy: 0, patrolVx: 0, patrolVy: 0 }
-  ];
 
   sfx.chime();
   screenEffects.triggerFlash('#DE2626', 0.25, 0.15);
@@ -381,14 +410,13 @@ function setDebugRoom(slug) {
     }
   });
   const activeBtnId = slug === 'debug_chamber' ? 'btn-room-debug'
-    : (slug === 'ganon_sanctuary' ? 'btn-room-sanctuary'
-    : (slug === 'forgotten_cavern' ? 'btn-room-cavern' : 'btn-room-courtyard'));
+    : (slug === 'shadow_cave' ? 'btn-room-sanctuary' : 'btn-room-cavern');
   const activeBtn = document.getElementById(activeBtnId);
   if (activeBtn) {
     activeBtn.style.background = '#DE2626';
     activeBtn.style.borderColor = '#f87171';
   }
-  console.log(`[DEBUG ROOM] Switched to level: ${slug} (${tilesW}x${tilesH} tiles, ${mapWorldWidth}x${mapWorldHeight}px)`);
+  console.log(`[SPATIAL ENGINE] Switched to level: ${slug} (${tilesW}x${tilesH} tiles, ${mapWorldWidth}x${mapWorldHeight}px)`);
 }
 
 
@@ -1057,6 +1085,15 @@ function updatePhysics() {
   px = nextPx;
   py = nextPy;
 
+  // Threshold Doorway Transitions: Shadow Cave (Supertile 0x00) <-> Empty 8x8 Overworld Grid (Sector 0x1B)
+  if (currentLevelSlug === 'shadow_cave' && py >= 468 && Math.abs(px - 256) < 28) {
+    const out = spatialWorldEngine.exitShadowCaveToOverworld();
+    setDebugRoom('overworld_grid', out.spawnX, out.spawnY);
+  } else if (currentLevelSlug === 'overworld_grid' && Math.abs(px - 1792) < 24 && Math.abs(py - 1784) < 16) {
+    const inside = spatialWorldEngine.enterShadowCaveFromOverworld(px, py);
+    setDebugRoom('shadow_cave', inside.spawnX, inside.spawnY);
+  }
+
   // Sheathing & Charging Logic
   if (keys['b'] || keys['j'] || keys['z']) {
     bHeldTime++;
@@ -1323,35 +1360,58 @@ function render() {
   const viewportWorldW = canvas.width / zoomScale;
   const viewportWorldH = canvas.height / zoomScale;
 
+  if (currentLevelSlug === 'overworld_grid') {
+    spatialWorldEngine.activeDomain = 'OVERWORLD';
+    spatialWorldEngine.updateOverworldCameraClamps(px, py);
+  } else if (currentLevelSlug === 'shadow_cave') {
+    spatialWorldEngine.activeDomain = 'UNDERWORLD';
+    spatialWorldEngine.updateUnderworldCameraClamps(px, py);
+  } else {
+    spatialWorldEngine.activeDomain = 'DEBUG';
+    spatialWorldEngine.cameraClamps = {
+      minX: 0,
+      minY: 0,
+      maxX: mapWorldWidth,
+      maxY: mapWorldHeight
+    };
+  }
+
+  const clampMinX = spatialWorldEngine.cameraClamps.minX;
+  const clampMinY = spatialWorldEngine.cameraClamps.minY;
+  const clampMaxX = Math.max(clampMinX, spatialWorldEngine.cameraClamps.maxX - viewportWorldW);
+  const clampMaxY = Math.max(clampMinY, spatialWorldEngine.cameraClamps.maxY - viewportWorldH);
+
   let camX = px - viewportWorldW / 2 + screenEffects.shake.offsetX;
   let camY = py - viewportWorldH / 2 + screenEffects.shake.offsetY;
 
-  camX = Math.max(0, Math.min(mapWorldWidth - viewportWorldW, camX));
-  camY = Math.max(0, Math.min(mapWorldHeight - viewportWorldH, camY));
+  camX = Math.max(clampMinX, Math.min(clampMaxX, camX));
+  camY = Math.max(clampMinY, Math.min(clampMaxY, camY));
 
   ctx.save();
   ctx.scale(zoomScale, zoomScale);
   ctx.translate(-camX, -camY);
 
-  // 1. TERRAIN TILEMAP MATRIX FLOOR RENDERING (100% Identical to React GameViewport)
+  // 1. PASS 1 (BG1): TERRAIN METATILE MATRIX RENDERING
   const minCol = Math.max(0, Math.floor(camX / tileUnitPx) - 1);
   const maxCol = Math.min(tilesW - 1, Math.ceil((camX + viewportWorldW) / tileUnitPx) + 1);
   const minRow = Math.max(0, Math.floor(camY / tileUnitPx) - 1);
   const maxRow = Math.min(tilesH - 1, Math.ceil((camY + viewportWorldH) / tileUnitPx) + 1);
+
+  const isShadowCave = currentLevelSlug === 'shadow_cave';
 
   for (let r = minRow; r <= maxRow; r++) {
     for (let c = minCol; c <= maxCol; c++) {
       const tx = c * tileUnitPx;
       const ty = r * tileUnitPx;
       const isBoundary = r === 0 || r === tilesH - 1 || c === 0 || c === tilesW - 1;
+      const isSouthExitGap = isShadowCave && r === tilesH - 1 && c >= 15 && c <= 17;
 
-      if (isBoundary) {
-        ctx.fillStyle = '#1c281e';
+      if (isBoundary && !isSouthExitGap) {
+        ctx.fillStyle = isShadowCave ? '#1f1924' : '#1c281e';
         ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-        ctx.fillStyle = '#2d4232';
+        ctx.fillStyle = isShadowCave ? '#2d2436' : '#2d4232';
         ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, 12);
-        ctx.fillRect(tx + 2, ty + 18, tileUnitPx - 4, 12);
-        ctx.strokeStyle = '#0f1710';
+        ctx.strokeStyle = isShadowCave ? '#110c17' : '#0f1710';
         ctx.lineWidth = 1;
         ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
       } else if (currentLevelSlug === 'debug_chamber') {
@@ -1377,16 +1437,14 @@ function render() {
           ctx.fillStyle = alt ? '#b45309' : '#92400e';
           ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
         }
-      } else if (currentLevelSlug === 'ganon_sanctuary') {
-        const isCenterCarpet = (c >= 14 && c <= 17) || (c >= 30 && c <= 33);
-        if (isCenterCarpet) {
-          ctx.fillStyle = '#991b1b';
-          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+      } else if (isShadowCave) {
+        // Supertile 0x00: Shadow Cave (Home Base) — 32x32 metatiles (512x512 px) with 4 Quadrants
+        const isCenterPath = c >= 15 && c <= 17 && r >= 14;
+        if (isCenterPath) {
           ctx.fillStyle = '#7f1d1d';
-          ctx.fillRect(tx + 4, ty + 4, tileUnitPx - 8, tileUnitPx - 8);
-          ctx.strokeStyle = '#f59e0b';
-          ctx.lineWidth = 0.5;
-          ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
+          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
+          ctx.fillStyle = '#991b1b';
+          ctx.fillRect(tx + 2, ty + 2, tileUnitPx - 4, tileUnitPx - 4);
         } else {
           const alt = (r + c) % 2 === 0;
           ctx.fillStyle = alt ? '#26262a' : '#1e1e22';
@@ -1395,81 +1453,55 @@ function render() {
           ctx.lineWidth = 0.5;
           ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
         }
-      } else if (currentLevelSlug === 'forgotten_cavern') {
-        // Forgotten Dark Cavern Biome: Subterranean Slate Floor & Blue Water Streams
-        const isWaterStream = (c >= 44 && c <= 52) || (r >= 44 && r <= 52);
-        if (isWaterStream) {
-          const altWater = (r + c) % 2 === 0;
-          ctx.fillStyle = altWater ? '#1e3a8a' : '#172554';
-          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-          if ((r * 13 + c * 7) % 4 === 0) {
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(tx + 4, ty + 7, 6, 2);
-          }
-        } else {
-          const altCavern = (r + c) % 2 === 0;
-          ctx.fillStyle = altCavern ? '#27272a' : '#1e1e24';
-          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-          ctx.strokeStyle = '#18181b';
-          ctx.lineWidth = 0.5;
-          ctx.strokeRect(tx + 1, ty + 1, tileUnitPx - 2, tileUnitPx - 2);
-        }
-      } else if (currentLevelSlug === 'castle_courtyard') {
-        // Castle Courtyard Biome: Cobblestone Path Crossroads & Royal Green Gardens
-        const isPath = (c >= 44 && c <= 50) || (r >= 44 && r <= 50);
-        if (isPath) {
-          const altCobble = (r + c) % 2 === 0;
-          ctx.fillStyle = altCobble ? '#71717a' : '#52525b';
-          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-          ctx.strokeStyle = '#3f3f46';
-          ctx.lineWidth = 0.5;
+        // Subtle 256px Quadrant dividing lines (c === 16 or r === 16)
+        if (c === 16 || r === 16) {
+          ctx.strokeStyle = 'rgba(245, 158, 11, 0.16)';
+          ctx.lineWidth = 1;
           ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
-        } else {
-          const altLawn = (r + c) % 2 === 0;
-          ctx.fillStyle = altLawn ? '#15803d' : '#166534';
-          ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
-          const flowerSeed = (r * 29 + c * 11) % 7;
-          if (flowerSeed === 0) {
-            ctx.fillStyle = '#DE2626'; // Crimson flower accent
-            ctx.fillRect(tx + 6, ty + 6, 3, 3);
-          } else if (flowerSeed === 1) {
-            ctx.fillStyle = '#4ade80'; // Bright grass tuft
-            ctx.fillRect(tx + 8, ty + 7, 2, 5);
-          }
         }
       } else {
-
+        // Empty 8x8 Overworld Grid (4096x4096 px, 64 Sectors of 32x32 metatiles = 512x512 px)
         const altGrass = (r + c) % 2 === 0;
-        ctx.fillStyle = altGrass ? '#2e7d32' : '#256628';
+        ctx.fillStyle = altGrass ? '#1e3a24' : '#19311e';
         ctx.fillRect(tx, ty, tileUnitPx, tileUnitPx);
 
-        const seed = (r * 31 + c * 17) % 5;
-        ctx.fillStyle = '#4caf50';
-        if (seed === 0) {
-          ctx.fillRect(tx + 6, ty + 8, 2, 6);
-          ctx.fillRect(tx + 10, ty + 6, 2, 8);
-        } else if (seed === 1) {
-          ctx.fillRect(tx + 18, ty + 10, 2, 7);
-        } else if (seed === 2) {
-          ctx.fillStyle = '#DE2626';
-          ctx.fillRect(tx + 14, ty + 14, 2, 2);
+        // 512px Sector Boundary Grid Marker (every 32 metatiles)
+        if (c % 32 === 0 || r % 32 === 0) {
+          ctx.strokeStyle = 'rgba(52, 211, 153, 0.22)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(tx, ty, tileUnitPx, tileUnitPx);
         }
       }
     }
   }
 
-  // Stone Pillars
-  const pillars = [
-    { x: 128, y: 128 }, { x: 896, y: 128 },
-    { x: 128, y: 640 }, { x: 896, y: 640 },
-    { x: 384, y: 384 }, { x: 640, y: 384 }
-  ];
-  pillars.forEach(p => {
+  // Render Shadow Cave Home Base Altar or Overworld Sector 0x1B Threshold Entrance
+  if (isShadowCave) {
+    ctx.fillStyle = '#18181b';
+    ctx.fillRect(256 - 32, 112, 64, 32);
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(256 - 32, 112, 64, 32);
+    ctx.fillStyle = '#DE2626';
+    ctx.font = 'bold 8px monospace';
+    ctx.fillText('SHADOW CAVE', 256 - 26, 126);
+    ctx.fillStyle = '#a1a1aa';
+    ctx.font = '7px monospace';
+    ctx.fillText('HOME BASE · 0x00', 256 - 30, 138);
+    // South Exit Threshold Mat
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(256 - 16, 480, 32, 12);
+  } else if (currentLevelSlug === 'overworld_grid') {
+    const caveX = 112 * tileUnitPx;
+    const caveY = 112 * tileUnitPx;
+    ctx.fillStyle = '#27272a';
+    ctx.fillRect(caveX - 32, caveY - 28, 64, 40);
+    ctx.strokeStyle = '#52525b';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(caveX - 32, caveY - 28, 64, 40);
     ctx.fillStyle = '#09090b';
-    ctx.fillRect(p.x - 16, p.y - 16, 32, 32);
-    ctx.strokeStyle = '#DE2626'; ctx.lineWidth = 1.5; ctx.strokeRect(p.x - 16, p.y - 16, 32, 32);
-    ctx.fillStyle = '#ef4444'; ctx.fillRect(p.x - 6, p.y - 6, 12, 12);
-  });
+    ctx.fillRect(caveX - 14, caveY - 8, 28, 22);
+  }
 
   // 2. CONSTRUCT 2.5D Y-SORTED DRAW QUEUE (TOP-TO-BOTTOM DEPTH SORTING)
   const renderQueue = [];
@@ -1725,6 +1757,23 @@ function render() {
     }
   });
 
+  // PASS 3 (BG2): PRIORITY OCCLUSION LAYER (Overhead Arches & Lintels)
+  if (isShadowCave) {
+    ctx.fillStyle = '#3f3f46';
+    ctx.fillRect(256 - 28, 464, 56, 12);
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(256 - 28, 464, 56, 12);
+  } else if (currentLevelSlug === 'overworld_grid') {
+    const caveX = 112 * tileUnitPx;
+    const caveY = 112 * tileUnitPx;
+    ctx.fillStyle = '#3f3f46';
+    ctx.fillRect(caveX - 24, caveY - 18, 48, 12);
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(caveX - 24, caveY - 18, 48, 12);
+  }
+
   ctx.restore();
 
   screenEffects.renderCanvasOverlay(ctx, canvas.width, canvas.height);
@@ -1737,15 +1786,21 @@ function render() {
 
   const curItem = inventoryState.getEquippedYItem();
   const yItemLabel = curItem ? `${curItem.icon} ${curItem.name.toUpperCase()}` : (activeYItem === 'shadow_boomerang' ? '🪃 BOOMERANG' : '🏹 DARK BOW');
-  const roomName = currentLevelSlug.replace('_', ' ').toUpperCase();
   ctx.fillText(`SHADOW LINK | HP: ${playerHp}/${playerMaxHp} | Y: ${yItemLabel}`, 12, 20);
 
-  // Bottom HUD Status Bar with Real-Time Camera Coordinates
+  // Bottom HUD Status Bar with O(1) Spatial Sector / Supertile Telemetry
+  const spatialSnap = spatialWorldEngine.getTelemetrySnapshot(Math.round(px), Math.round(py));
   ctx.fillStyle = '#09090b';
   ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
   ctx.fillStyle = '#10b981';
   ctx.font = '10px monospace';
-  ctx.fillText(`ROOM: ${roomName} (${tilesW}x${tilesH}) | CAM FOLLOW: (${Math.round(px)}, ${Math.round(py)})`, 12, canvas.height - 8);
+  if (spatialSnap.domain === 'OVERWORLD') {
+    ctx.fillText(`OVERWORLD SEC ${spatialSnap.sectorHex} (${spatialSnap.sectorCol},${spatialSnap.sectorRow}) | XY:(${Math.round(px)},${Math.round(py)})`, 12, canvas.height - 8);
+  } else if (spatialSnap.domain === 'UNDERWORLD') {
+    ctx.fillText(`SHADOW CAVE [ST ${spatialSnap.supertileHex} · Q:${spatialSnap.quadrantLabel}] | XY:(${Math.round(px)},${Math.round(py)})`, 12, canvas.height - 8);
+  } else {
+    ctx.fillText(`DEBUG DOMAIN (${tilesW}x${tilesH}) | XY:(${Math.round(px)},${Math.round(py)})`, 12, canvas.height - 8);
+  }
 }
 
 function gameLoop() {

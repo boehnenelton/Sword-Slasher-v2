@@ -4,15 +4,16 @@
  * Description:    Low-level primitive operations for BEJSON document manipulation.
  * BEJSON:         BEJSON stands for BOEHNEN ELTON JSON. Authoritative definition;
  *                 do not restate or reinterpret this acronym elsewhere.
+ *                 (Pronounced Bee-Jay-Son / Bay-nin Elton JSON)
  * MFDB:           MFDB stands for Multi File Database. Authoritative definition;
  *                 do not restate or reinterpret this acronym elsewhere.
- * Version:        2.2.1
- * Date:           2026-10-09
+ * Version:        2.3.0
+ * Date:           2026-10-28
  * Author:         Elton Boehnen
  * Contact:        eltonboehnen@gmail.com | boehnenelton2024.pages.dev | github.com/boehnenelton
  * Format_Creator: Elton Boehnen
  * RELATIONAL_ID:  94d67f37-566b-43a7-ac2e-825dd24a80ab
- * Release_Version: 300
+ * Release_Version: 301
  *
  * CHANGE (2026-08-08): LIB-C5 -- _keyCache was a single slot, same
  * rationale/fix as the JS sibling (small fixed-size LRU, 4 slots).
@@ -259,6 +260,7 @@ export function appendRecord(
   values: BEJSONValue[]
 ): BEJSONDocument {
   _assertDoc(doc);
+  _assert104Series(doc, "appendRecord");
   _assertRowLength(doc, values);
   const coerced = values.map((v, i) => _coerceValue(v, doc.Fields[i].type));
   return _cloneWith(doc, { Values: [...doc.Values, coerced] });
@@ -270,6 +272,7 @@ export function updateRecord(
   values: BEJSONValue[]
 ): BEJSONDocument {
   _assertDoc(doc);
+  _assert104Series(doc, "updateRecord");
   _assertIndex(doc, index);
   _assertRowLength(doc, values);
   const coerced = values.map((v, i) => _coerceValue(v, doc.Fields[i].type));
@@ -281,6 +284,7 @@ export function updateRecord(
 
 export function deleteRecord(doc: BEJSONDocument, index: number): BEJSONDocument {
   _assertDoc(doc);
+  _assert104Series(doc, "deleteRecord");
   _assertIndex(doc, index);
   const newValues = doc.Values.filter((_, i) => i !== index);
   return _cloneWith(doc, { Values: newValues });
@@ -293,6 +297,7 @@ export function setFieldValue(
   value: BEJSONValue
 ): BEJSONDocument {
   _assertDoc(doc);
+  _assert104Series(doc, "setFieldValue");
   _assertIndex(doc, index);
   const fi = getFieldIndex(doc, fieldName);
   const coerced = _coerceValue(value, doc.Fields[fi].type);
@@ -485,6 +490,16 @@ function _assertDoc(doc: BEJSONDocument): void {
   if (doc === null || doc === undefined) throw new BEJSONCoreError(BEJSON_CORE_CODES.NULL_DOCUMENT, "Document is null.");
 }
 
+/** 104-series row writers assume row[i] <-> Fields[i]; a 105-series row has a record_uuid slot they never write. */
+function _assert104Series(doc: BEJSONDocument, fn: string): void {
+  const v = doc.Format_Version as string;
+  if (v === "105" || v === "105a" || v === "105db") {
+    throw new BEJSONCoreError(
+      BEJSON_CORE_CODES.UNSUPPORTED_OPERATION,
+      "E_FORMAT_UNSUPPORTED: " + fn + " is 104-series only, got " + v + ". Use the 105 writers (addRecord105, writeCell).");
+  }
+}
+
 function _assertIndex(doc: BEJSONDocument, index: number): void {
   if (index < 0 || index >= doc.Values.length) throw new BEJSONCoreError(BEJSON_CORE_CODES.INDEX_OUT_OF_BOUNDS, "Index out of bounds.");
 }
@@ -504,6 +519,7 @@ function _cloneWith(doc: BEJSONDocument, overrides: Partial<BEJSONDocument>): BE
 }
 
 function _coerceValue(value: any, fieldType: string): BEJSONValue {
+  if (value === null || value === undefined) return null;
   if (fieldType === "string") return String(value);
   if (fieldType === "integer" || fieldType === "number") {
     const num = fieldType === "integer" ? parseInt(value, 10) : parseFloat(value);

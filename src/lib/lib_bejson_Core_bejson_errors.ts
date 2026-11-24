@@ -1,21 +1,12 @@
 /**
  * Library:         lib_bejson_Core_bejson_errors.ts
  * Family:          Core
- * Module Purpose:  Error Code Registry for BEJSON Core Family
- * Architecture:    BEJSON Core validation and parser error taxonomy (Allocated Range: 1 - 29)
- * Version:         3.0.0
- * Release_Version: 300
- * Date:            2026-10-27
+ * Description:     Standalone BEJSON Core 77-code error registry for TypeScript.
+ * Version:         1.0.0
+ * Release_Version: 301
+ * Date:            2026-11-24
  * Author:          Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton
- * Format_Creator:  Elton Boehnen
- * RELATIONAL_ID:   105a0300-2026-1027-9999-000000000300
+ * RELATIONAL_ID:   a1e95be4-99ec-42ee-914f-6308907519a1
+ * License:         PolyForm-Noncommercial-1.0.0
  */
-
-export const E_BEJSON_INVALID_FORMAT = "E_BEJSON_1";
-export const E_BEJSON_INVALID_CREATOR = "E_BEJSON_2";
-export const E_BEJSON_UNSUPPORTED_VERSION = "E_BEJSON_3";
-export const E_BEJSON_RECORD_LENGTH_MISMATCH = "E_BEJSON_4";
-export const E_BEJSON_NULL_VIOLATION = "E_BEJSON_5";
-export const E_BEJSON_ENUM_VIOLATION = "E_BEJSON_6";
-export const E_BEJSON_FIELD_MAP_NOT_BUILT = "E_BEJSON_7";
-export const E_BEJSON_MISSING_PRIMARY_KEY = "E_BEJSON_8";
+export * from "./lib_bejson_Core_bejson_types";

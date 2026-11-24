@@ -16,10 +16,10 @@
 - **Visuals**: Pixel-art dialogue box with character portrait (Ganon, Shadow Link, Princess Zelda, Hermit, Guard).
 - **Function**: Parses BEJSON 105 `events.105.bejson` opcode scripts (`SHOW_DIALOGUE`, `PLAY_SFX`, `GIVE_ITEM`, `OBJECTIVE_SET`).
 
-### 4. GameHUD (`src/components/GameHUD.tsx`)
+### 4. GameHUD (`src/components/GameHUD.tsx`) - REMOVED in V1.0.56 (orphan, never mounted)
 - **Elements**: Hearts Container (Health Points), Magic Bar, Active Item/Weapon Badge, Level Title, Quest Objective Tracker, Live BEJSON 105 Telemetry (FPS, Physics Bodies, Collisions).
 
-### 5. HorizToolbar (`src/components/HorizToolbar.tsx`)
+### 5. HorizToolbar (`src/components/HorizToolbar.tsx`) - REMOVED in V1.0.56 (orphan, never mounted)
 - **Behavior**: Contextual scrolling header toolbar with section buttons (Game Canvas, File Hub / Inventory, BEJSON Database Viewer, Telemetry HUD, Settings, About / Meta-UI).
 
 ### 6. MetaUIModal (`src/components/MetaUIModal.tsx`)

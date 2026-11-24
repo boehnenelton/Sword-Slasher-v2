@@ -38,7 +38,7 @@ export default function App() {
   const [isWorldMapOpen, setIsWorldMapOpen] = useState(false);
   const [activeDialogue, setActiveDialogue] = useState<GameEventData | null>(null);
   const [isDebugMode, setIsDebugMode] = useState(false);
-  const [savedRealWorldSlug, setSavedRealWorldSlug] = useState('ganon_sanctuary');
+  const [savedRealWorldSlug, setSavedRealWorldSlug] = useState('shadow_cave');
 
   const handleToggleDebugMode = (enable: boolean) => {
     if (enable) {
@@ -52,10 +52,15 @@ export default function App() {
       soundEngine.playChimeSFX();
     } else {
       setIsDebugMode(false);
-      const target = (savedRealWorldSlug && savedRealWorldSlug !== 'debug_chamber') ? savedRealWorldSlug : 'ganon_sanctuary';
+      const target = (savedRealWorldSlug && savedRealWorldSlug !== 'debug_chamber') ? savedRealWorldSlug : 'shadow_cave';
       bejsonEngine.currentLevelSlug = target;
-      bejsonEngine.playerX = 320;
-      bejsonEngine.playerY = 360;
+      if (target === 'overworld_grid') {
+        bejsonEngine.playerX = 1792;
+        bejsonEngine.playerY = 1808;
+      } else {
+        bejsonEngine.playerX = 256;
+        bejsonEngine.playerY = 256;
+      }
       soundEngine.playChimeSFX();
     }
   };
