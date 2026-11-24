@@ -226,6 +226,52 @@ export class SpatialWorldEngine {
     return (this.roomPersistenceFlags[256 + sectorId] & SPATIAL_CONSTANTS.BIT_VISITED) !== 0;
   }
 
+  public enterShadowCaveFromOverworld(worldX: number, worldY: number) {
+    if (typeof worldX === 'number' && typeof worldY === 'number') {
+      const secId = SpatialCoordinateMath.toOverworldSectorId(worldX, worldY);
+      this.overworldReturnAnchor = {
+        realmId: this.activeRealmId,
+        sectorId: secId,
+        worldX,
+        worldY: worldY + 20,
+        facing: 'DOWN'
+      };
+    }
+    this.activeDomain = 'UNDERWORLD';
+    this.activeSupertileId = SPATIAL_CONSTANTS.HOME_SUPERTILE_ID;
+    this.markSupertileVisited(SPATIAL_CONSTANTS.HOME_SUPERTILE_ID);
+    this.tileMutationBuffer.clear();
+    this.updateUnderworldCameraClamps(256, 256);
+    return {
+      levelSlug: 'shadow_cave',
+      spawnX: 256,
+      spawnY: 420,
+      facing: 'UP' as const
+    };
+  }
+
+  public exitShadowCaveToOverworld() {
+    this.activeDomain = 'OVERWORLD';
+    const anchor = this.overworldReturnAnchor || {
+      realmId: 0,
+      sectorId: SPATIAL_CONSTANTS.HOME_OVERWORLD_SECTOR_ID,
+      worldX: SPATIAL_CONSTANTS.HOME_THRESHOLD_WORLD_X,
+      worldY: SPATIAL_CONSTANTS.HOME_THRESHOLD_WORLD_Y,
+      facing: 'DOWN' as const
+    };
+    this.activeSectorId = SpatialCoordinateMath.toOverworldSectorId(anchor.worldX, anchor.worldY);
+    this.markOverworldSectorVisited(this.activeSectorId);
+    this.tileMutationBuffer.clear();
+    this.updateOverworldCameraClamps(anchor.worldX, anchor.worldY);
+    return {
+      levelSlug: 'overworld_grid',
+      spawnX: anchor.worldX,
+      spawnY: anchor.worldY,
+      sectorId: this.activeSectorId,
+      facing: 'DOWN' as const
+    };
+  }
+
   public updateOverworldCameraClamps(worldX: number, worldY: number) {
     const secId = SpatialCoordinateMath.toOverworldSectorId(worldX, worldY);
     const prevSec = this.overworldSectors[this.activeSectorId];
@@ -250,6 +296,9 @@ export class SpatialWorldEngine {
 
     const interRegionTransition =
       sectorChanged && (!prevSec || prevSec.rootSectorId !== nextSec.rootSectorId);
+    if (interRegionTransition) {
+      this.tileMutationBuffer.clear();
+    }
 
     return {
       sectorId: secId,
@@ -264,16 +313,113 @@ export class SpatialWorldEngine {
   public updateUnderworldCameraClamps(localX: number, localY: number) {
     const quadId = SpatialCoordinateMath.toSupertileQuadrant(localX, localY);
     this.activeQuadrantId = quadId;
-    this.cameraClamps = {
-      minX: 0,
-      minY: 0,
-      maxX: 512,
-      maxY: 512
-    };
+    const st = this.underworldSupertiles[this.activeSupertileId];
+    const layout = st ? st.partitionLayout : 'FULL_4Q';
+
+    const qx = quadId & 1;
+    const qy = (quadId >> 1) & 1;
+
+    if (layout === 'QUAD_4X1Q') {
+      this.cameraClamps = {
+        minX: qx * 256,
+        minY: qy * 256,
+        maxX: (qx + 1) * 256,
+        maxY: (qy + 1) * 256
+      };
+    } else if (layout === 'SPLIT_V_2X2Q') {
+      this.cameraClamps = {
+        minX: qx * 256,
+        minY: 0,
+        maxX: (qx + 1) * 256,
+        maxY: 512
+      };
+    } else if (layout === 'SPLIT_H_2X2Q') {
+      this.cameraClamps = {
+        minX: 0,
+        minY: qy * 256,
+        maxX: 512,
+        maxY: (qy + 1) * 256
+      };
+    } else {
+      this.cameraClamps = {
+        minX: 0,
+        minY: 0,
+        maxX: 512,
+        maxY: 512
+      };
+    }
+
     return {
       supertileId: this.activeSupertileId,
       quadrantId: quadId,
       quadrantLabel: (['NW', 'NE', 'SW', 'SE'][quadId] || 'NW') as 'NW' | 'NE' | 'SW' | 'SE',
+      clamps: this.cameraClamps
+    };
+  }
+
+  public clampCamera(targetX: number, targetY: number, viewWidth: number, viewHeight: number) {
+    const minCamX = this.cameraClamps.minX;
+    const minCamY = this.cameraClamps.minY;
+    const maxCamX = Math.max(minCamX, this.cameraClamps.maxX - viewWidth);
+    const maxCamY = Math.max(minCamY, this.cameraClamps.maxY - viewHeight);
+
+    return {
+      cameraX: Math.max(minCamX, Math.min(targetX - viewWidth / 2, maxCamX)),
+      cameraY: Math.max(minCamY, Math.min(targetY - viewHeight / 2, maxCamY))
+    };
+  }
+
+  public getTelemetrySnapshot(px: number, py: number) {
+    if (this.activeDomain === 'OVERWORLD') {
+      const secId = SpatialCoordinateMath.toOverworldSectorId(px, py);
+      const col = SpatialCoordinateMath.toOverworldSectorCol(px);
+      const row = SpatialCoordinateMath.toOverworldSectorRow(py);
+      const mode7 = SpatialCoordinateMath.projectToMode7MapSpace(px, py);
+      return {
+        domain: 'OVERWORLD' as const,
+        realmId: this.activeRealmId,
+        sectorId: secId,
+        sectorHex: `0x${secId.toString(16).toUpperCase().padStart(2, '0')}`,
+        sectorCol: col,
+        sectorRow: row,
+        supertileId: this.activeSupertileId,
+        supertileHex: `0x${this.activeSupertileId.toString(16).toUpperCase().padStart(2, '0')}`,
+        quadrantId: 0,
+        quadrantLabel: 'NW' as const,
+        metatileX: SpatialCoordinateMath.toMetatile(px),
+        metatileY: SpatialCoordinateMath.toMetatile(py),
+        megatileX: SpatialCoordinateMath.toMegatile(px),
+        megatileY: SpatialCoordinateMath.toMegatile(py),
+        localPx: SpatialCoordinateMath.toSectorLocalPx(px),
+        localPy: SpatialCoordinateMath.toSectorLocalPx(py),
+        mode7MapX: mode7.mapX,
+        mode7MapY: mode7.mapY,
+        elevationLayer: this.elevationLayer,
+        clamps: this.cameraClamps
+      };
+    }
+
+    const quadId = SpatialCoordinateMath.toSupertileQuadrant(px, py);
+    return {
+      domain: this.activeDomain,
+      realmId: this.activeRealmId,
+      sectorId: this.activeSectorId,
+      sectorHex: `0x${this.activeSectorId.toString(16).toUpperCase().padStart(2, '0')}`,
+      sectorCol: this.activeSectorId & 0x07,
+      sectorRow: (this.activeSectorId >> 3) & 0x07,
+      supertileId: this.activeSupertileId,
+      supertileHex: `0x${this.activeSupertileId.toString(16).toUpperCase().padStart(2, '0')}`,
+      quadrantId: quadId,
+      quadrantLabel: (['NW', 'NE', 'SW', 'SE'][quadId] || 'NW') as 'NW' | 'NE' | 'SW' | 'SE',
+      metatileX: SpatialCoordinateMath.toMetatile(px),
+      metatileY: SpatialCoordinateMath.toMetatile(py),
+      megatileX: SpatialCoordinateMath.toMegatile(px),
+      megatileY: SpatialCoordinateMath.toMegatile(py),
+      localPx: SpatialCoordinateMath.toSectorLocalPx(px),
+      localPy: SpatialCoordinateMath.toSectorLocalPx(py),
+      mode7MapX: 0,
+      mode7MapY: 0,
+      elevationLayer: this.elevationLayer,
       clamps: this.cameraClamps
     };
   }

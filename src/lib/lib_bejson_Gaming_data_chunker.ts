@@ -11,7 +11,7 @@
  * RELATIONAL_ID:   105a0800-2026-1101-9999-000000000801
  */
 
-import { bejsonCore } from './lib_bejson_Core_bejson_core';
+import { bejsonCore } from './lib_bejson_Gaming_core_adapter';
 
 export interface ChunkedFileDescriptor {
   fileName: string;

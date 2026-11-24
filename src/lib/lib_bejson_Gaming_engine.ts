@@ -11,7 +11,7 @@
  * RELATIONAL_ID:   105a0401-2026-1027-9999-000000000401
  */
 
-import { bejsonCore, BejsonDocument } from './lib_bejson_Core_bejson_core';
+import { bejsonCore, BejsonDocument } from './lib_bejson_Gaming_core_adapter';
 import {
   E_GAMING_INVALID_ARCHETYPE,
   E_GAMING_LEVEL_NOT_FOUND,

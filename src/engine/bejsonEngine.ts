@@ -6,7 +6,7 @@
  * Version:         300100
  */
 
-import { bejsonCore, BejsonDocument } from '../lib/lib_bejson_Core_bejson_core';
+import { bejsonCore, BejsonDocument } from '../lib/lib_bejson_Gaming_core_adapter';
 import { bejsonGaming, GamingLevelRecord, GamingActorRecord, GamingItemRecord, GamingPortalRecord } from '../lib/lib_bejson_Gaming_engine';
 
 export interface GameEventData {

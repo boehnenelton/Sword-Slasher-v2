@@ -7,7 +7,7 @@
  * Version:         200102
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { bejsonEngine } from '../engine/bejsonEngine';
 import { soundEngine } from '../engine/soundEngine';
 import { spatialWorldEngine, SpatialCoordinateMath, SPATIAL_CONSTANTS } from '../lib/lib_bejson_Gaming_spatial_world_engine';
@@ -24,6 +24,12 @@ export const WorldMapOverlay: React.FC<Props> = ({ isOpen, onClose }) => {
     isCurrentlyOverworld ? 'OVERWORLD' : 'UNDERWORLD'
   );
   const [perspectiveTilt, setPerspectiveTilt] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      setViewMode(bejsonEngine.currentLevelSlug === 'overworld_grid' ? 'OVERWORLD' : 'UNDERWORLD');
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
